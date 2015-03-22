@@ -437,7 +437,7 @@ namespace BBox3Tool
             int uploadProfile = _profiles.Aggregate((x, y) => Math.Abs(x.UploadSpeed - _upstreamCurrentBitRate) < Math.Abs(y.UploadSpeed - _upstreamCurrentBitRate) ? x : y).UploadSpeed;
             
             //find closest profile
-            _currentProfile = _profiles.Where(x => x.UploadSpeed == uploadProfile && x.DownloadSpeed == downloadProfile && x.VectoringEnabled == _vectoringEnabled).FirstOrDefault();
+            _currentProfile = _profiles.Where(x => x.UploadSpeed == uploadProfile && x.DownloadSpeed == downloadProfile /*&& x.VectoringEnabled == _vectoringEnabled*/).FirstOrDefault();
             if (_currentProfile != null && Math.Abs(_currentProfile.DownloadSpeed - _downstreamCurrentBitRate) <= 256 && Math.Abs(_currentProfile.UploadSpeed - _upstreamCurrentBitRate) <= 256){ }
             else
                 _currentProfile = new ProximusLineProfile("unknown", _downstreamCurrentBitRate, _upstreamCurrentBitRate, false, false, false, false, VDSL2Profile.unknown);
@@ -572,26 +572,26 @@ namespace BBox3Tool
         public void getDownstreamMaxBitRate()
         {
             int startValue = (_downstreamCurrentBitRate > 0) ? _downstreamCurrentBitRate : 0;
-            
-            ////download profiles 50+
-            //if (_downstreamCurrentBitRate >= 50000)
-            //{
-            //    decimal restMarginDown = _downstreamNoiseMargin - 7;
-            //    startValue = _downstreamCurrentBitRate + (int)Math.Floor(restMarginDown * 3000);
-            //    if (startValue < _downstreamCurrentBitRate)
-            //        startValue = _downstreamCurrentBitRate;
 
-            //    startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
-            //    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, startValue + 15000, 1000);
+            //download profiles 70 vectoring
+            if (_downstreamCurrentBitRate >= 69990 && _currentProfile.VectoringEnabled)
+            {
+                decimal restMarginDown = _downstreamNoiseMargin - 6m;
+                startValue = _downstreamCurrentBitRate + (int) Math.Floor(restMarginDown * 2900);
+                if (startValue < _downstreamCurrentBitRate)
+                    startValue = _downstreamCurrentBitRate;
 
-            //    if (_downstreamMaxBitRate < 0)
-            //        _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue - 10000, startValue, 1000);
+                startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
+                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, startValue + 15000, 1000);
 
-            //    if (_downstreamMaxBitRate < 0)
-            //        _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue - 10000, 1000);
-            //}
-            ////profiles 0-50
-            //else
+                if (_downstreamMaxBitRate < 0)
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue - 10000, startValue, 1000);
+
+                if (_downstreamMaxBitRate < 0)
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue - 10000, 1000);
+            }
+            //other profiles
+            else
             {
                 startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
                 _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, 150000, 1000);
@@ -1018,8 +1018,8 @@ namespace BBox3Tool
             profiles.Add(new ProximusLineProfile("LP704", 9064 , 576, false, false, true, false, VDSL2Profile.p8d));
             //dlm
             profiles.Add(new ProximusLineProfile("LP???", 30064 , 6064, false, true, false, false, VDSL2Profile.p17a));
-            profiles.Add(new ProximusLineProfile("LP???", 30064 , 4064, false, true, false, false, VDSL2Profile.p17a));
-            profiles.Add(new ProximusLineProfile("LP???", 30064 , 3064, false, true, false, false, VDSL2Profile.p17a));
+            profiles.Add(new ProximusLineProfile("LP???", 30064 , 4064, false, true, false, false, VDSL2Profile.p8d));
+            profiles.Add(new ProximusLineProfile("LP???", 30064 , 3064, false, true, false, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP719", 30064 , 2064, false, true, false, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP720", 25064 , 2064, false, true, false, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP722", 20200 , 2064, false, true, false, false, VDSL2Profile.p8d));

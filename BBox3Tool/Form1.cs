@@ -113,7 +113,8 @@ namespace BBox3Tool
             if (_session.DslStandard == DSLStandard.VDSL2)
             {
                 builder.AppendLine("VDSL2 profile:                 " + _session.CurrentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
+                //builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
+                builder.AppendLine("Vectoring:                     " + (_session.CurrentProfile.VectoringEnabled ? "Yes" : "No")); 
                 builder.AppendLine("Proximus profile:              " + _session.CurrentProfile.Name);
                 builder.AppendLine("DLM:                           " + (_session.CurrentProfile.DlmProfile ? "Yes" : "No"));
                 builder.AppendLine("Repair:                        " + (_session.CurrentProfile.RepairProfile ? "Yes" : "No"));
@@ -158,10 +159,32 @@ namespace BBox3Tool
                 //get dsl stats
                 _session.getDSLStandard();
                 setLabelText(labelDSLStandard, _session.DslStandard.ToString().Replace("plus", "+"));
+
+                //get sync values
+                setLabelText(labelDownstreamCurrentBitRate, "busy...");
+                _session.getDownstreamCurrentBitRate();
+                setLabelText(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
+
+                setLabelText(labelUpstreamCurrentBitRate, "busy...");
+                _session.getUpstreamCurrentBitRate();
+                setLabelText(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
+
+                //get profile info
                 if (_session.DslStandard == DSLStandard.VDSL2)
                 {
-                    _session.getVectoringEnabled();
-                    setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
+                    _session.getProfileInfo();
+
+                    //TODO check why this is incorrect
+                    //_session.getVectoringEnabled();
+                    //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
+
+                    //get vectoring status fallback: get from profile list
+                    setLabelText(labelVectoring, _session.CurrentProfile.VectoringEnabled ? "Yes" : "No");
+
+                    setLabelText(labelDLM, _session.CurrentProfile.DlmProfile ? "Yes" : "No");
+                    setLabelText(labelRepair, _session.CurrentProfile.RepairProfile ? "Yes" : "No");
+                    setLabelText(labelProximusProfile, _session.CurrentProfile.Name.ToString());
+                    setLabelText(labelVDSLProfile, _session.CurrentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                 }
                 else
                 {
@@ -180,25 +203,6 @@ namespace BBox3Tool
                     setLabelText(labelProximusProfile, "n/a");
                     labelProximusProfile.ForeColor = Color.Gray;
                     labelProximusProfileLabel.ForeColor = Color.Gray;
-                }
-
-                //get sync values
-                setLabelText(labelDownstreamCurrentBitRate, "busy...");
-                _session.getDownstreamCurrentBitRate();
-                setLabelText(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
-
-                setLabelText(labelUpstreamCurrentBitRate, "busy...");
-                _session.getUpstreamCurrentBitRate();
-                setLabelText(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
-
-                //get profile info
-                if (_session.DslStandard == DSLStandard.VDSL2)
-                {
-                    _session.getProfileInfo();
-                    setLabelText(labelDLM, _session.CurrentProfile.DlmProfile ? "Yes" : "No");
-                    setLabelText(labelRepair, _session.CurrentProfile.RepairProfile ? "Yes" : "No");
-                    setLabelText(labelProximusProfile, _session.CurrentProfile.Name.ToString());
-                    setLabelText(labelVDSLProfile, _session.CurrentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                 }
 
                 //get line stats
