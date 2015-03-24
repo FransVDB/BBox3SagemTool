@@ -29,6 +29,7 @@ namespace BBox3Tool
         private string _user;
         private string _password;
         private bool _basicAuth;
+        private bool _debug;
 
         //profiles
         private List<ProximusLineProfile> _profiles;
@@ -42,9 +43,19 @@ namespace BBox3Tool
         private int _upstreamMaxBitRate;
         private int _downstreamCurrentBitRate;
         private int _upstreamCurrentBitRate;
-
+        private decimal _distance;
+        
+        //device
+        private string _hardwareVersion;
+        private string _GUIFirmwareVersion;
+        private string _InternalFirmwareVersion;
+        private TimeSpan _deviceUptime;
+        private TimeSpan _linkUptime;
+        
         //profile
-        private ProximusLineProfile _currentProfile;
+        private ProximusLineProfile _currentProfile;      
+        private bool _vectoringEnabled;
+        private DSLStandard _dslProfile;
 
         #endregion
 
@@ -113,9 +124,49 @@ namespace BBox3Tool
             get { return _upstreamCurrentBitRate; }
         }
 
-        internal ProximusLineProfile CurrentProfile
+        public ProximusLineProfile CurrentProfile
         {
             get { return _currentProfile; }
+        }
+
+        public decimal Distance
+        {
+            get { return _distance; }
+        }
+
+        public bool VectoringEnabled
+        {
+            get { return _vectoringEnabled; }
+        }
+        
+        public string HardwareVersion
+        {
+            get { return _hardwareVersion; }
+        }
+
+        public string GUIFirmwareVersion
+        {
+            get { return _GUIFirmwareVersion; }
+        }
+
+        public string InternalFirmwareVersion
+        {
+            get { return _InternalFirmwareVersion; }
+        }
+        
+        public TimeSpan DeviceUptime
+        {
+            get { return _deviceUptime; }
+        }
+
+        public TimeSpan LinkUptime
+        {
+            get { return _linkUptime; }
+        }
+
+        public DSLStandard DslStandard
+        {
+            get { return _dslProfile; }
         }
 
         #endregion
@@ -125,15 +176,17 @@ namespace BBox3Tool
         public Bbox3Session()
         {
             _loggedIn = false;
+            _currentProfile = new ProximusLineProfile();
         }
 
-        public Bbox3Session(string bboxUrl, string user, string password, BackgroundWorker worker)
+        public Bbox3Session(string bboxUrl, string user, string password, BackgroundWorker worker, bool debug = false)
         {
             _loggedIn = false;
             _user = user;
             _password = password;
             _bboxUrl = new Uri(bboxUrl);
             _cgiReq = new Uri(BboxUrl, Path.Combine("cgi", "json-req"));
+            _debug = debug;
 
             //worker thread
             _worker = worker;
@@ -155,7 +208,17 @@ namespace BBox3Tool
             _downstreamCurrentBitRate = -1;
             _upstreamCurrentBitRate = -1;
 
+            //device
+            _hardwareVersion = "";
+            _GUIFirmwareVersion = "";
+            _InternalFirmwareVersion = "";
+            _deviceUptime = new TimeSpan(0);
+            _linkUptime = new TimeSpan(0);
+
             _currentProfile = new ProximusLineProfile();
+            _distance = -1;
+            _vectoringEnabled = false;
+            _dslProfile = DSLStandard.unknown;
 
             //load profiles
             _profiles = loadProfiles();
@@ -217,7 +280,7 @@ namespace BBox3Tool
                                             {"type",false} //default true
                                         }},
                                         {"time-format","ISO_8601"},
-                                        {"depth",1},  //default 2
+                                        {"depth",_debug ? 99 : 1},  //default 2
                                         {"max-add-events",5},
                                         {"write-only-string","_XMO_WRITE_ONLY_"},
                                         {"undefined-write-only-string","_XMO_UNDEFINED_WRITE_ONLY_"}
@@ -313,19 +376,18 @@ namespace BBox3Tool
         /// <summary>
         /// Get current download sync speed in kbps
         /// </summary>
-        /// <returns>Speed in kbps, 'unknown' if not found</returns>
-        public string getDownstreamCurrentBitRate()
+        public void getDownstreamCurrentBitRate()
         {
             List<int> knownDownloadBitrates = new List<int>();
 
             //check confirmed bitrates first (feedback from users)
             //TODO add confirmed bitrates in profile
-            knownDownloadBitrates.AddRange(new List<int> { 69999, 60198, 50200, 50199, 30063, 30057, 25063, 20061, 16559, 16550, 12063, 4448, 2240 });
+            knownDownloadBitrates.AddRange(new List<int> { 69999, 60198, 50200, 50199, 49999, 49998, 30063, 30057, 25063, 20061, 16559, 16550, 12063, 4448, 2496, 2240 });
             _downstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 1));
 
             //speed found, return
             if (_downstreamCurrentBitRate >= 0)
-                return _downstreamCurrentBitRate.ToString("###,###,##0 'kbps'");
+                return;
 
             //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -64 to +64
             knownDownloadBitrates.Clear();
@@ -336,29 +398,23 @@ namespace BBox3Tool
             //fallback: speed not found in profile list, check every speed (very slow)
             if (_downstreamCurrentBitRate < 0)
                 _downstreamCurrentBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", 0, 100000, 1000);
-            
-            if (_downstreamCurrentBitRate < 0)
-                return "unknown";
-            else
-                return _downstreamCurrentBitRate.ToString("###,###,##0 'kbps'"); ;
         }
 
         /// <summary>
         /// Get current upload sync speed in kbps
         /// </summary>
-        /// <returns>Speed in kbps, 'unknown' if not found</returns>
-        public string getUpstreamCurrentBitRate()
+        public void getUpstreamCurrentBitRate()
         {
               List<int> knownUploadBitrates = new List<int>();
 
             //check confirmed bitrates first (feedback from users)
             //TODO add confirmed bitrates in profile
-            knownUploadBitrates.AddRange(new List<int> { 10064, 10054, 10049, 10004, 6063, 2063, 2054, 2045, 1044, 512, 384 });
+            knownUploadBitrates.AddRange(new List<int> { 10064, 10054, 10049, 10004, 6063, 4056, 2063, 2054, 2045, 2043, 1044, 512, 384 });
             _upstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 1));
             
             //speed found, return
             if (_upstreamCurrentBitRate >= 0)
-                return _upstreamCurrentBitRate.ToString("###,###,##0 'kbps'");
+                return;
 
             //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -64 to +64
             knownUploadBitrates.Clear();
@@ -369,30 +425,89 @@ namespace BBox3Tool
             //fallback: speed not found in profile list, check every speed (slow)
             if (_upstreamCurrentBitRate < 0)
                 _upstreamCurrentBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", 0, 20000, 1000);
-
-            if (_upstreamCurrentBitRate < 0)
-                return "unknown";
-            else
-                return _upstreamCurrentBitRate.ToString("###,###,##0 'kbps'");
         }
 
         /// <summary>
         /// Get Proximus Line profile, based on current download and upload speeds
         /// </summary>
-        /// <returns>Proximus line profile</returns>
-        public ProximusLineProfile getProfileInfo()
+        public void getProfileInfo()
         {
             //find closest profile values
             int downloadProfile = _profiles.Aggregate((x, y) => Math.Abs(x.DownloadSpeed - _downstreamCurrentBitRate) < Math.Abs(y.DownloadSpeed - _downstreamCurrentBitRate) ? x : y).DownloadSpeed;
             int uploadProfile = _profiles.Aggregate((x, y) => Math.Abs(x.UploadSpeed - _upstreamCurrentBitRate) < Math.Abs(y.UploadSpeed - _upstreamCurrentBitRate) ? x : y).UploadSpeed;
             
             //find closest profile
-            _currentProfile = _profiles.Where(x => x.UploadSpeed == uploadProfile && x.DownloadSpeed == downloadProfile).FirstOrDefault();
+            _currentProfile = _profiles.Where(x => x.UploadSpeed == uploadProfile && x.DownloadSpeed == downloadProfile /*&& x.VectoringEnabled == _vectoringEnabled*/).FirstOrDefault();
             if (_currentProfile != null && Math.Abs(_currentProfile.DownloadSpeed - _downstreamCurrentBitRate) <= 256 && Math.Abs(_currentProfile.UploadSpeed - _upstreamCurrentBitRate) <= 256){ }
             else
                 _currentProfile = new ProximusLineProfile("unknown", _downstreamCurrentBitRate, _upstreamCurrentBitRate, false, false, false, false, VDSL2Profile.unknown);
+        }
 
-            return _currentProfile;
+        /// <summary>
+        /// Get DSL standard (VDSL2 / ADSL2+ / ADSL2 / ADSL
+        /// </summary>
+        public void getDSLStandard()
+        {
+            dynamic jsonObject = getValuesFromBBox(new List<string> { 
+                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_L\"]/Status",
+            });
+
+            //check standard
+            for (int i = 0; i < 13; i++)
+            {
+                if (jsonObject["reply"]["actions"][i]["error"]["description"] == "Applied")
+                {
+                    switch (i)
+                    {
+                        case 0: 
+                        case 1: 
+                        case 2:
+                            _dslProfile = DSLStandard.VDSL2;
+                            break;
+                        case 3: 
+                        case 4: 
+                        case 5:
+                            _dslProfile = DSLStandard.ADSL2plus;
+                            break;
+                        case 6: 
+                        case 7: 
+                        case 8:
+                            _dslProfile = DSLStandard.ADSL2;
+                            break;
+                        case 9: 
+                        case 10: 
+                        case 11: 
+                        case 12:
+                            _dslProfile = DSLStandard.ADSL;    
+                            break;
+                        default:
+                            _dslProfile = DSLStandard.unknown;
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check if vectoring is enabled on this line
+        /// </summary>
+        public void getVectoringEnabled()
+        {
+            dynamic jsonObject = getValuesFromBBox(new List<string> { "Device/DSL/Lines/Line[number(VectoringState)=0]/Status" });
+            _vectoringEnabled = (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied");
         }
 
         #endregion profile
@@ -402,24 +517,17 @@ namespace BBox3Tool
         /// <summary>
         /// Get downstream attenuation, check from 0 to 100 dB
         /// </summary>
-        /// <returns>Downstream attenuation in dB, or 'unknown' if not found</returns>
-        public string getDownstreamAttenuation()
+        public void getDownstreamAttenuation()
         {
             //check attenuation from 0.0 to 100.0
             List<int> valuesToCheck = Enumerable.Range(0, 1000).ToList();
             _downstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "DownstreamAttenuation", valuesToCheck, 20) / 10;
-
-            if (_downstreamAttenuation < 0)
-                return "unknown";
-
-            return _downstreamAttenuation.ToString("0.0 'dB'");
         }
         
         /// <summary>
         /// Get upstream attenuation, check from 0 to 100 dB
         /// </summary>
-        /// <returns>Upstream attenuation in dB, or 'unknown' if not found</returns>
-        public string getUpstreamAttenuation()
+        public void getUpstreamAttenuation()
         {
             //special case, upstream attenuation always seems to be 0, so check 0 first to save requests
             List<int> valuesToCheck = new List<int> { 0 };
@@ -431,69 +539,73 @@ namespace BBox3Tool
                 valuesToCheck = Enumerable.Range(1, 1000).ToList();
                 _upstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamAttenuation", valuesToCheck, 20) / 10;
             }
-
-            if (_upstreamAttenuation < 0)
-                return "unknown";
-
-            return _upstreamAttenuation.ToString("0.0 'dB'");
         }
         
         /// <summary>
         /// Get downstream noise margin, check from 0 to 100 dB
         /// </summary>
-        /// <returns>Downstream noise margin in dB, or 'unknown' if not found</returns>
-        public string getDownstreamNoiseMargin()
+        public void getDownstreamNoiseMargin()
         {
-            //check noise margin from 0.0 to 100.0
-            List<int> valuesToCheck = Enumerable.Range(0, 1000).ToList();
-            _downstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "DownstreamNoiseMargin", valuesToCheck, 20) / 10;
-
-            if (_downstreamNoiseMargin < 0)
-                return "unknown";
-
-            return _downstreamNoiseMargin.ToString("0.0 'dB'");
+            //check noise margin from 0.0 to 50.0
+            List<int> valuesToCheck = new List<int> { 0 };
+            valuesToCheck.AddRange(Enumerable.Range(50, 500).ToList());
+            valuesToCheck.AddRange(Enumerable.Range(1, 49).ToList()); 
+            _downstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamNoiseMargin", valuesToCheck, 20) / 10;
         }
 
         /// <summary>
         /// Get upstream noise margin, check from 0 to 100 dB
         /// </summary>
-        /// <returns>Upstream noise margin in dB, or 'unknown' if not found</returns>
-        public string getUpstreamNoiseMargin()
+        public void getUpstreamNoiseMargin()
         {
-            //check noise margin from 0.0 to 100.0
-            List<int> valuesToCheck = Enumerable.Range(0, 1000).ToList();
-            _upstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamNoiseMargin", valuesToCheck) / 10;
-
-            if (_upstreamNoiseMargin < 0)
-                return "unknown";
-
-            return _upstreamNoiseMargin.ToString("0.0 'dB'");
+            //check noise margin from 0.0 to 50.0
+            List<int> valuesToCheck = new List<int> { 0 };
+            valuesToCheck.AddRange(Enumerable.Range(50, 500).ToList());
+            valuesToCheck.AddRange(Enumerable.Range(1, 49).ToList()); 
+            _upstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "DownstreamNoiseMargin", valuesToCheck) / 10;
         }
         
         /// <summary>
         /// Get downstream max bit rate, check from 0 to 150.000 kbps
         /// </summary>
         /// <returns>Downstream max bit rate in kbps, or 'unknown' if not found</returns>
-        public string getDownstreamMaxBitRate()
+        public void getDownstreamMaxBitRate()
         {
             int startValue = (_downstreamCurrentBitRate > 0) ? _downstreamCurrentBitRate : 0;
-            startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
-            _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, 150000, 1000);
 
-            if (_downstreamMaxBitRate < 0)
-                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate",0, startValue, 1000);
+            //download profiles 70 vectoring
+            if (_downstreamCurrentBitRate >= 69990 && _currentProfile.VectoringEnabled)
+            {
+                decimal restMarginDown = _downstreamNoiseMargin - 6m;
+                startValue = _downstreamCurrentBitRate + (int) Math.Floor(restMarginDown * 2900);
+                if (startValue < _downstreamCurrentBitRate)
+                    startValue = _downstreamCurrentBitRate;
 
-            if (_downstreamMaxBitRate < 0)
-                return "unknown";
+                startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
+                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, startValue + 15000, 1000);
 
-            return _downstreamMaxBitRate.ToString("###,###,##0 'kbps'");
+                if (_downstreamMaxBitRate < 0)
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue - 10000, startValue, 1000);
+
+                if (_downstreamMaxBitRate < 0)
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue - 10000, 1000);
+            }
+            //other profiles
+            else
+            {
+                startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
+                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, 150000, 1000);
+
+                if (_downstreamMaxBitRate < 0)
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue, 1000);
+            }
         }
         
         /// <summary>
         /// Get upstream max bit rate, check from 0 to 50.000 kbps
         /// </summary>
         /// <returns>Upstream max bit rate in kbps, or 'unknown' if not found</returns>
-        public string getUpstreamMaxBitRate()
+        public void getUpstreamMaxBitRate()
         {
             int startValue = (_upstreamCurrentBitRate > 0) ? _upstreamCurrentBitRate : 0;
             startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
@@ -501,63 +613,79 @@ namespace BBox3Tool
 
             if (_upstreamMaxBitRate < 0)
                 _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate",0, startValue, 1000);
+        }
 
-            if (_upstreamMaxBitRate < 0)
-                return "unknown";
 
-            return _upstreamMaxBitRate.ToString("###,###,##0 'kbps'");
+        public string getEstimatedDistance()
+        {
+            string distance = "unknown";
+            if (_currentProfile.ProfileVDSL2 == VDSL2Profile.p17a)
+            {
+                _distance = (1000m / (17.664m * 2.3m)) * _downstreamAttenuation;
+                distance = _distance.ToString("0 'm'");
+            }
+            if (_currentProfile.ProfileVDSL2 == VDSL2Profile.p8d)
+            {
+                _distance = (1000m / (8.832m * 2.3m)) * _downstreamAttenuation;
+                distance = _distance.ToString("0 'm'");
+            }
+            return distance;
+        }
+
+        #endregion
+
+        #region device
+
+        /// <summary>
+        /// Get device info: software & hardware versions, link and device uptime
+        /// </summary>
+        public void getDeviceCommonInfo()
+        {
+            dynamic jsonObject = getValuesFromBBox(new List<string> { 
+                "Device/DeviceInfo/HardwareVersion",
+                "Device/DeviceInfo/GUIFirmwareVersion",
+                "Device/DeviceInfo/InternalFirmwareVersion",
+                "Device/DeviceInfo/UpTime",
+                "Device/DSL/Lines/Line[Alias=\"DSL0\"]/LastChange"
+            });
+            _hardwareVersion = jsonObject["reply"]["actions"][0]["callbacks"][0]["parameters"]["value"].ToString();
+            _GUIFirmwareVersion = jsonObject["reply"]["actions"][1]["callbacks"][0]["parameters"]["value"].ToString();
+            _InternalFirmwareVersion = jsonObject["reply"]["actions"][2]["callbacks"][0]["parameters"]["value"].ToString();
+            try
+            {
+                double seconds = Convert.ToDouble(jsonObject["reply"]["actions"][3]["callbacks"][0]["parameters"]["value"]);
+                _deviceUptime = TimeSpan.FromSeconds(seconds);
+                seconds = Convert.ToDouble(jsonObject["reply"]["actions"][4]["callbacks"][0]["parameters"]["value"]);
+                _linkUptime = TimeSpan.FromSeconds(seconds);
+            }
+            catch { }
+
         }
 
         #endregion
 
         //test
 
-        public void getTestValues()
-        {
-            //calc local nonce
-            _localNonce = Bbox3Utils.getLocalNonce();
-
-            //create json object
-            var jsonGetValue = new
-            {
-                request = new Dictionary<string, object>{ 
-                { "id", _requestID },
-                { "session-id", _sessionID },
-                { "priority", false },
-                { "actions", new Dictionary<string, object>[]{
-                    new Dictionary<string, object> {
-                        {"id",0},
-                        {"method","getValue"},
-                        //test xpaths here
-                        {"xpath", "Device/DSL/Lines/Line[UpstreamMaxBitRate = 70000]/Status"}, 
-                    },
-                }},
-                { "cnonce", Convert.ToUInt32(_localNonce)},
-                { "auth-key" , Bbox3Utils.calcAuthKey(User, Password, _requestID, _serverNonce, _localNonce)}}
-            };
-
-            //prepare data to send
-            string jsonString = new JavaScriptSerializer().Serialize(jsonGetValue);
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add("req", jsonString);
-
-            //send request & get response
-            string response = Bbox3Utils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
-                
-            //TO TEST: set breakpoint on next line
-
-            //deserialize object
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            dynamic jsonObject = serializer.Deserialize<dynamic>(response);
-
-            _requestID++;
-        }
-
         public int getDownstreamMaxBitRate2()
         {
             _downstreamMaxBitRate = (int)getDslValueExponentional("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 24);
             return _downstreamMaxBitRate;
         }
+
+        public void getTest()
+        {
+            List<int> valuesToCheck = Enumerable.Range(0, 2500).ToList();
+            decimal test = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "CurrentProfile", valuesToCheck, 50);
+        }
+
+        #region debug
+
+        public string getDebugValue(string xpath)
+        {
+            return getValuesFromBBoxAsString(new List<string> { xpath });
+        }
+
+        #endregion
 
         //private functions
         //-----------------
@@ -723,6 +851,20 @@ namespace BBox3Tool
         /// <returns>JSON reply from bbox</returns>
         private dynamic getValuesFromBBox(List<string> xpaths)
         {
+            string response = getValuesFromBBoxAsString(xpaths);
+
+            //deserialize object
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            return serializer.Deserialize<dynamic>(response);
+        }
+
+        /// <summary>
+        /// Make request to bbox and return the JSON-object as a string
+        /// </summary>
+        /// <param name="xpaths">Xpaths to check</param>
+        /// <returns>JSON reply from bbox as string</returns>
+        private string getValuesFromBBoxAsString(List<string> xpaths)
+        {
             //check thread cancel
             if (_worker.CancellationPending)
                 throw new ThreadCancelledException("Request cancelled.");
@@ -765,9 +907,7 @@ namespace BBox3Tool
             //increase request id
             _requestID++;
 
-            //deserialize object
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<dynamic>(response);
+            return response;
         }
 
         /// <summary>
@@ -824,27 +964,31 @@ namespace BBox3Tool
 
             List<ProximusLineProfile> profiles = new List<ProximusLineProfile>();
 
-            //17a vectoring profiles
+            //ZONE 1: 0-400m
+            //--------------
+            //vectoring provisioning 
             profiles.Add(new ProximusLineProfile("LP145", 70000, 10064, true, false, false, true, VDSL2Profile.p17a));
-            profiles.Add(new ProximusLineProfile("LP810", 70000, 6064, true, false, false, true, VDSL2Profile.p17a));
-            //17a vectoring repair
+            //vectoring dlm 
+            profiles.Add(new ProximusLineProfile("LP???", 100000, 10064, false, true, false, true, VDSL2Profile.p17a));
+            //vectoring repair
+            profiles.Add(new ProximusLineProfile("LP810", 70000, 6064, false, false, true, true, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP141", 70000, 8064, false, false, true, true, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP820", 70000, 4064, false, false, true, true, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP830", 50000, 4064, false, false, true, true, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP840", 50000, 2064, false, false, true, true, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP850", 30000, 2064, false, false, true, true, VDSL2Profile.p17a));
-            //8d vectoring fallback (not possible with bbox3...)
+            //vectoring fallback (not possible with bbox3...)
             profiles.Add(new ProximusLineProfile("LP725", 7544, 576, true, false, false, false, VDSL2Profile.p8d));
 
-            //17a profiles
+            //provisioning
             profiles.Add(new ProximusLineProfile("LP056", 30064, 10064, true, false, false, false, VDSL2Profile.p17a));
-            //17a repair
+            //repair
             profiles.Add(new ProximusLineProfile("LP048", 30064, 8064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP705", 30064, 6064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP706", 25064, 6064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP707", 20064, 6064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP708", 14564, 4064, false, false, true, false, VDSL2Profile.p17a));
-            //17a dlm
+            //dlm
             profiles.Add(new ProximusLineProfile("LP060", 70200, 10064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP052", 70200, 8064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP059", 60200, 10064, false, true, false, false, VDSL2Profile.p17a));
@@ -858,36 +1002,56 @@ namespace BBox3Tool
             profiles.Add(new ProximusLineProfile("LP723", 70200, 6064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP724", 60200, 6064, false, true, false, false, VDSL2Profile.p17a));
 
-            //17a high upload
+            //high upload
             profiles.Add(new ProximusLineProfile("LP715", 16564, 10064, true, false, false, false, VDSL2Profile.p17a));
-            //17a high upload repair
+            //high upload repair
             profiles.Add(new ProximusLineProfile("LP716", 16564, 8064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP717", 14564, 6064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP718", 12064, 4064, false, false, true, false, VDSL2Profile.p17a));
 
-            //8d profiles
+            //ZONE 2: 400-700m
+            //-----------------
+            //provisioning
             profiles.Add(new ProximusLineProfile("LP701", 20064 , 2064, true, false, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP702", 16564 , 2064, true, false, false, false, VDSL2Profile.p8d));
-            //8d repair
+            //repair
             profiles.Add(new ProximusLineProfile("LP703", 14564 , 1064, false, false, true, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP704", 9064 , 576, false, false, true, false, VDSL2Profile.p8d));
-            //8d dlm
+            //dlm
+            profiles.Add(new ProximusLineProfile("LP???", 30064 , 6064, false, true, false, false, VDSL2Profile.p17a));
+            profiles.Add(new ProximusLineProfile("LP???", 30064 , 4064, false, true, false, false, VDSL2Profile.p8d));
+            profiles.Add(new ProximusLineProfile("LP???", 30064 , 3064, false, true, false, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP719", 30064 , 2064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP720", 25200 , 2064, false, true, false, false, VDSL2Profile.p8d));
+            profiles.Add(new ProximusLineProfile("LP720", 25064 , 2064, false, true, false, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP722", 20200 , 2064, false, true, false, false, VDSL2Profile.p8d));
+            //vectoring
+            profiles.Add(new ProximusLineProfile("LP???", 50000, 6064, true, false, true, true, VDSL2Profile.p17a));
+            //vectoring DLM
+            //TODO
 
-            //8d profiles long reach
+            //ZONE 3: 700-1000m
+            //-----------------
+            //provisioning
+            profiles.Add(new ProximusLineProfile("LP702", 16564, 2064, true, false, false, false, VDSL2Profile.p8d));
+
+            //ZONE 4: 1000-1400m
+            //------------------
+            //provisioning
             profiles.Add(new ProximusLineProfile("LP711", 12064, 1064, true, false, false, false, VDSL2Profile.p8d));
             //dlm
-            profiles.Add(new ProximusLineProfile("LP???", 16564, 1064, false, true, false, false, VDSL2Profile.p8d));
-            //8d profiles long reach repair
+            profiles.Add(new ProximusLineProfile("LP100", 14564, 1064, false, true, false, false, VDSL2Profile.p8d));
+            profiles.Add(new ProximusLineProfile("LP101", 16564, 1064, false, true, false, false, VDSL2Profile.p8d));
+            //profiles.Add(new ProximusLineProfile("LP???", 16564, 2064, false, true, false, false, VDSL2Profile.p8d));
+            profiles.Add(new ProximusLineProfile("LP???", 16564, 3064, false, true, false, false, VDSL2Profile.p8d));
+            //repair
             profiles.Add(new ProximusLineProfile("LP712", 12064, 576, false, false, true, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP713", 7064, 576, false, false, true, false, VDSL2Profile.p8d));
             profiles.Add(new ProximusLineProfile("LP714", 10100, 576, false, false, true, false, VDSL2Profile.p8d));
 
-            //8d profiles very long reach
+            //ZONE 5: 1400-1600m
+            //------------------
+            //provisioning
             profiles.Add(new ProximusLineProfile("LP730", 9564, 704, true, false, false, false, VDSL2Profile.p8d));
-            //8d profiles very long reach repair
+            //repair
             profiles.Add(new ProximusLineProfile("LP731", 5064, 576, false, false, true, false, VDSL2Profile.p8d));
 
             return profiles;

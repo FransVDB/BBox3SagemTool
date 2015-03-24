@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Bbox3Session.cs" />
     <Compile Include="Bbox3Utils.cs" />
+    <Compile Include="DSLStandard.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
