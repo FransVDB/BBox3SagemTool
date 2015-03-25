@@ -29,7 +29,7 @@ namespace BBox3Tool
         {
             get { return _name; }
         }
-       
+
         /// <summary>
         /// Downloadspeed in kbps
         /// </summary>
@@ -100,6 +100,7 @@ namespace BBox3Tool
         public VDSL2Profile ProfileVDSL2
         {
             get { return _profileVDSL2; }
+            set { _profileVDSL2 = value; }
         }
 
         #endregion
