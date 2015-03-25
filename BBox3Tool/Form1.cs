@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using System.ComponentModel;
-using System.Web;
 using System.Windows.Forms;
 using System.Text;
 using System.Drawing;
@@ -11,19 +8,48 @@ namespace BBox3Tool
 {
     public partial class Form1 : Form
     {
-        Bbox3Session _session;
+        private IModemSession _session;
 
         public Form1()
         {
             InitializeComponent();
             this.Text += " " + Application.ProductVersion;
-            backgroundWorkerBbox.WorkerSupportsCancellation = true;
-            backgroundWorkerBbox.WorkerReportsProgress = true;
-            _session = new Bbox3Session();
+            backgroundWorker.WorkerSupportsCancellation = true;
+            backgroundWorker.WorkerReportsProgress = true;
+
+            // Init for bbox3 by default
+            _session = new Bbox3Session(backgroundWorker);
         }
 
         //buttons
         //-------
+
+        private void bbox2button_Click(object sender, EventArgs e)
+        {
+            _session = new Bbox2Session();
+
+            // Set default username
+            textBoxUsername.Text = "admin";
+            textBoxUsername.Enabled = true;
+        }
+
+        private void bbox3button_Click(object sender, EventArgs e)
+        {
+            _session = new Bbox3Session(backgroundWorker);
+
+            // Set default username
+            textBoxUsername.Text = "User";
+            textBoxUsername.Enabled = true;
+        }
+
+        private void fritzboxButton_Click(object sender, EventArgs e)
+        {
+            _session = new FritzBoxSession();
+
+            // Disable username textBox
+            textBoxUsername.Text = "N/A";
+            textBoxUsername.Enabled = false;
+        }
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
@@ -38,13 +64,13 @@ namespace BBox3Tool
         private void initDebugMode()
         {
             //get textbox values
-            string bboxUrl = "http://" + textBoxBboxUrl.Text;
-            string user = "User";
+            string host = textBoxIpAddress.Text;
+            string username = textBoxUsername.Text;
             string password = textBoxPassword.Text;
 
             //init session
-            _session = new Bbox3Session(bboxUrl, user, password, backgroundWorkerBbox, true);
-            if (_session.openSession())
+            _session = new Bbox3Session(backgroundWorker, true);
+            if (_session.OpenSession(host, username, password))
             {
                 buttonConnect.Enabled = false;
                 panelDebug.Visible = true;
@@ -52,21 +78,22 @@ namespace BBox3Tool
                 panelLogin.Visible = false;
             }
             else
+            {
                 MessageBox.Show("Login incorrect.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+            }
         }
 
         private void initNormalMode()
         {
             //get textbox values
-            string bboxUrl = "http://" + textBoxBboxUrl.Text;
-            string user = textBoxUsername.Text;
+            string host = textBoxIpAddress.Text;
+            string username = textBoxUsername.Text;
             string password = textBoxPassword.Text;
 
-            //inint session
-            _session = new Bbox3Session(bboxUrl, user, password, backgroundWorkerBbox);
-            if (_session.openSession())
+            //init session
+            if (_session.OpenSession(host, username, password))
             {
+                buttonClipboard.Enabled = false;
                 buttonConnect.Enabled = false;
                 buttonCancel.Enabled = true;
 
@@ -74,17 +101,19 @@ namespace BBox3Tool
                 panelInfo.Visible = true;
                 panelLogin.Visible = false;
 
-                backgroundWorkerBbox.RunWorkerAsync();
+                backgroundWorker.RunWorkerAsync();
             }
             else
+            {
                 MessageBox.Show("Login incorrect.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            if (backgroundWorkerBbox.IsBusy)
+            if (backgroundWorker.IsBusy)
             {
-                backgroundWorkerBbox.CancelAsync();
+                backgroundWorker.CancelAsync();
                 buttonCancel.Enabled = false;
             }
         }
@@ -109,15 +138,16 @@ namespace BBox3Tool
             builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
-            builder.AppendLine("DSL standard:                  " + _session.DslStandard.ToString().Replace("plus", "+"));
-            if (_session.DslStandard == DSLStandard.VDSL2)
+            builder.AppendLine("DSL standard:                  " + _session.GetDslStandard().ToString().Replace("plus", "+"));
+            if (_session.GetDslStandard() == DSLStandard.VDSL2)
             {
-                builder.AppendLine("VDSL2 profile:                 " + _session.CurrentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                ProximusLineProfile currentProfile = _session.GetProfileInfo();
+                builder.AppendLine("VDSL2 profile:                 " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                 //builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
-                builder.AppendLine("Vectoring:                     " + (_session.CurrentProfile.VectoringEnabled ? "Yes" : "No")); 
-                builder.AppendLine("Proximus profile:              " + _session.CurrentProfile.Name);
-                builder.AppendLine("DLM:                           " + (_session.CurrentProfile.DlmProfile ? "Yes" : "No"));
-                builder.AppendLine("Repair:                        " + (_session.CurrentProfile.RepairProfile ? "Yes" : "No"));
+                builder.AppendLine("Vectoring:                     " + (currentProfile.VectoringEnabled ? "Yes" : "No")); 
+                builder.AppendLine("Proximus profile:              " + currentProfile.Name);
+                builder.AppendLine("DLM:                           " + (currentProfile.DlmProfile ? "Yes" : "No"));
+                builder.AppendLine("Repair:                        " + (currentProfile.RepairProfile ? "Yes" : "No"));
 
             }
 
@@ -130,7 +160,7 @@ namespace BBox3Tool
         //debug
         private void buttonDebug_Click(object sender, EventArgs e)
         {
-            textBoxDebugResult.Text = _session.getDebugValue(textBoxDebug.Text);
+            textBoxDebugResult.Text = _session.GetDebugValue(textBoxDebug.Text);
         }
         
         //debug textbox on enter --> debug button click
@@ -148,89 +178,84 @@ namespace BBox3Tool
             BackgroundWorker worker = sender as BackgroundWorker;
             try
             {
-                //get device stats
-                _session.getDeviceCommonInfo();
-                setLabelText(labelHardwareVersion, _session.HardwareVersion);
-                setLabelText(labelSoftwareVersion, _session.InternalFirmwareVersion);
-                setLabelText(labelGUIVersion, _session.GUIFirmwareVersion);
-                setLabelText(labelDeviceUptime, _session.DeviceUptime.ToString("%d") + (_session.DeviceUptime.Days == 1 ? " day " : " days ") + _session.DeviceUptime.ToString("hh\\:mm\\:ss"));
-                setLabelText(labelLinkUptime, _session.LinkUptime.ToString("%d") + (_session.LinkUptime.Days == 1 ? " day " : " days ") + _session.LinkUptime.ToString("hh\\:mm\\:ss"));
+                // Get line data
+                _session.GetLineData();
 
-                //get dsl stats
-                _session.getDSLStandard();
-                setLabelText(labelDSLStandard, _session.DslStandard.ToString().Replace("plus", "+"));
+                // Get device info
+                DeviceInfo deviceInfo = _session.GetDeviceInfo();
+                setLabelText(labelHardwareVersion, deviceInfo.HardwareVersion);
+                setLabelText(labelSoftwareVersion, deviceInfo.FirmwareVersion);
+                setLabelText(labelGUIVersion, deviceInfo.GuiVersion);
+                setLabelText(labelDeviceUptime, deviceInfo.DeviceUptime);
+                setLabelText(labelLinkUptime, deviceInfo.LinkUptime);
 
-                //get sync values
+                // Get dsl standard
+                DSLStandard dslStandard = _session.GetDslStandard();
+                setLabelText(labelDSLStandard, dslStandard.ToString().Replace("plus", "+"));
+
+                // Get sync values
                 setLabelText(labelDownstreamCurrentBitRate, "busy...");
-                _session.getDownstreamCurrentBitRate();
                 setLabelText(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
 
                 setLabelText(labelUpstreamCurrentBitRate, "busy...");
-                _session.getUpstreamCurrentBitRate();
                 setLabelText(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
 
-                //get profile info
-                if (_session.DslStandard == DSLStandard.VDSL2)
+                // Get profile info
+                if (_session.GetDslStandard() == DSLStandard.VDSL2)
                 {
-                    _session.getProfileInfo();
+                    ProximusLineProfile currentProfile = _session.GetProfileInfo();
 
                     //TODO check why this is incorrect
                     //_session.getVectoringEnabled();
                     //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
 
                     //get vectoring status fallback: get from profile list
-                    setLabelText(labelVectoring, _session.CurrentProfile.VectoringEnabled ? "Yes" : "No");
+                    setLabelText(labelVectoring, currentProfile.VectoringEnabled ? "Yes" : "No");
 
-                    setLabelText(labelDLM, _session.CurrentProfile.DlmProfile ? "Yes" : "No");
-                    setLabelText(labelRepair, _session.CurrentProfile.RepairProfile ? "Yes" : "No");
-                    setLabelText(labelProximusProfile, _session.CurrentProfile.Name.ToString());
-                    setLabelText(labelVDSLProfile, _session.CurrentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    setLabelText(labelDLM, currentProfile.DlmProfile ? "Yes" : "No");
+                    setLabelText(labelRepair, currentProfile.RepairProfile ? "Yes" : "No");
+                    setLabelText(labelProximusProfile, currentProfile.Name.ToString());
+                    setLabelText(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                 }
                 else
                 {
                     setLabelText(labelVDSLProfile, "n/a");
                     labelVDSLProfile.ForeColor = Color.Gray;
-                    labelVDSLProfileLabel.ForeColor = Color.Gray;
+                    vdslProfileLabel.ForeColor = Color.Gray;
                     setLabelText(labelVectoring, "n/a");
                     labelVectoring.ForeColor = Color.Gray;
-                    labelVectoringLabel.ForeColor = Color.Gray;
+                    vectoringLabel.ForeColor = Color.Gray;
                     setLabelText(labelRepair, "n/a");
                     labelRepair.ForeColor = Color.Gray;
-                    labelRepairLabel.ForeColor = Color.Gray;
+                    repairLabel.ForeColor = Color.Gray;
                     setLabelText(labelDLM, "n/a");
                     labelDLM.ForeColor = Color.Gray;
-                    labelDLMLabel.ForeColor = Color.Gray;
+                    dlmLabel.ForeColor = Color.Gray;
                     setLabelText(labelProximusProfile, "n/a");
                     labelProximusProfile.ForeColor = Color.Gray;
-                    labelProximusProfileLabel.ForeColor = Color.Gray;
+                    proximusProfileLabel.ForeColor = Color.Gray;
                 }
 
                 //get line stats
                 setLabelText(labelDownstreamAttenuation, "busy...");
-                _session.getDownstreamAttenuation();
                 setLabelText(labelDownstreamAttenuation, _session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'"));
                 //distance
                 //setLabelText(labelDistance, _session.getEstimatedDistance());
                 //return;
 
                 setLabelText(labelUpstreamAttenuation, "busy...");
-                _session.getUpstreamAttenuation();
                 setLabelText(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));
 
                 setLabelText(labelDownstreamNoiseMargin, "busy...");
-                _session.getDownstreamNoiseMargin();
                 setLabelText(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'"));
 
                 setLabelText(labelUpstreamNoiseMargin, "busy...");
-                _session.getUpstreamNoiseMargin();
                 setLabelText(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'"));
 
                 setLabelText(labelDownstreamMaxBitRate, "busy...");
-                _session.getDownstreamMaxBitRate();
                 setLabelText(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
 
                 setLabelText(labelUpstreamMaxBitRate, "busy...");
-                _session.getUpstreamMaxBitRate();
                 setLabelText(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
 
             }
@@ -244,10 +269,10 @@ namespace BBox3Tool
             }
             finally
             {
-                _session.closeSession();
+                _session.CloseSession();
             }
 
-            worker.ReportProgress(100);
+            //worker.ReportProgress(100);
         }
 
         private void backgroundWorkerBbox_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -257,6 +282,7 @@ namespace BBox3Tool
 
         private void backgroundWorkerBbox_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            buttonClipboard.Enabled = true;
             buttonConnect.Enabled = true;
             buttonCancel.Enabled = false;
         }
@@ -271,9 +297,5 @@ namespace BBox3Tool
                 label.Text = text;
             });
         }
-
-
-
-
     }
 }
