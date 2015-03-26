@@ -65,7 +65,7 @@ namespace BBox3Tool
         {
             //get textbox values
             string host = textBoxIpAddress.Text;
-            string username = textBoxUsername.Text;
+            string username = "User"; //overwrite textbox value
             string password = textBoxPassword.Text;
 
             //init session
