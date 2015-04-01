@@ -61,7 +61,7 @@ namespace BBox3Tool
         /// </summary>
         public DeviceInfo GetDeviceInfo()
         {
-            dynamic jsonObject = getValuesFromBBox(new List<string>
+            dynamic jsonObject = BBoxGetValue(new List<string>
             {
                 "Device/DeviceInfo/HardwareVersion",
                 "Device/DeviceInfo/GUIFirmwareVersion",
@@ -100,7 +100,15 @@ namespace BBox3Tool
 
         public string GetDebugValue(string xpath)
         {
-            return getValuesFromBBoxAsString(new List<string> {xpath});
+            //prepare actions
+            var actions = new List<Dictionary<string, object>>();
+            actions.Add(new Dictionary<string, object>
+            {
+                {"id", 0},
+                {"method", "getValue"},
+                {"xpath", xpath}
+            });
+            return sendActionsToBBox(actions);
         }
 
         #endregion
@@ -151,12 +159,14 @@ namespace BBox3Tool
         private decimal _upstreamAttenuation;
         private decimal _downstreamNoiseMargin;
         private decimal _upstreamNoiseMargin;
+        private decimal _distance;
 
         //booleans for stats
         private bool dsCurrBitRateDone, usCurrBitRateDone;
         private bool dsMaxBitRateDone, usMaxBitRateDone;
         private bool dsAttenuationDone, usAttenuationDone;
         private bool dsNoiseMarginDone, usNoiseMarginDone;
+        private bool distanceDone;
 
         #endregion
 
@@ -245,10 +255,19 @@ namespace BBox3Tool
             }
             set { this._upstreamCurrentBitRate = value; }
         }
+        
+        public decimal Distance
+        {
+            get
+            {
+                if (!distanceDone)
+                    GetEstimatedDistance();
+                return _distance;
+            }
+            set { this._distance = value; }
+        }
 
         public ProximusLineProfile CurrentProfile { get; private set; }
-
-        public decimal Distance { get; private set; }
 
         public bool VectoringEnabled { get; private set; }
 
@@ -294,8 +313,8 @@ namespace BBox3Tool
                     request = new Dictionary<string, object>
                     {
                         {"id", _requestID},
-                        {"priority", true},
                         {"session-id", _sessionID.ToString()}, // !! must be string
+                        {"priority", true},
                         {
                             "actions", new[]
                             {
@@ -319,7 +338,7 @@ namespace BBox3Tool
                                                             new
                                                             {
                                                                 name = "gtw",
-                                                                uri = "http://sagem.com/gateway-data"
+                                                                uri = "http://sagemcom.com/gateway-data"
                                                             }
                                                         }
                                                     },
@@ -329,7 +348,7 @@ namespace BBox3Tool
                                                         {
                                                             {"get-content-name", true},
                                                             {"local-time", true},
-                                                            {"no-default", true}
+                                                            {"no-default", false}
                                                         }
                                                     },
                                                     {"capability-depth", 1}, //default 1
@@ -345,7 +364,7 @@ namespace BBox3Tool
                                                         }
                                                     },
                                                     {"time-format", "ISO_8601"},
-                                                    {"depth", _debug ? 99 : 1}, //default 2
+                                                    {"depth", _debug ? 99 : 2}, //default 2
                                                     {"max-add-events", 5},
                                                     {"write-only-string", "_XMO_WRITE_ONLY_"},
                                                     {"undefined-write-only-string", "_XMO_UNDEFINED_WRITE_ONLY_"}
@@ -356,10 +375,8 @@ namespace BBox3Tool
                                 }
                             }
                         },
-                        {"cnonce", Convert.ToUInt32(_localNonce)},
-                        {
-                            "auth-key", Bbox3Utils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)
-                        }
+                        {"cnonce", Convert.ToInt32(_localNonce)},
+                        {"auth-key", Bbox3Utils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
                     }
                 };
 
@@ -383,6 +400,10 @@ namespace BBox3Tool
 
                 //successfully logged in
                 LoggedIn = true;
+
+                //BBoxSubscribeForNotification(new List<string> { "Device/PPP/Interfaces/Interface[Alias=\"PPP_DATA_BACKUP\"]/Status" });
+
+
                 return true;
             }
             catch (Exception ex)
@@ -599,7 +620,7 @@ namespace BBox3Tool
         /// </summary>
         public DSLStandard GetDslStandard()
         {
-            dynamic jsonObject = getValuesFromBBox(new List<string>
+            dynamic jsonObject = BBoxGetValue(new List<string>
             {
                 "Device/DSL/Lines/Line[StandardUsed=\"G_993_2\"]/Status",
                 "Device/DSL/Lines/Line[StandardUsed=\"G_993_2_ANNEX_A\"]/Status",
@@ -661,7 +682,7 @@ namespace BBox3Tool
         public void GetVectoringEnabled()
         {
             dynamic jsonObject =
-                getValuesFromBBox(new List<string> {"Device/DSL/Lines/Line[number(VectoringState)=0]/Status"});
+                BBoxGetValue(new List<string> {"Device/DSL/Lines/Line[number(VectoringState)=0]/Status"});
             VectoringEnabled = (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied");
         }
 
@@ -776,20 +797,16 @@ namespace BBox3Tool
             usMaxBitRateDone = true;
         }
 
-        public string GetEstimatedDistance()
+        public void GetEstimatedDistance()
         {
-            var distance = "unknown";
-            if (CurrentProfile.ProfileVDSL2 == VDSL2Profile.p17a)
-            {
-                Distance = (1000m/(17.664m*2.3m))*_downstreamAttenuation;
-                distance = Distance.ToString("0 'm'");
-            }
-            if (CurrentProfile.ProfileVDSL2 == VDSL2Profile.p8d)
-            {
-                Distance = (1000m/(8.832m*2.3m))*_downstreamAttenuation;
-                distance = Distance.ToString("0 'm'");
-            }
-            return distance;
+            var valuesToCheck = Enumerable.Range(0, 1280).ToList();
+            valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
+            decimal upbokle = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck) / 100;
+            /*if (upbokle > 0)
+                Distance = (upbokle / 13.81m) * 1000;*/
+            if (upbokle > 0)
+                Distance = (upbokle / 20m) * 1000;
+            distanceDone = true;
         }
 
         #endregion
@@ -821,7 +838,7 @@ namespace BBox3Tool
                 }
 
                 //get values from bbox
-                dynamic jsonObject = getValuesFromBBox(actions);
+                dynamic jsonObject = BBoxGetValue(actions);
 
                 //check values
                 for (var i = 0; i < requestCount; i++)
@@ -854,7 +871,7 @@ namespace BBox3Tool
                 actionsPrecise.Add(string.Format(xpathBase, node + "=" + ((i*subStep) + dslValue)));
 
             //get values from bbox
-            dynamic jsonObjectPrecise = getValuesFromBBox(actionsPrecise);
+            dynamic jsonObjectPrecise = BBoxGetValue(actionsPrecise);
 
             //check values
             for (var i = 0; i < xpathCount; i++)
@@ -896,7 +913,7 @@ namespace BBox3Tool
                     subrange.Select(x => string.Format(xpathBase, node + "=\"" + x.ToString() + "\"")).ToList();
 
                 //get values from bbox
-                dynamic jsonObject = getValuesFromBBox(actions);
+                dynamic jsonObject = BBoxGetValue(actions);
 
                 //check values
                 for (var i = 0; i < actions.Count; i++)
@@ -929,7 +946,7 @@ namespace BBox3Tool
             {
                 //get values from bbox
                 dynamic jsonObject =
-                    getValuesFromBBox(new List<string> {string.Format(xpathBase, node + " > " + greaterThen)});
+                    BBoxGetValue(new List<string> {string.Format(xpathBase, node + " > " + greaterThen)});
                 //doens't work, always true :(  
 
                 //check values
@@ -949,29 +966,8 @@ namespace BBox3Tool
         /// </summary>
         /// <param name="xpaths">Xpaths to check</param>
         /// <returns>JSON reply from bbox</returns>
-        private dynamic getValuesFromBBox(List<string> xpaths)
+        private dynamic BBoxGetValue(List<string> xpaths)
         {
-            var response = getValuesFromBBoxAsString(xpaths);
-
-            //deserialize object
-            var serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<dynamic>(response);
-        }
-
-        /// <summary>
-        ///     Make request to bbox and return the JSON-object as a string
-        /// </summary>
-        /// <param name="xpaths">Xpaths to check</param>
-        /// <returns>JSON reply from bbox as string</returns>
-        private string getValuesFromBBoxAsString(List<string> xpaths)
-        {
-            //check thread cancel
-            if (_worker.CancellationPending)
-                throw new ThreadCancelledException("Request cancelled.");
-
-            //calc local nonce
-            _localNonce = Bbox3Utils.getLocalNonce();
-
             //prepare actions
             var actions = new List<Dictionary<string, object>>();
             var i = 0;
@@ -985,6 +981,56 @@ namespace BBox3Tool
                 });
                 i++;
             }
+
+            var response = sendActionsToBBox(actions);
+
+            //deserialize object
+            var serializer = new JavaScriptSerializer();
+            return serializer.Deserialize<dynamic>(response);
+        }
+
+        private dynamic BBoxSubscribeForNotification(List<string> xpaths)
+        {
+            //prepare actions
+            var actions = new List<Dictionary<string, object>>();
+            var i = 0;
+            foreach (var xpath in xpaths)
+            {
+                actions.Add(new Dictionary<string, object>
+                {
+                    {"id", i},
+                    {"method", "subscribeForNotification"},
+                    {"xpath", xpath},
+                    {"parameters", new Dictionary<string, object>{
+                        {"id", (i+1).ToString()},
+                        {"type","value-change"},
+                        {"current-value",true}
+                    }}
+                });
+                i++;
+            }
+
+            var response = sendActionsToBBox(actions);
+
+            //deserialize object
+            var serializer = new JavaScriptSerializer();
+            return serializer.Deserialize<dynamic>(response);
+        }
+
+        /// <summary>
+        ///     Make request to bbox and return the JSON-object as a string
+        /// </summary>
+        /// <param name="xpaths">Xpaths to check</param>
+        /// <returns>JSON reply from bbox as string</returns>
+        private string sendActionsToBBox(List<Dictionary<string, object>> actions)
+        {
+            //check thread cancel
+            if (_worker.CancellationPending)
+                throw new ThreadCancelledException("Request cancelled.");
+
+            //calc local nonce
+            _localNonce = Bbox3Utils.getLocalNonce();
+
             //create json object
             var jsonGetValue = new
             {
@@ -1029,6 +1075,7 @@ namespace BBox3Tool
             {
                 request = new Dictionary<string, object>
                 {
+                    //{"request", (_requestID + 1)},
                     {"req_id", (_requestID + 1)},
                     {"sess_id", _sessionID},
                     {"basic", _basicAuth},
@@ -1036,10 +1083,10 @@ namespace BBox3Tool
                     {"nonce", _serverNonce},
                     {"ha1", Bbox3Utils.calcHa1Cookie(_username, _password, _serverNonce)},
                     {
-                        "datamodel",
+                        "dataModel",
                         new
                         {
-                            name = "internal",
+                            name = "Internal",
                             nss = new[]
                             {
                                 new
@@ -1096,8 +1143,8 @@ namespace BBox3Tool
             profiles.Add(new ProximusLineProfile("LP707", 20064, 6064, false, false, true, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP708", 14564, 4064, false, false, true, false, VDSL2Profile.p17a));
             //dlm
-            profiles.Add(new ProximusLineProfile("LP060", 70200, 10064, false, true, false, false, VDSL2Profile.p17a));
-            profiles.Add(new ProximusLineProfile("LP052", 70200, 8064, false, true, false, false, VDSL2Profile.p17a));
+            profiles.Add(new ProximusLineProfile("LP060", 70000, 10050, false, true, false, false, VDSL2Profile.p17a));
+            profiles.Add(new ProximusLineProfile("LP052", 70000, 8064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP059", 60200, 10064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP051", 60200, 8064, false, true, false, false, VDSL2Profile.p17a));
             profiles.Add(new ProximusLineProfile("LP058", 50200, 10064, false, true, false, false, VDSL2Profile.p17a));

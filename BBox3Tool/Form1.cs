@@ -102,6 +102,9 @@ namespace BBox3Tool
                 panelLogin.Visible = false;
 
                 backgroundWorker.RunWorkerAsync();
+
+                if (_session is Bbox3Session)
+                    distanceLabel.Text += "\r\n(experimental)";
             }
             else
             {
@@ -151,7 +154,11 @@ namespace BBox3Tool
 
             }
 
-            //builder.AppendLine("Distance:                      " + (_session.Distance == -1 ? "unknown" : _session.Distance.ToString("0 'm'")));
+            if (_session is Bbox3Session)
+                builder.AppendLine("Distance (experimental):       " + (_session.Distance < 0 ? "unknown" : _session.Distance.ToString("0 'm'")));
+            else
+                builder.AppendLine("Distance                       " + (_session.Distance < 0 ? "unknown" : _session.Distance.ToString("0 'm'")));
+
             builder.AppendLine("[/code]");
 
             Clipboard.SetText(builder.ToString());
@@ -236,12 +243,13 @@ namespace BBox3Tool
                     proximusProfileLabel.ForeColor = Color.Gray;
                 }
 
+                //distance
+                setLabelText(labelDistance, "busy...");
+                setLabelText(labelDistance, _session.Distance.ToString("0 'm'"));
+
                 //get line stats
                 setLabelText(labelDownstreamAttenuation, "busy...");
                 setLabelText(labelDownstreamAttenuation, _session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'"));
-                //distance
-                //setLabelText(labelDistance, _session.getEstimatedDistance());
-                //return;
 
                 setLabelText(labelUpstreamAttenuation, "busy...");
                 setLabelText(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));

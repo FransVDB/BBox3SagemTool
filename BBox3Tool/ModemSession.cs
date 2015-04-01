@@ -21,5 +21,6 @@ namespace BBox3Tool
         decimal UpstreamAttenuation { get; }
         decimal DownstreamNoiseMargin { get; }
         decimal UpstreamNoiseMargin { get; }
+        decimal Distance { get; }
     }
 }

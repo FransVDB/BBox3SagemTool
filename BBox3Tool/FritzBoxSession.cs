@@ -195,5 +195,7 @@ namespace BBox3Tool
         public decimal DownstreamNoiseMargin { get; private set; }
 
         public decimal UpstreamNoiseMargin { get; private set; }
+
+        public decimal Distance { get; private set; }
     }
 }
