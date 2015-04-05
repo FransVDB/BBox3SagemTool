@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<document>
+  <version>1.0</version>
+  <login>
+    <device></device>
+    <ip></ip>
+    <user></user>
+    <password></password>
+  </login>
+</document>

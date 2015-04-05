@@ -11,6 +11,11 @@ namespace BBox3Tool
 
         private TelnetConnection tc;
 
+        public FritzBoxSession()
+	    {
+            DeviceName = "Fritz!Box 7390";
+	    }
+
         public bool OpenSession(String host, String username, String password)
         {
             // New connection
@@ -197,5 +202,7 @@ namespace BBox3Tool
         public decimal UpstreamNoiseMargin { get; private set; }
 
         public decimal Distance { get; private set; }
+
+        public string DeviceName { get; private set; }
     }
 }

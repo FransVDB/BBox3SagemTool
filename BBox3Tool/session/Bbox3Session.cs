@@ -37,6 +37,7 @@ namespace BBox3Tool
             UpstreamCurrentBitRate = -1;
 
             //device
+            DeviceName = "B-Box 3 Sagem";
             HardwareVersion = "";
             GUIFirmwareVersion = "";
             InternalFirmwareVersion = "";
@@ -266,6 +267,8 @@ namespace BBox3Tool
             }
             set { this._distance = value; }
         }
+
+        public string DeviceName { get; private set; }
 
         public ProximusLineProfile CurrentProfile { get; private set; }
 

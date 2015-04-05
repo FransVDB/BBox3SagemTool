@@ -8,7 +8,24 @@ namespace BBox3Tool
     internal class Bbox2Session : IModemSession
     {
         private VDSL2Profile _vdslProfile;
+        private DSLStandard _dslStandard;
         private TelnetConnection tc;
+
+        public int DownstreamCurrentBitRate { get; private set; }
+        public int UpstreamCurrentBitRate { get; private set; }
+        public int DownstreamMaxBitRate { get; private set; }
+        public int UpstreamMaxBitRate { get; private set; }
+        public decimal DownstreamAttenuation { get; private set; }
+        public decimal UpstreamAttenuation { get; private set; }
+        public decimal DownstreamNoiseMargin { get; private set; }
+        public decimal UpstreamNoiseMargin { get; private set; }
+        public decimal Distance { get; private set; }
+        public string DeviceName { get; private set; }
+
+        public Bbox2Session ()
+	    {
+            DeviceName = "B-Box 2";
+	    }
 
         public bool OpenSession(String host, String username, String password)
         {
@@ -105,7 +122,7 @@ namespace BBox3Tool
 
         public DSLStandard GetDslStandard()
         {
-            return DSLStandard.unknown;
+            return _dslStandard;
         }
 
         public DeviceInfo GetDeviceInfo()
@@ -118,16 +135,6 @@ namespace BBox3Tool
         {
             return "Not implemented yet!";
         }
-
-        public int DownstreamCurrentBitRate { get; private set; }
-        public int UpstreamCurrentBitRate { get; private set; }
-        public int DownstreamMaxBitRate { get; private set; }
-        public int UpstreamMaxBitRate { get; private set; }
-        public decimal DownstreamAttenuation { get; private set; }
-        public decimal UpstreamAttenuation { get; private set; }
-        public decimal DownstreamNoiseMargin { get; private set; }
-        public decimal UpstreamNoiseMargin { get; private set; }
-        public decimal Distance { get; private set; }
 
         private void ParsePstatex(String pstatex)
         {
@@ -153,8 +160,8 @@ namespace BBox3Tool
                             DownstreamMaxBitRate = Convert.ToInt32(dsMaxBitRate);
                             break;
                         case "Downstream Training Margin":
-                            var dsAttenuation = array[1].Trim().Replace(" dB", "");
-                            DownstreamAttenuation = Convert.ToDecimal(dsAttenuation, CultureInfo.InvariantCulture);
+                            var dsNoiseMargin = array[1].Trim().Replace(" dB", "");
+                            DownstreamNoiseMargin = Convert.ToDecimal(dsNoiseMargin, CultureInfo.InvariantCulture);
                             break;
                         case "Bandplan Type...........":
                             _vdslProfile = VDSL2Profile.p8d;
@@ -162,6 +169,16 @@ namespace BBox3Tool
                             {
                                 _vdslProfile = VDSL2Profile.p17a;
                             }
+                            break;
+                        case "VDSL Estimated Loop Length ":
+                            var loopLength = array[1].Trim().Replace("ft", "").Trim();
+                            Distance = Convert.ToDecimal(loopLength, CultureInfo.InvariantCulture) * 0.3048m;
+                            break;
+                        case "Line Type":
+                            if (array[1].Trim() == "0x00800000#" || array[1].Trim() == "0x04000000#")
+                                _dslStandard = DSLStandard.VDSL2;
+                            else
+                                _dslStandard = DSLStandard.unknown;
                             break;
                         case "Far-end ITU Vendor Id":
                             break;
@@ -186,8 +203,8 @@ namespace BBox3Tool
                     switch (array[0])
                     {
                         case "Attenuation":
-                            var dsNoiseMargin = array[1].Trim().Replace(" dB", "");
-                            DownstreamNoiseMargin = Convert.ToDecimal(dsNoiseMargin, CultureInfo.InvariantCulture);
+                            var dsAttenuation = array[1].Trim().Replace(" dB", "");
+                            DownstreamAttenuation = Convert.ToDecimal(dsAttenuation, CultureInfo.InvariantCulture);
                             break;
                     }
                 }

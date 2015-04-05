@@ -22,5 +22,6 @@ namespace BBox3Tool
         decimal DownstreamNoiseMargin { get; }
         decimal UpstreamNoiseMargin { get; }
         decimal Distance { get; }
+        string DeviceName { get; }
     }
 }

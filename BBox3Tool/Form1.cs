@@ -126,8 +126,8 @@ namespace BBox3Tool
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("[code]");
             builder.AppendLine("B-Box 3 Sagem Tool v" + Application.ProductVersion);
-            builder.AppendLine("-----------------------");
-            //builder.AppendLine("Date:                          " + DateTime.Now.ToString("d/M/yyyy HH:mm:ss"));
+            builder.AppendLine("--------------------" + new String('-', Application.ProductVersion.Length));
+            builder.AppendLine("Device:                        " + _session.DeviceName);
             builder.AppendLine("");
             builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
@@ -145,13 +145,24 @@ namespace BBox3Tool
             if (_session.GetDslStandard() == DSLStandard.VDSL2)
             {
                 ProximusLineProfile currentProfile = _session.GetProfileInfo();
-                builder.AppendLine("VDSL2 profile:                 " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                //builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
-                builder.AppendLine("Vectoring:                     " + (currentProfile.VectoringEnabled ? "Yes" : "No")); 
-                builder.AppendLine("Proximus profile:              " + currentProfile.Name);
-                builder.AppendLine("DLM:                           " + (currentProfile.DlmProfile ? "Yes" : "No"));
-                builder.AppendLine("Repair:                        " + (currentProfile.RepairProfile ? "Yes" : "No"));
+                if (currentProfile.Name == "unknown")
+                {
+                    builder.AppendLine("VDSL2 profile:                 unknown");
+                    builder.AppendLine("Vectoring:                     unknown");
+                    builder.AppendLine("Proximus profile:              unknown");
+                    builder.AppendLine("DLM:                           unknown");
+                    builder.AppendLine("Repair:                        unknown");
+                }
+                else
+                {
 
+                    builder.AppendLine("VDSL2 profile:                 " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    //builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
+                    builder.AppendLine("Vectoring:                     " + (currentProfile.VectoringEnabled ? "Yes" : "No"));
+                    builder.AppendLine("Proximus profile:              " + currentProfile.Name);
+                    builder.AppendLine("DLM:                           " + (currentProfile.DlmProfile ? "Yes" : "No"));
+                    builder.AppendLine("Repair:                        " + (currentProfile.RepairProfile ? "Yes" : "No"));
+                }
             }
 
             if (_session is Bbox3Session)
@@ -169,7 +180,7 @@ namespace BBox3Tool
         {
             textBoxDebugResult.Text = _session.GetDebugValue(textBoxDebug.Text);
         }
-        
+
         //debug textbox on enter --> debug button click
         private void textBoxDebug_KeyDown(object sender, KeyEventArgs e)
         {
@@ -216,13 +227,23 @@ namespace BBox3Tool
                     //_session.getVectoringEnabled();
                     //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
 
-                    //get vectoring status fallback: get from profile list
-                    setLabelText(labelVectoring, currentProfile.VectoringEnabled ? "Yes" : "No");
-
-                    setLabelText(labelDLM, currentProfile.DlmProfile ? "Yes" : "No");
-                    setLabelText(labelRepair, currentProfile.RepairProfile ? "Yes" : "No");
-                    setLabelText(labelProximusProfile, currentProfile.Name.ToString());
-                    setLabelText(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    if (currentProfile.Name == "unknown")
+                    {
+                        setLabelText(labelVectoring, "unknown");
+                        setLabelText(labelDLM, "unknown");
+                        setLabelText(labelRepair, "unknown");
+                        setLabelText(labelProximusProfile, "unknown");
+                        setLabelText(labelVDSLProfile, "unknown");
+                    }
+                    else
+                    {
+                        //get vectoring status fallback: get from profile list
+                        setLabelText(labelVectoring, currentProfile.VectoringEnabled ? "Yes" : "No");
+                        setLabelText(labelDLM, currentProfile.DlmProfile ? "Yes" : "No");
+                        setLabelText(labelRepair, currentProfile.RepairProfile ? "Yes" : "No");
+                        setLabelText(labelProximusProfile, currentProfile.Name.ToString());
+                        setLabelText(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    }
                 }
                 else
                 {
@@ -281,11 +302,6 @@ namespace BBox3Tool
             }
 
             //worker.ReportProgress(100);
-        }
-
-        private void backgroundWorkerBbox_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-
         }
 
         private void backgroundWorkerBbox_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
