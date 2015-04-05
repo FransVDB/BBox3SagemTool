@@ -115,7 +115,7 @@ namespace BBox3Tool
                             request.Method = "POST";
                             request.Host = url.Host;
 
-                            request.Referer = "http://192.168.1.1/2.5.7/gui/";
+                            //request.Referer = "http://192.168.1.1/2.5.7/gui/";
 
                             //thank you stackoverflow!
                             //http://stackoverflow.com/questions/566437/http-post-returns-the-error-417-expectation-failed-c
