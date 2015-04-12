@@ -8,7 +8,6 @@ namespace BBox3Tool
         bool CloseSession();
         void GetLineData();
 
-        ProximusLineProfile GetProfileInfo();
         DSLStandard GetDslStandard();
         DeviceInfo GetDeviceInfo();
         String GetDebugValue(String debugValue);

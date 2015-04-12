@@ -3,12 +3,17 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using System.Collections.Generic;
 
 namespace BBox3Tool
 {
     public partial class Form1 : Form
     {
         private IModemSession _session;
+        private List<ProximusLineProfile> _profiles;
 
         public Form1()
         {
@@ -17,8 +22,11 @@ namespace BBox3Tool
             backgroundWorker.WorkerSupportsCancellation = true;
             backgroundWorker.WorkerReportsProgress = true;
 
+            //load xml profiles
+            _profiles = loadEmbeddedProfiles();
+
             // Init for bbox3 by default
-            _session = new Bbox3Session(backgroundWorker);
+            _session = new Bbox3Session(backgroundWorker, _profiles);
         }
 
         //buttons
@@ -35,7 +43,7 @@ namespace BBox3Tool
 
         private void bbox3button_Click(object sender, EventArgs e)
         {
-            _session = new Bbox3Session(backgroundWorker);
+            _session = new Bbox3Session(backgroundWorker, _profiles);
 
             // Set default username
             textBoxUsername.Text = "User";
@@ -69,7 +77,7 @@ namespace BBox3Tool
             string password = textBoxPassword.Text;
 
             //init session
-            _session = new Bbox3Session(backgroundWorker, true);
+            _session = new Bbox3Session(backgroundWorker, _profiles, true);
             if (_session.OpenSession(host, username, password))
             {
                 buttonConnect.Enabled = false;
@@ -132,20 +140,27 @@ namespace BBox3Tool
             builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
+            
             builder.AppendLine("Downstream max bit rate:       " + (_session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
-            builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
+            if (_session is Bbox3Session || _session is FritzBoxSession)
+                builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
+            
             builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
-            builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
+            if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.GetDslStandard()))
+                builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
             builder.AppendLine("");
+            
             builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
-            builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
+            if (_session is Bbox3Session || _session is FritzBoxSession)
+                builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
+           
             builder.AppendLine("DSL standard:                  " + _session.GetDslStandard().ToString().Replace("plus", "+"));
             if (_session.GetDslStandard() == DSLStandard.VDSL2)
             {
-                ProximusLineProfile currentProfile = _session.GetProfileInfo();
-                if (currentProfile.Name == "unknown")
+                ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate);
+                if (currentProfile == null)
                 {
                     builder.AppendLine("VDSL2 profile:                 unknown");
                     builder.AppendLine("Vectoring:                     unknown");
@@ -221,13 +236,12 @@ namespace BBox3Tool
                 // Get profile info
                 if (_session.GetDslStandard() == DSLStandard.VDSL2)
                 {
-                    ProximusLineProfile currentProfile = _session.GetProfileInfo();
-
                     //TODO check why this is incorrect
                     //_session.getVectoringEnabled();
                     //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
 
-                    if (currentProfile.Name == "unknown")
+                    ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate);
+                    if (currentProfile == null)
                     {
                         setLabelText(labelVectoring, "unknown");
                         setLabelText(labelDLM, "unknown");
@@ -272,21 +286,52 @@ namespace BBox3Tool
                 setLabelText(labelDownstreamAttenuation, "busy...");
                 setLabelText(labelDownstreamAttenuation, _session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'"));
 
-                setLabelText(labelUpstreamAttenuation, "busy...");
-                setLabelText(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));
+                //upstream attenuation: BBOX3 adsl only
+                if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.GetDslStandard()))
+                {
+                    setLabelText(labelUpstreamAttenuation, "busy...");
+                    setLabelText(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));
+                }
+                else
+                {
+                    setLabelText(labelUpstreamAttenuation, "n/a");
+                    labelUpstreamAttenuation.ForeColor = Color.Gray;
+                    upstreamAttenuationLabel.ForeColor = Color.Gray;
+                }
 
+                //downstream attenuation
                 setLabelText(labelDownstreamNoiseMargin, "busy...");
                 setLabelText(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'"));
-
-                setLabelText(labelUpstreamNoiseMargin, "busy...");
-                setLabelText(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'"));
-
+                
+                //upstream noise margin: not for BBOX2
+                if (_session is Bbox3Session || _session is FritzBoxSession)
+                {
+                    setLabelText(labelUpstreamNoiseMargin, "busy...");
+                    setLabelText(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")); 
+                }
+                else
+                {
+                    setLabelText(labelUpstreamNoiseMargin, "n/a");
+                    labelUpstreamNoiseMargin.ForeColor = Color.Gray;
+                    upstreamNoiseMarginLabel.ForeColor = Color.Gray;
+                }
+                
+                //downstream max bitrate
                 setLabelText(labelDownstreamMaxBitRate, "busy...");
                 setLabelText(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
-
-                setLabelText(labelUpstreamMaxBitRate, "busy...");
-                setLabelText(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
-
+                
+                //upstream max bit rate: not for BBOX2
+                if (_session is Bbox3Session || _session is FritzBoxSession)
+                {
+                    setLabelText(labelUpstreamMaxBitRate, "busy...");
+                    setLabelText(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
+                }
+                else
+                {
+                    setLabelText(labelUpstreamMaxBitRate, "n/a");
+                    labelUpstreamMaxBitRate.ForeColor = Color.Gray;
+                    upstreamMaxBitRateLabel.ForeColor = Color.Gray;
+                }
             }
             catch (ThreadCancelledException)
             {
@@ -320,6 +365,82 @@ namespace BBox3Tool
             {
                 label.Text = text;
             });
+        }
+
+        private List<ProximusLineProfile> loadEmbeddedProfiles()
+        {
+            //load xml doc
+            XmlDocument profilesDoc = new XmlDocument();
+            using (Stream stream = typeof(Form1).Assembly.GetManifestResourceStream("BBox3Tool.profile.profiles.xml"))
+            {
+                using (StreamReader sr = new StreamReader(stream))
+                {
+                    profilesDoc.LoadXml(sr.ReadToEnd());
+                }
+            }
+
+            //run trough all xml profiles
+            List<ProximusLineProfile> listProfiles = new List<ProximusLineProfile>();
+            foreach (XmlNode profileNode in profilesDoc.SelectNodes("//document/profiles/profile"))
+            {
+                List<int> confirmedDownloadList = new List<int>();
+                List<int> confirmedUploadList = new List<int>();
+                foreach (XmlNode confirmedNode in profileNode.SelectNodes("confirmed"))
+                {
+                    confirmedDownloadList.Add(Convert.ToInt32(confirmedNode.Attributes["down"].Value));
+                    confirmedUploadList.Add(Convert.ToInt32(confirmedNode.Attributes["up"].Value));
+                }
+                confirmedDownloadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["down"].Value));
+                confirmedUploadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["up"].Value));
+
+                ProximusLineProfile profile = new ProximusLineProfile(
+                    profileNode.Attributes["name"].Value,
+                    confirmedDownloadList.Last(),
+                    confirmedUploadList.Last(),
+                    Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
+                    Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
+                    Convert.ToBoolean(profileNode.Attributes["repair"].Value),
+                    Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
+                    (VDSL2Profile) Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
+                    confirmedDownloadList.Distinct().ToList(),
+                    confirmedUploadList.Distinct().ToList());
+
+                listProfiles.Add(profile);
+            }
+            return listProfiles;
+        }
+
+        private ProximusLineProfile getProfile(int uploadSpeed, int downloadSpeed)
+        {
+            ProximusLineProfile profile = new ProximusLineProfile();
+
+            //check if speed matches with confirmed speeds
+            List<ProximusLineProfile> confirmedMatches = _profiles.Where(x => x.ConfirmedDownloadSpeeds.Contains(downloadSpeed) && x.ConfirmedUploadSpeeds.Contains(uploadSpeed)).ToList();
+            
+            //1 match found
+            if (confirmedMatches.Count == 1)
+                return confirmedMatches.First();
+
+            //multiple matches found, get profile with closest official download speed
+            if (confirmedMatches.Count > 1)
+                return confirmedMatches.Select(x => new { x, diff = Math.Abs(x.DownloadSpeed - downloadSpeed) })
+                  .OrderBy(p => p.diff)
+                  .First().x;
+
+            //no matches found, get profile with closest speeds in range of +256kb
+            List<ProximusLineProfile> rangeMatches = _profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
+                .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
+                .OrderBy(p => p.diffDownload)
+                .ThenBy(p => p.diffUpload)
+                .Select(y => y.x)
+                .ToList();
+
+            //check matches found
+            if (rangeMatches.Count > 0)
+                return rangeMatches.First();
+
+            //no matches found
+            return null;
         }
     }
 }

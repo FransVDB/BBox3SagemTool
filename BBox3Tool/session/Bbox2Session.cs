@@ -113,13 +113,6 @@ namespace BBox3Tool
             }
         }
 
-        public ProximusLineProfile GetProfileInfo()
-        {
-            var profile = new ProximusLineProfile();
-            profile.ProfileVDSL2 = _vdslProfile;
-            return profile;
-        }
-
         public DSLStandard GetDslStandard()
         {
             return _dslStandard;
