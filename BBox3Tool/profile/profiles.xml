@@ -156,6 +156,33 @@
     </profile>
 
     <!-- non-vectoring dlm-->
+    <profile name="LP___" forum="30/6" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30064" up="6064" />
+      <confirmed down="30063" up="6048" />
+    </profile>
+    <profile name="LP___" forum="30/4" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="30064" up="4064" />
+      <confirmed down="30063" up="4056" />
+    </profile>
+    <!--<profile name="LP___" forum="30/3" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="30064" up="3064" />
+    </profile>-->
+    <profile name="LP719" forum="30/2" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="30064" up="2064" />
+      <confirmed down="30063" up="2063" />
+      <confirmed down="30063" up="2045" />
+      <confirmed down="30057" up="2045" />
+    </profile>
+    <profile name="LP720" forum="25/2" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="25064" up="2064" />
+      <confirmed down="25063" up="2045" />
+      <confirmed down="25061" up="2045" />
+    </profile>
+    <profile name="LP722" forum="20/2" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="20200" up="2064" />
+      <confirmed down="20061" up="2043" />
+      <confirmed down="20061" up="2042" />
+    </profile>
 
     <!-- non-vectoring repair-->
     <profile name="LP703" forum="14,5/1" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
@@ -163,6 +190,72 @@
     </profile>
     <profile name="LP704" forum="9/0,5" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
       <official down="9064" up="576" />
+    </profile>
+
+    <!-- ZONE 3: 700 - 1000m -->
+    
+    <!-- non-vectoring profiles-->
+    <profile name="LP702" forum="16,5/2" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="16564" up="2064" />
+      <confirmed down="16550" up="2054" />
+    </profile>
+    
+    <!-- non-vectoring dlm-->
+    <profile name="LP___" forum="16,5/3" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="16564" up="3064" />
+    </profile>
+    <profile name="LP___" forum="16,5/4" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="16564" up="4064" />
+    </profile>
+    
+    <!-- ZONE 4: 1000 - 1400m -->
+    
+    <!-- non-vectoring profiles-->
+    <profile name="LP711" forum="12/1" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="12064" up="1064" />
+      <confirmed down="12063" up="1044" />
+    </profile>
+
+    <!-- non-vectoring dlm-->
+    <profile name="LP100" forum="14,5/1" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="14564" up="1064" />
+    </profile>
+    <profile name="LP101" forum="16,5/1" vectoring="false" provisioning="false" dlm="true" repair="false" vdsl2="8d">
+      <official down="16564" up="1064" />
+      <confirmed down="16559" up="1044" />
+    </profile>
+    
+    <!-- non-vectoring repair-->
+    <profile name="LP712" forum="12/0,5" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
+      <official down="12064" up="576" />
+    </profile>
+    <profile name="LP714" forum="10/0,5" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
+      <official down="10100" up="576" />
+    </profile>
+    <profile name="LP713" forum="7/0,5" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
+      <official down="7064" up="576" />
+    </profile>
+    
+    <!-- ZONE 5: 1400 - 1600m -->
+
+    <!-- non-vectoring profiles-->
+    <profile name="LP730" forum="9,5/0,7" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="9564" up="704" />
+    </profile>
+    
+    <!-- non-vectoring repair-->
+    <profile name="LP7731" forum="5/0,5" vectoring="false" provisioning="false" dlm="false" repair="true" vdsl2="8d">
+      <official down="5064" up="576" />
+    </profile>
+
+    <!-- ADSL profiles-->
+
+    <profile name="ADSL" forum="4,5/0,5" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="4448" up="512" />
+    </profile>
+    
+    <profile name="ADSL" forum="2/0,4" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="2240" up="384" />
     </profile>
     
   </profiles>

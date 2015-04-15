@@ -1012,64 +1012,6 @@ namespace BBox3Tool
             return cookies;
         }
 
-        /// <summary>
-        ///     Get the Proximus line profiles
-        /// </summary>
-        /// <returns>List of profiles</returns>
-        private List<ProximusLineProfile> loadProfiles()
-        {
-            //TODO get profiles from (online) xml
-
-            var profiles = new List<ProximusLineProfile>();
-            /*
-            //ZONE 2: 400-700m
-            //-----------------
-            //provisioning
-            profiles.Add(new ProximusLineProfile("LP701", 20064, 2064, true, false, false, false, VDSL2Profile.p8d));
-            //repair
-            profiles.Add(new ProximusLineProfile("LP703", 14564, 1064, false, false, true, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP704", 9064, 576, false, false, true, false, VDSL2Profile.p8d));
-            //dlm
-            profiles.Add(new ProximusLineProfile("LP???", 30064, 6064, false, true, false, false, VDSL2Profile.p17a));
-            profiles.Add(new ProximusLineProfile("LP???", 30064, 4064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP???", 30064, 3064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP719", 30064, 2064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP720", 25064, 2064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP722", 20200, 2064, false, true, false, false, VDSL2Profile.p8d));
-            //vectoring
-            profiles.Add(new ProximusLineProfile("LP???", 50000, 6064, true, false, true, true, VDSL2Profile.p17a));
-            //vectoring DLM
-            //TODO
-
-            //ZONE 3: 700-1000m
-            //-----------------
-            //provisioning
-            profiles.Add(new ProximusLineProfile("LP702", 16564, 2064, true, false, false, false, VDSL2Profile.p8d));
-
-            //ZONE 4: 1000-1400m
-            //------------------
-            //provisioning
-            profiles.Add(new ProximusLineProfile("LP711", 12064, 1064, true, false, false, false, VDSL2Profile.p8d));
-            //dlm
-            profiles.Add(new ProximusLineProfile("LP100", 14564, 1064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP101", 16564, 1064, false, true, false, false, VDSL2Profile.p8d));
-            //profiles.Add(new ProximusLineProfile("LP???", 16564, 2064, false, true, false, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP???", 16564, 3064, false, true, false, false, VDSL2Profile.p8d));
-            //repair
-            profiles.Add(new ProximusLineProfile("LP712", 12064, 576, false, false, true, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP713", 7064, 576, false, false, true, false, VDSL2Profile.p8d));
-            profiles.Add(new ProximusLineProfile("LP714", 10100, 576, false, false, true, false, VDSL2Profile.p8d));
-
-            //ZONE 5: 1400-1600m
-            //------------------
-            //provisioning
-            profiles.Add(new ProximusLineProfile("LP730", 9564, 704, true, false, false, false, VDSL2Profile.p8d));
-            //repair
-            profiles.Add(new ProximusLineProfile("LP731", 5064, 576, false, false, true, false, VDSL2Profile.p8d));
-            */
-            return profiles;
-        }
-
         #endregion
     }
 }
