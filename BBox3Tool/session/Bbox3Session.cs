@@ -614,8 +614,8 @@ namespace BBox3Tool
         public void GetVectoringEnabled()
         {
             dynamic jsonObject =
-                BBoxGetValue(new List<string> {"Device/DSL/Lines/Line[number(VectoringState)=0]/Status"});
-            VectoringEnabled = (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied");
+                BBoxGetValue(new List<string> { "Device/DSL/Lines/Line[VectoringState=\"RUNNING\"]/Status", "Device/DSL/Lines/Line[VectoringState=\"DISABLED\"]/Status" });
+            VectoringEnabled = (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied" || jsonObject["reply"]["actions"][1]["error"]["description"] == "Applied");
         }
 
         #endregion profile
@@ -737,7 +737,7 @@ namespace BBox3Tool
             /*if (upbokle > 0)
                 Distance = (upbokle / 13.81m) * 1000;*/
             if (upbokle > 0)
-                Distance = (upbokle / 20m) * 1000;
+                Distance = (upbokle / (20m + (upbokle/3m))) * 1000;
             distanceDone = true;
         }
 

@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Collections.Generic;
+using BBox3Tool.objects;
+using System.Net.NetworkInformation;
 
 namespace BBox3Tool
 {
@@ -25,8 +27,15 @@ namespace BBox3Tool
             //load xml profiles
             _profiles = loadEmbeddedProfiles();
 
-            // Init for bbox3 by default
-            _session = new Bbox3Session(backgroundWorker, _profiles);
+            //load settings if saved
+            if (loadSettings())
+                checkBoxSave.Checked = true;
+            else
+            {
+                // Init for bbox3 if not found
+                _session = new Bbox3Session(backgroundWorker, _profiles);
+                checkBoxSave.Checked = false;
+            }
         }
 
         //buttons
@@ -101,6 +110,12 @@ namespace BBox3Tool
             //init session
             if (_session.OpenSession(host, username, password))
             {
+                //check remember settings
+                if (checkBoxSave.Checked)
+                    saveSettings(username, password, host);
+                else
+                    deleteSettings();
+                
                 buttonClipboard.Enabled = false;
                 buttonConnect.Enabled = false;
                 buttonCancel.Enabled = true;
@@ -441,6 +456,93 @@ namespace BBox3Tool
 
             //no matches found
             return null;
+        }
+
+        //save & load settings
+        //--------------------
+
+        private void saveSettings(string username, string password, string host)
+        {
+            //load xml doc
+            XmlDocument settingsDoc = new XmlDocument();
+            using (Stream stream = typeof(Form1).Assembly.GetManifestResourceStream("BBox3Tool.settings.xml"))
+            {
+                using (StreamReader sr = new StreamReader(stream))
+                {
+                    settingsDoc.LoadXml(sr.ReadToEnd());
+                }
+            }
+            settingsDoc.SelectSingleNode("//document/login/ip").InnerText = host;
+            settingsDoc.SelectSingleNode("//document/login/user").InnerText = username;
+            
+            try
+            {
+                settingsDoc.SelectSingleNode("//document/login/password").InnerText = Crypto.EncryptStringAES(password, NetworkInterface.GetAllNetworkInterfaces().First().GetPhysicalAddress().ToString());
+            }
+            catch { }
+
+            if (_session is Bbox3Session)
+                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX3S";
+            else if (_session is Bbox2Session)
+                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX2";
+            else if (_session is FritzBoxSession)
+                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "FRITZBOX";
+
+            settingsDoc.Save("settings.xml");
+        }
+
+        private bool loadSettings()
+        {
+            //load xml doc
+            try
+            {
+                if (File.Exists("settings.xml"))
+                {
+                    XmlDocument settingsDoc = new XmlDocument();
+                    settingsDoc.Load("settings.xml");
+
+                    //only support settings v1.0
+                    if (settingsDoc.SelectSingleNode("//document/version").InnerText != "1.0")
+                        return false;
+
+                    textBoxIpAddress.Text = settingsDoc.SelectSingleNode("//document/login/ip").InnerText;
+                    textBoxUsername.Text = settingsDoc.SelectSingleNode("//document/login/user").InnerText;
+                    try
+                    {
+                        textBoxPassword.Text = Crypto.DecryptStringAES(settingsDoc.SelectSingleNode("//document/login/password").InnerText, NetworkInterface.GetAllNetworkInterfaces().First().GetPhysicalAddress().ToString());
+                    }
+                    catch { }
+                    switch (settingsDoc.SelectSingleNode("//document/login/device").InnerText)
+                    {
+                        case "BBOX3S":
+                            _session = new Bbox3Session(backgroundWorker, _profiles);
+                            break;
+                        case "BBOX2":
+                            _session = new Bbox2Session();
+                            break;
+                        case "FRITZBOX":
+                            _session = new FritzBoxSession();
+                            break;
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+            }
+            catch
+            { }
+            return false;
+        }
+
+        private void deleteSettings() 
+        {
+            if (File.Exists("settings.xml"))
+            {
+                try {
+                    File.Delete("settings.xml");
+                }
+                catch { }
+            }
         }
     }
 }
