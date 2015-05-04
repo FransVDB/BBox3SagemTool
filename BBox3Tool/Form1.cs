@@ -488,7 +488,7 @@ namespace BBox3Tool
             else if (_session is FritzBoxSession)
                 settingsDoc.SelectSingleNode("//document/login/device").InnerText = "FRITZBOX";
 
-            settingsDoc.Save("settings.xml");
+            settingsDoc.Save("BBox3Tool.settings.xml");
         }
 
         private bool loadSettings()
@@ -496,10 +496,10 @@ namespace BBox3Tool
             //load xml doc
             try
             {
-                if (File.Exists("settings.xml"))
+                if (File.Exists("BBox3Tool.settings.xml"))
                 {
                     XmlDocument settingsDoc = new XmlDocument();
-                    settingsDoc.Load("settings.xml");
+                    settingsDoc.Load("BBox3Tool.settings.xml");
 
                     //only support settings v1.0
                     if (settingsDoc.SelectSingleNode("//document/version").InnerText != "1.0")
@@ -536,10 +536,10 @@ namespace BBox3Tool
 
         private void deleteSettings() 
         {
-            if (File.Exists("settings.xml"))
+            if (File.Exists("BBox3Tool.settings.xml"))
             {
                 try {
-                    File.Delete("settings.xml");
+                    File.Delete("BBox3Tool.settings.xml");
                 }
                 catch { }
             }
