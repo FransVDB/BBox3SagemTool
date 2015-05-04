@@ -5,11 +5,27 @@ using MinimalisticTelnet;
 
 namespace BBox3Tool
 {
-    internal class FritzBoxSession : IModemSession
+    internal class Bbox2Session : IModemSession
     {
         private VDSL2Profile _vdslProfile;
-
+        private DSLStandard _dslStandard;
         private TelnetConnection tc;
+
+        public int DownstreamCurrentBitRate { get; private set; }
+        public int UpstreamCurrentBitRate { get; private set; }
+        public int DownstreamMaxBitRate { get; private set; }
+        public int UpstreamMaxBitRate { get; private set; }
+        public decimal DownstreamAttenuation { get; private set; }
+        public decimal UpstreamAttenuation { get; private set; }
+        public decimal DownstreamNoiseMargin { get; private set; }
+        public decimal UpstreamNoiseMargin { get; private set; }
+        public decimal Distance { get; private set; }
+        public string DeviceName { get; private set; }
+
+        public Bbox2Session ()
+	    {
+            DeviceName = "B-Box 2";
+	    }
 
         public bool OpenSession(String host, String username, String password)
         {
@@ -17,8 +33,17 @@ namespace BBox3Tool
             tc = new TelnetConnection(host, 23);
 
             // Login
+            var usernamePrompt = tc.Read(2000);
+            if (usernamePrompt.Contains("login:"))
+            {
+                tc.WriteLine(username);
+            }
+            else
+            {
+                return false;
+            }
             var passwordPrompt = tc.Read(200);
-            if (passwordPrompt.Contains("password:"))
+            if (passwordPrompt.Contains("Password:"))
             {
                 tc.WriteLine(password);
             }
@@ -47,40 +72,40 @@ namespace BBox3Tool
 
         public void GetLineData()
         {
-            // Exec 'vdsl' command
-            if (tc.Read(500).EndsWith("# "))
+            // Exec 'shell' command
+            if (tc.Read(500).EndsWith("$ "))
             {
-                tc.WriteLine("vdsl");
+                tc.WriteLine("shell");
             }
 
-            // Wait for cpe prompt
-            if (tc.Read(1000).EndsWith("cpe>"))
+            // Wait for shell prompt
+            if (tc.Read(1000).EndsWith("# "))
             {
-                // Request extended port status
-                tc.WriteLine("11");
+                // Send 'vdsl pstatex' command
+                tc.WriteLine("vdsl pstatex");
             }
 
             // Read reply
-            var extendedPortStatusReply = tc.Read(2000);
-            if (extendedPortStatusReply.Contains("Far-end ITU Vendor Id"))
+            var pstatexReply = tc.Read(1000);
+            if (pstatexReply.Contains("Far-end ITU Vendor Id"))
             {
                 // Parse results
-                ParsePortStatus(extendedPortStatusReply);
+                ParsePstatex(pstatexReply);
             }
             else
             {
-                throw new Exception("Unable to read extended port status. Try rebooting the Fritz!Box.");
+                throw new Exception("Unable to read extended port status.");
             }
 
-            // Wait for cpe prompt
-            if (extendedPortStatusReply.EndsWith("cpe> "))
+            // Wait for shell prompt
+            if (pstatexReply.EndsWith("# "))
             {
-                // Request near-end SNR margin and attenuation
-                tc.WriteLine("13");
+                // Send 'vdsl getsnr' command
+                tc.WriteLine("vdsl getsnr");
             }
 
             // Read reply
-            var getsnrReply = tc.Read(2000);
+            var getsnrReply = tc.Read(1000);
             if (getsnrReply.Contains("Attenuation"))
             {
                 // Parse results
@@ -88,9 +113,25 @@ namespace BBox3Tool
             }
         }
 
-        private void ParsePortStatus(String extendedPortStatus)
+        public DSLStandard GetDslStandard()
         {
-            var reader = new StringReader(extendedPortStatus);
+            return _dslStandard;
+        }
+
+        public DeviceInfo GetDeviceInfo()
+        {
+            var deviceInfo = new DeviceInfo();
+            return deviceInfo;
+        }
+
+        public string GetDebugValue(string debugValue)
+        {
+            return "Not implemented yet!";
+        }
+
+        private void ParsePstatex(String pstatex)
+        {
+            var reader = new StringReader(pstatex);
             while (true)
             {
                 var line = reader.ReadLine();
@@ -112,8 +153,8 @@ namespace BBox3Tool
                             DownstreamMaxBitRate = Convert.ToInt32(dsMaxBitRate);
                             break;
                         case "Downstream Training Margin":
-                            var dsAttenuation = array[1].Trim().Replace(" dB", "");
-                            DownstreamAttenuation = Convert.ToDecimal(dsAttenuation, CultureInfo.InvariantCulture);
+                            var dsNoiseMargin = array[1].Trim().Replace(" dB", "");
+                            DownstreamNoiseMargin = Convert.ToDecimal(dsNoiseMargin, CultureInfo.InvariantCulture);
                             break;
                         case "Bandplan Type...........":
                             _vdslProfile = VDSL2Profile.p8d;
@@ -121,6 +162,16 @@ namespace BBox3Tool
                             {
                                 _vdslProfile = VDSL2Profile.p17a;
                             }
+                            break;
+                        case "VDSL Estimated Loop Length ":
+                            var loopLength = array[1].Trim().Replace("ft", "").Trim();
+                            Distance = Convert.ToDecimal(loopLength, CultureInfo.InvariantCulture) * 0.3048m;
+                            break;
+                        case "Line Type":
+                            if (array[1].Trim() == "0x00800000#" || array[1].Trim() == "0x04000000#")
+                                _dslStandard = DSLStandard.VDSL2;
+                            else
+                                _dslStandard = DSLStandard.unknown;
                             break;
                         case "Far-end ITU Vendor Id":
                             break;
@@ -145,8 +196,8 @@ namespace BBox3Tool
                     switch (array[0])
                     {
                         case "Attenuation":
-                            var dsNoiseMargin = array[1].Trim().Replace(" dB", "");
-                            DownstreamNoiseMargin = Convert.ToDecimal(dsNoiseMargin, CultureInfo.InvariantCulture);
+                            var dsAttenuation = array[1].Trim().Replace(" dB", "");
+                            DownstreamAttenuation = Convert.ToDecimal(dsAttenuation, CultureInfo.InvariantCulture);
                             break;
                     }
                 }
@@ -156,46 +207,5 @@ namespace BBox3Tool
                 }
             }
         }
-
-        public ProximusLineProfile GetProfileInfo()
-        {
-            var profile = new ProximusLineProfile();
-            profile.ProfileVDSL2 = _vdslProfile;
-            return profile;
-        }
-
-        public DSLStandard GetDslStandard()
-        {
-            return DSLStandard.unknown;
-        }
-
-        public DeviceInfo GetDeviceInfo()
-        {
-            var deviceInfo = new DeviceInfo();
-            return deviceInfo;
-        }
-
-        public string GetDebugValue(string debugValue)
-        {
-            return "Not implemented yet!";
-        }
-
-        public int DownstreamCurrentBitRate { get; private set; }
-
-        public int UpstreamCurrentBitRate { get; private set; }
-
-        public int DownstreamMaxBitRate { get; private set; }
-
-        public int UpstreamMaxBitRate { get; private set; }
-
-        public decimal DownstreamAttenuation { get; private set; }
-
-        public decimal UpstreamAttenuation { get; private set; }
-
-        public decimal DownstreamNoiseMargin { get; private set; }
-
-        public decimal UpstreamNoiseMargin { get; private set; }
-
-        public decimal Distance { get; private set; }
     }
 }

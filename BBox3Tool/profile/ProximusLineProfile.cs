@@ -134,7 +134,9 @@ namespace BBox3Tool
         /// <param name="repair">Indicated if this is a repair profile or not</param>
         /// <param name="vectoring">Indicated if this is a vectoring profile or not</param>
         /// <param name="profile">VDSL2 profile (17a or 8d)</param>
-        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool provisioning, bool dlm, bool repair, bool vectoring, VDSL2Profile profile)
+        /// <param name="confirmedDownloadSpeeds">List of confirmed download speeds (feedback from users)</param>
+        /// <param name="confirmedUploadSpeeds">List of confirmed upload speeds (feedback from users)</param>
+        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool provisioning, bool dlm, bool repair, bool vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds)
         {
             _name = name;
             _downloadSpeed =downloadSpeed;
@@ -144,8 +146,8 @@ namespace BBox3Tool
             _provisioningProfile = provisioning;
             _vectoringEnabled = vectoring;
             _profileVDSL2 = profile;
-            _confirmedDownloadSpeeds = new List<int>();
-            _confirmedUploadSpeeds = new List<int>();
+            _confirmedDownloadSpeeds = confirmedDownloadSpeeds;
+            _confirmedUploadSpeeds = confirmedUploadSpeeds;
         }
   
         #endregion

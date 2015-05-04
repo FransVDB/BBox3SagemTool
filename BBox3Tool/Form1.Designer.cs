@@ -94,6 +94,7 @@
             this.upstreamAttenuationLabel = new System.Windows.Forms.Label();
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
+            this.checkBoxSave = new System.Windows.Forms.CheckBox();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelInfo.SuspendLayout();
@@ -102,7 +103,6 @@
             // backgroundWorker
             // 
             this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerBbox_DoWork);
-            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorkerBbox_ProgressChanged);
             this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerBbox_RunWorkerCompleted);
             // 
             // panelDebug
@@ -463,6 +463,7 @@
             // panelLogin
             // 
             this.panelLogin.BackColor = System.Drawing.Color.Transparent;
+            this.panelLogin.Controls.Add(this.checkBoxSave);
             this.panelLogin.Controls.Add(this.label7);
             this.panelLogin.Controls.Add(this.fritzboxButton);
             this.panelLogin.Controls.Add(this.bbox3button);
@@ -808,15 +809,25 @@
             this.labelDistance.TabIndex = 45;
             this.labelDistance.Text = "unknown";
             // 
+            // checkBoxSave
+            // 
+            this.checkBoxSave.AutoSize = true;
+            this.checkBoxSave.Location = new System.Drawing.Point(304, 255);
+            this.checkBoxSave.Name = "checkBoxSave";
+            this.checkBoxSave.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxSave.TabIndex = 13;
+            this.checkBoxSave.Text = "Remember";
+            this.checkBoxSave.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(699, 316);
+            this.Controls.Add(this.panelLogin);
             this.Controls.Add(this.panelInfo);
             this.Controls.Add(this.panelDebug);
-            this.Controls.Add(this.panelLogin);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(715, 355);
             this.MinimumSize = new System.Drawing.Size(715, 355);
@@ -900,6 +911,7 @@
         private System.Windows.Forms.Button fritzboxButton;
         private System.Windows.Forms.Button bbox3button;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox checkBoxSave;
     }
 }
 

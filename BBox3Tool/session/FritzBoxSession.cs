@@ -5,10 +5,16 @@ using MinimalisticTelnet;
 
 namespace BBox3Tool
 {
-    internal class Bbox2Session : IModemSession
+    internal class FritzBoxSession : IModemSession
     {
         private VDSL2Profile _vdslProfile;
+
         private TelnetConnection tc;
+
+        public FritzBoxSession()
+	    {
+            DeviceName = "Fritz!Box 7390";
+	    }
 
         public bool OpenSession(String host, String username, String password)
         {
@@ -16,17 +22,8 @@ namespace BBox3Tool
             tc = new TelnetConnection(host, 23);
 
             // Login
-            var usernamePrompt = tc.Read(2000);
-            if (usernamePrompt.Contains("login:"))
-            {
-                tc.WriteLine(username);
-            }
-            else
-            {
-                return false;
-            }
             var passwordPrompt = tc.Read(200);
-            if (passwordPrompt.Contains("Password:"))
+            if (passwordPrompt.Contains("password:"))
             {
                 tc.WriteLine(password);
             }
@@ -55,40 +52,40 @@ namespace BBox3Tool
 
         public void GetLineData()
         {
-            // Exec 'shell' command
-            if (tc.Read(500).EndsWith("$ "))
+            // Exec 'vdsl' command
+            if (tc.Read(500).EndsWith("# "))
             {
-                tc.WriteLine("shell");
+                tc.WriteLine("vdsl");
             }
 
-            // Wait for shell prompt
-            if (tc.Read(1000).EndsWith("# "))
+            // Wait for cpe prompt
+            if (tc.Read(1000).EndsWith("cpe>"))
             {
-                // Send 'vdsl pstatex' command
-                tc.WriteLine("vdsl pstatex");
+                // Request extended port status
+                tc.WriteLine("11");
             }
 
             // Read reply
-            var pstatexReply = tc.Read(1000);
-            if (pstatexReply.Contains("Far-end ITU Vendor Id"))
+            var extendedPortStatusReply = tc.Read(2000);
+            if (extendedPortStatusReply.Contains("Far-end ITU Vendor Id"))
             {
                 // Parse results
-                ParsePstatex(pstatexReply);
+                ParsePortStatus(extendedPortStatusReply);
             }
             else
             {
-                throw new Exception("Unable to read extended port status.");
+                throw new Exception("Unable to read extended port status. Try rebooting the Fritz!Box.");
             }
 
-            // Wait for shell prompt
-            if (pstatexReply.EndsWith("# "))
+            // Wait for cpe prompt
+            if (extendedPortStatusReply.EndsWith("cpe> "))
             {
-                // Send 'vdsl getsnr' command
-                tc.WriteLine("vdsl getsnr");
+                // Request near-end SNR margin and attenuation
+                tc.WriteLine("13");
             }
 
             // Read reply
-            var getsnrReply = tc.Read(1000);
+            var getsnrReply = tc.Read(2000);
             if (getsnrReply.Contains("Attenuation"))
             {
                 // Parse results
@@ -96,42 +93,9 @@ namespace BBox3Tool
             }
         }
 
-        public ProximusLineProfile GetProfileInfo()
+        private void ParsePortStatus(String extendedPortStatus)
         {
-            var profile = new ProximusLineProfile();
-            profile.ProfileVDSL2 = _vdslProfile;
-            return profile;
-        }
-
-        public DSLStandard GetDslStandard()
-        {
-            return DSLStandard.unknown;
-        }
-
-        public DeviceInfo GetDeviceInfo()
-        {
-            var deviceInfo = new DeviceInfo();
-            return deviceInfo;
-        }
-
-        public string GetDebugValue(string debugValue)
-        {
-            return "Not implemented yet!";
-        }
-
-        public int DownstreamCurrentBitRate { get; private set; }
-        public int UpstreamCurrentBitRate { get; private set; }
-        public int DownstreamMaxBitRate { get; private set; }
-        public int UpstreamMaxBitRate { get; private set; }
-        public decimal DownstreamAttenuation { get; private set; }
-        public decimal UpstreamAttenuation { get; private set; }
-        public decimal DownstreamNoiseMargin { get; private set; }
-        public decimal UpstreamNoiseMargin { get; private set; }
-        public decimal Distance { get; private set; }
-
-        private void ParsePstatex(String pstatex)
-        {
-            var reader = new StringReader(pstatex);
+            var reader = new StringReader(extendedPortStatus);
             while (true)
             {
                 var line = reader.ReadLine();
@@ -197,5 +161,41 @@ namespace BBox3Tool
                 }
             }
         }
+
+        public DSLStandard GetDslStandard()
+        {
+            return DSLStandard.unknown;
+        }
+
+        public DeviceInfo GetDeviceInfo()
+        {
+            var deviceInfo = new DeviceInfo();
+            return deviceInfo;
+        }
+
+        public string GetDebugValue(string debugValue)
+        {
+            return "Not implemented yet!";
+        }
+
+        public int DownstreamCurrentBitRate { get; private set; }
+
+        public int UpstreamCurrentBitRate { get; private set; }
+
+        public int DownstreamMaxBitRate { get; private set; }
+
+        public int UpstreamMaxBitRate { get; private set; }
+
+        public decimal DownstreamAttenuation { get; private set; }
+
+        public decimal UpstreamAttenuation { get; private set; }
+
+        public decimal DownstreamNoiseMargin { get; private set; }
+
+        public decimal UpstreamNoiseMargin { get; private set; }
+
+        public decimal Distance { get; private set; }
+
+        public string DeviceName { get; private set; }
     }
 }
