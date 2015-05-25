@@ -67,6 +67,7 @@
             this.labelHardwareVersion = new System.Windows.Forms.Label();
             this.labelSoftwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
+            this.checkBoxSave = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.fritzboxButton = new System.Windows.Forms.Button();
             this.bbox3button = new System.Windows.Forms.Button();
@@ -94,7 +95,7 @@
             this.upstreamAttenuationLabel = new System.Windows.Forms.Label();
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
-            this.checkBoxSave = new System.Windows.Forms.CheckBox();
+            this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelInfo.SuspendLayout();
@@ -483,6 +484,16 @@
             this.panelLogin.Size = new System.Drawing.Size(699, 316);
             this.panelLogin.TabIndex = 7;
             // 
+            // checkBoxSave
+            // 
+            this.checkBoxSave.AutoSize = true;
+            this.checkBoxSave.Location = new System.Drawing.Point(304, 255);
+            this.checkBoxSave.Name = "checkBoxSave";
+            this.checkBoxSave.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxSave.TabIndex = 13;
+            this.checkBoxSave.Text = "Remember";
+            this.checkBoxSave.UseVisualStyleBackColor = true;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -809,15 +820,11 @@
             this.labelDistance.TabIndex = 45;
             this.labelDistance.Text = "unknown";
             // 
-            // checkBoxSave
+            // backgroundWorkerLiveUpdate
             // 
-            this.checkBoxSave.AutoSize = true;
-            this.checkBoxSave.Location = new System.Drawing.Point(304, 255);
-            this.checkBoxSave.Name = "checkBoxSave";
-            this.checkBoxSave.Size = new System.Drawing.Size(77, 17);
-            this.checkBoxSave.TabIndex = 13;
-            this.checkBoxSave.Text = "Remember";
-            this.checkBoxSave.UseVisualStyleBackColor = true;
+            this.backgroundWorkerLiveUpdate.WorkerReportsProgress = true;
+            this.backgroundWorkerLiveUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerLiveUpdate_DoWork);
+            this.backgroundWorkerLiveUpdate.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerLiveUpdate_RunWorkerCompleted);
             // 
             // Form1
             // 
@@ -912,6 +919,7 @@
         private System.Windows.Forms.Button bbox3button;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox checkBoxSave;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerLiveUpdate;
     }
 }
 

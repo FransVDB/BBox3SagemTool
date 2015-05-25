@@ -14,6 +14,9 @@ namespace BBox3Tool
         public FritzBoxSession()
 	    {
             DeviceName = "Fritz!Box 7390";
+            DSLStandard = DSLStandard.unknown;
+            Distance = null;
+            Vectoring = null;
 	    }
 
         public bool OpenSession(String host, String username, String password)
@@ -162,11 +165,6 @@ namespace BBox3Tool
             }
         }
 
-        public DSLStandard GetDslStandard()
-        {
-            return DSLStandard.unknown;
-        }
-
         public DeviceInfo GetDeviceInfo()
         {
             var deviceInfo = new DeviceInfo();
@@ -194,8 +192,12 @@ namespace BBox3Tool
 
         public decimal UpstreamNoiseMargin { get; private set; }
 
-        public decimal Distance { get; private set; }
+        public decimal? Distance { get; private set; }
 
         public string DeviceName { get; private set; }
+
+        public bool? Vectoring { get; private set; }
+
+        public DSLStandard DSLStandard { get; private set; }
     }
 }
