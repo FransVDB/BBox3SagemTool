@@ -9,6 +9,7 @@ using System.Xml;
 using System.Collections.Generic;
 using BBox3Tool.objects;
 using System.Net.NetworkInformation;
+using System.Globalization;
 
 namespace BBox3Tool
 {
@@ -17,15 +18,25 @@ namespace BBox3Tool
         private IModemSession _session;
         private List<ProximusLineProfile> _profiles;
 
+        private readonly Uri _liveUpdateCheck = new Uri("http://www.cloudscape.be/userbasepyro85/latest.xml");
+        private readonly Uri _liveUpdateProfiles = new Uri("http://www.cloudscape.be/userbasepyro85/profiles.xml");
+
         public Form1()
         {
             InitializeComponent();
+
+            //set form title
             this.Text += " " + Application.ProductVersion;
+
+            //set worker thread properties
             backgroundWorker.WorkerSupportsCancellation = true;
             backgroundWorker.WorkerReportsProgress = true;
 
-            //load xml profiles
+            //load embedded xml profiles
             _profiles = loadEmbeddedProfiles();
+
+            //do live update
+            backgroundWorkerLiveUpdate.RunWorkerAsync();
 
             //load settings if saved
             if (loadSettings())
@@ -162,7 +173,7 @@ namespace BBox3Tool
             builder.AppendLine("");
             
             builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
-            if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.GetDslStandard()))
+            if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
                 builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
             builder.AppendLine("");
             
@@ -170,11 +181,11 @@ namespace BBox3Tool
             if (_session is Bbox3Session || _session is FritzBoxSession)
                 builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
-           
-            builder.AppendLine("DSL standard:                  " + _session.GetDslStandard().ToString().Replace("plus", "+"));
-            if (_session.GetDslStandard() == DSLStandard.VDSL2)
+
+            builder.AppendLine("DSL standard:                  " + _session.DSLStandard.ToString().Replace("plus", "+"));
+            if (_session.DSLStandard == DSLStandard.VDSL2)
             {
-                ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate);
+                ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
                 if (currentProfile == null)
                 {
                     builder.AppendLine("VDSL2 profile:                 unknown");
@@ -196,9 +207,9 @@ namespace BBox3Tool
             }
 
             if (_session is Bbox3Session)
-                builder.AppendLine("Distance (experimental):       " + (_session.Distance < 0 ? "unknown" : _session.Distance.ToString("0 'm'")));
+                builder.AppendLine("Distance (experimental):       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
             else
-                builder.AppendLine("Distance                       " + (_session.Distance < 0 ? "unknown" : _session.Distance.ToString("0 'm'")));
+                builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
 
             builder.AppendLine("[/code]");
 
@@ -238,8 +249,7 @@ namespace BBox3Tool
                 setLabelText(labelLinkUptime, deviceInfo.LinkUptime);
 
                 // Get dsl standard
-                DSLStandard dslStandard = _session.GetDslStandard();
-                setLabelText(labelDSLStandard, dslStandard.ToString().Replace("plus", "+"));
+                setLabelText(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
 
                 // Get sync values
                 setLabelText(labelDownstreamCurrentBitRate, "busy...");
@@ -248,14 +258,18 @@ namespace BBox3Tool
                 setLabelText(labelUpstreamCurrentBitRate, "busy...");
                 setLabelText(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
 
+                //distance
+                setLabelText(labelDistance, "busy...");
+                setLabelText(labelDistance, (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+
                 // Get profile info
-                if (_session.GetDslStandard() == DSLStandard.VDSL2)
+                if (_session.DSLStandard == DSLStandard.VDSL2)
                 {
                     //TODO check why this is incorrect
                     //_session.getVectoringEnabled();
                     //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
 
-                    ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate);
+                    ProximusLineProfile currentProfile = getProfile(_session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
                     if (currentProfile == null)
                     {
                         setLabelText(labelVectoring, "unknown");
@@ -293,16 +307,12 @@ namespace BBox3Tool
                     proximusProfileLabel.ForeColor = Color.Gray;
                 }
 
-                //distance
-                setLabelText(labelDistance, "busy...");
-                setLabelText(labelDistance, _session.Distance.ToString("0 'm'"));
-
                 //get line stats
                 setLabelText(labelDownstreamAttenuation, "busy...");
                 setLabelText(labelDownstreamAttenuation, _session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'"));
 
                 //upstream attenuation: BBOX3 adsl only
-                if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.GetDslStandard()))
+                if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
                 {
                     setLabelText(labelUpstreamAttenuation, "busy...");
                     setLabelText(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));
@@ -382,6 +392,9 @@ namespace BBox3Tool
             });
         }
 
+        //profiles
+        //--------
+
         private List<ProximusLineProfile> loadEmbeddedProfiles()
         {
             //load xml doc
@@ -395,8 +408,14 @@ namespace BBox3Tool
             }
 
             //run trough all xml profiles
+            return loadProfilesFromXML(profilesDoc);
+        }
+
+        private List<ProximusLineProfile> loadProfilesFromXML(XmlDocument xmlDoc)
+        {
+            //run trough all xml profiles
             List<ProximusLineProfile> listProfiles = new List<ProximusLineProfile>();
-            foreach (XmlNode profileNode in profilesDoc.SelectNodes("//document/profiles/profile"))
+            foreach (XmlNode profileNode in xmlDoc.SelectNodes("//document/profiles/profile"))
             {
                 List<int> confirmedDownloadList = new List<int>();
                 List<int> confirmedUploadList = new List<int>();
@@ -416,43 +435,80 @@ namespace BBox3Tool
                     Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
                     Convert.ToBoolean(profileNode.Attributes["repair"].Value),
                     Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
-                    (VDSL2Profile) Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
+                    (VDSL2Profile)Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
                     confirmedDownloadList.Distinct().ToList(),
-                    confirmedUploadList.Distinct().ToList());
+                    confirmedUploadList.Distinct().ToList(),
+                    Convert.ToDecimal(profileNode.Attributes["min"].Value, CultureInfo.InvariantCulture),
+                    Convert.ToDecimal(profileNode.Attributes["max"].Value, CultureInfo.InvariantCulture));
 
                 listProfiles.Add(profile);
             }
             return listProfiles;
         }
 
-        private ProximusLineProfile getProfile(int uploadSpeed, int downloadSpeed)
+        private ProximusLineProfile getProfile(int uploadSpeed, int downloadSpeed, bool? vectoringEnabled, decimal? distance)
         {
             ProximusLineProfile profile = new ProximusLineProfile();
 
-            //check if speed matches with confirmed speeds
-            List<ProximusLineProfile> confirmedMatches = _profiles.Where(x => x.ConfirmedDownloadSpeeds.Contains(downloadSpeed) && x.ConfirmedUploadSpeeds.Contains(uploadSpeed)).ToList();
-            
-            //1 match found
-            if (confirmedMatches.Count == 1)
-                return confirmedMatches.First();
+            lock (_profiles)
+            {
+                //check if speed matches with confirmed speeds
+                /*List<ProximusLineProfile> confirmedMatches = _profiles.Where(x => x.ConfirmedDownloadSpeeds.Contains(downloadSpeed) && x.ConfirmedUploadSpeeds.Contains(uploadSpeed)).ToList();
 
-            //multiple matches found, get profile with closest official download speed
-            if (confirmedMatches.Count > 1)
-                return confirmedMatches.Select(x => new { x, diff = Math.Abs(x.DownloadSpeed - downloadSpeed) })
-                  .OrderBy(p => p.diff)
-                  .First().x;
+                //if vectoringstatus could be determined, filter on vectoring
+                if (vectoringEnabled != null)
+                    confirmedMatches = confirmedMatches.Where(x => x.VectoringEnabled == vectoringEnabled).ToList();
 
-            //no matches found, get profile with closest speeds in range of +256kb
-            List<ProximusLineProfile> rangeMatches = _profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
-                .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
-                .OrderBy(p => p.diffDownload)
-                .ThenBy(p => p.diffUpload)
-                .Select(y => y.x)
-                .ToList();
+                //1 match found
+                if (confirmedMatches.Count == 1)
+                    return confirmedMatches.First();
 
-            //check matches found
-            if (rangeMatches.Count > 0)
-                return rangeMatches.First();
+                //multiple matches found
+                if (confirmedMatches.Count > 1)
+                {
+                    //get profile with closest distance
+                    if (distance != null)
+                    {
+                        return confirmedMatches
+                          .Select(x => new { x, diffDistance = (distance - x.DistanceMin), diffSpeed = Math.Abs(x.DownloadSpeed - downloadSpeed) })
+                          .OrderBy(p => p.diffDistance < 0)
+                          .ThenBy(p => p.diffDistance)
+                          .ThenBy(p => p.diffSpeed)
+                          .First().x;
+                    }
+                    //get profile with closest official download speed
+                    else
+                        return confirmedMatches.Select(x => new { x, diff = Math.Abs(x.DownloadSpeed - downloadSpeed) })
+                          .OrderBy(p => p.diff)
+                          .First().x;
+                }*/
+
+                //no matches found, get profile with closest speeds in range of +256kb
+                List<ProximusLineProfile> rangeMatches = _profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
+                    .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
+                    .OrderBy(p => p.diffDownload)
+                    .ThenBy(p => p.diffUpload)
+                    .Select(y => y.x)
+                    .ToList();
+
+                //check on vectoring
+                if (vectoringEnabled != null)
+                    rangeMatches = rangeMatches
+                        .Where(x => x.VectoringEnabled == vectoringEnabled).ToList();
+                
+                //check on distance
+                if (distance != null)
+                    rangeMatches = rangeMatches
+                        .Select(x => new { x, diffDistance = (distance - x.DistanceMin), diffSpeed = Math.Abs(x.DownloadSpeed - downloadSpeed) })
+                        .OrderBy(p => p.diffDistance < 0)
+                        .ThenBy(p => p.diffDistance)
+                        .Select(y => y.x)
+                        .ToList();
+
+                //check matches found
+                if (rangeMatches.Count > 0)
+                    return rangeMatches.First();
+            }
 
             //no matches found
             return null;
@@ -543,6 +599,92 @@ namespace BBox3Tool
                 }
                 catch { }
             }
+        }
+
+        //live update
+        //-----------
+
+        private void backgroundWorkerLiveUpdate_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //disable connect button until
+            buttonConnect.Enabled = false;
+            try
+            {
+                //check latest profiles & distance
+                string latest = Bbox3Utils.sendRequest(_liveUpdateCheck);
+                if (!string.IsNullOrEmpty(latest))
+                {
+                    XmlDocument latestDoc = new XmlDocument();
+                    latestDoc.LoadXml(latest);
+                    if (Decimal.Parse(latestDoc.SelectSingleNode("//document/version").InnerText, CultureInfo.InvariantCulture) == 1)
+                    {
+                        decimal latestOnlineProfile = Decimal.Parse(latestDoc.SelectSingleNode("//document/latest/profiles").InnerText, CultureInfo.InvariantCulture);
+                        decimal latestBBox3Distance = Decimal.Parse(latestDoc.SelectSingleNode("//document/bbox3s/distance").InnerText, CultureInfo.InvariantCulture);
+
+                        //check if online version is more recent then embedded verion
+                        XmlDocument profilesDoc = new XmlDocument();
+                        using (Stream stream = typeof(Form1).Assembly.GetManifestResourceStream("BBox3Tool.profile.profiles.xml"))
+                        {
+                            using (StreamReader sr = new StreamReader(stream))
+                            {
+                                profilesDoc.LoadXml(sr.ReadToEnd());
+                            }
+                        }
+                        decimal latestembEddedProfile = Decimal.Parse(profilesDoc.SelectSingleNode("//document/version").InnerText, CultureInfo.InvariantCulture);
+
+                        //more recent version found, update needed
+                        if (latestOnlineProfile > latestembEddedProfile)
+                        {
+                            bool getOnlineProfiles = false;
+
+                            //check if we need latest profiles
+                            if (!File.Exists("BBox3Tool.profiles.xml"))
+                                getOnlineProfiles = true;
+                            else
+                            {
+                                XmlDocument localDoc = new XmlDocument();
+                                localDoc.Load("BBox3Tool.profiles.xml");
+                                decimal latestLocalProfile = Decimal.Parse(localDoc.SelectSingleNode("//document/version").InnerText, CultureInfo.InvariantCulture);
+                                if (latestOnlineProfile > latestLocalProfile)
+                                    getOnlineProfiles = true;
+                            }
+
+                            //check if profiles are already stored locally
+                            if (getOnlineProfiles)
+                            {
+                                string latestProfiles = Bbox3Utils.sendRequest(_liveUpdateProfiles);
+                                if (!string.IsNullOrEmpty(latestProfiles))
+                                {
+                                    XmlDocument latestprofilesDoc = new XmlDocument();
+                                    latestprofilesDoc.LoadXml(latestProfiles);
+                                    latestprofilesDoc.Save("BBox3Tool.profiles.xml");
+                                }
+                            }
+
+                            //check again, live update could have failed
+                            if (File.Exists("BBox3Tool.profiles.xml"))
+                            {
+                                XmlDocument localDoc = new XmlDocument();
+                                localDoc.Load("BBox3Tool.profiles.xml");
+                                lock (_profiles)
+                                {
+                                    _profiles = loadProfilesFromXML(localDoc);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                backgroundWorkerLiveUpdate.ReportProgress(100);
+            }
+        }
+
+        private void backgroundWorkerLiveUpdate_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            buttonConnect.Enabled = true;
         }
     }
 }

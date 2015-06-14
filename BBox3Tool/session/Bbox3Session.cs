@@ -11,6 +11,194 @@ namespace BBox3Tool
 {
     public class Bbox3Session : IModemSession
     {
+        #region private members
+
+        //worker thread
+        private BackgroundWorker _worker;
+
+        //bbox url
+        private Uri _bboxUrl;
+        private Uri _cgiReq;
+
+        //authentication
+        private string _serverNonce;
+        private string _localNonce;
+        private int _sessionID;
+        private int _requestID;
+        private int _notificationID;
+        private string _username;
+        private string _password;
+        private bool _basicAuth;
+        private readonly bool _debug;
+
+        //profiles
+        private readonly List<ProximusLineProfile> _profiles;
+
+        //stats
+        private int _downstreamCurrentBitRate;
+        private int _upstreamCurrentBitRate;
+        private int _downstreamMaxBitRate;
+        private int _upstreamMaxBitRate;
+        private decimal _downstreamAttenuation;
+        private decimal _upstreamAttenuation;
+        private decimal _downstreamNoiseMargin;
+        private decimal _upstreamNoiseMargin;
+        private decimal? _distance;
+        private bool? _vectoring;
+        private DSLStandard _DSLStandard;
+
+        //booleans for stats
+        private bool dsCurrBitRateDone, usCurrBitRateDone;
+        private bool dsMaxBitRateDone, usMaxBitRateDone;
+        private bool dsAttenuationDone, usAttenuationDone;
+        private bool dsNoiseMarginDone, usNoiseMarginDone;
+        private bool distanceDone;
+        private bool vectoringDone;
+        private bool DSLStandardDone;
+
+        #endregion
+
+        #region getters&setters
+
+        public bool LoggedIn { get; private set; }
+
+        public decimal DownstreamAttenuation
+        {
+            get
+            {
+                if (!dsAttenuationDone)
+                    GetDownstreamAttenuation();
+                return _downstreamAttenuation;
+            }
+            set { this._downstreamAttenuation = value; }
+        }
+
+        public decimal UpstreamAttenuation
+        {
+            get
+            {
+                if (!usAttenuationDone)
+                    GetUpstreamAttenuation();
+                return _upstreamAttenuation;
+            }
+            set { this._upstreamAttenuation = value; }
+        }
+
+        public decimal DownstreamNoiseMargin
+        {
+            get
+            {
+                if (!dsNoiseMarginDone)
+                    GetDownstreamNoiseMargin();
+                return _downstreamNoiseMargin;
+            }
+            set { this._downstreamNoiseMargin = value; }
+        }
+
+        public decimal UpstreamNoiseMargin
+        {
+            get
+            {
+                if (!usNoiseMarginDone)
+                    GetUpstreamNoiseMargin();
+                return _upstreamNoiseMargin;
+            }
+            set { this._upstreamNoiseMargin = value; }
+        }
+
+        public int DownstreamMaxBitRate
+        {
+            get
+            {
+                if (!dsMaxBitRateDone)
+                    GetDownstreamMaxBitRate();
+                return _downstreamMaxBitRate;
+            }
+            set { this._downstreamMaxBitRate = value; }
+        }
+
+        public int UpstreamMaxBitRate
+        {
+            get
+            {
+                if (!usMaxBitRateDone)
+                    GetUpstreamMaxBitRate();
+                return _upstreamMaxBitRate;
+            }
+            set { this._upstreamMaxBitRate = value; }
+        }
+
+        public int DownstreamCurrentBitRate
+        {
+            get
+            {
+                if (!dsCurrBitRateDone)
+                    GetDownstreamCurrentBitRate();
+                return _downstreamCurrentBitRate;
+            }
+            set { this._downstreamCurrentBitRate = value; }
+        }
+
+        public int UpstreamCurrentBitRate
+        {
+            get
+            {
+                if (!usCurrBitRateDone)
+                    GetUpstreamCurrentBitRate();
+                return _upstreamCurrentBitRate;
+            }
+            set { this._upstreamCurrentBitRate = value; }
+        }
+
+        public decimal? Distance
+        {
+            get
+            {
+                if (!distanceDone)
+                    GetEstimatedDistance();
+                return _distance;
+            }
+            set { this._distance = value; }
+        }
+
+        public bool? Vectoring
+        {
+            get
+            {
+                if (!vectoringDone)
+                    GetVectoringEnabled();
+                return _vectoring;
+            }
+            private set { this._vectoring = value; }
+        }
+
+        public string DeviceName { get; private set; }
+
+        public ProximusLineProfile CurrentProfile { get; private set; }
+
+        public string HardwareVersion { get; private set; }
+
+        public string GUIFirmwareVersion { get; private set; }
+
+        public string InternalFirmwareVersion { get; private set; }
+
+        public TimeSpan DeviceUptime { get; private set; }
+
+        public TimeSpan LinkUptime { get; private set; }
+
+        public DSLStandard DSLStandard
+        {
+            get
+            {
+                if (!DSLStandardDone)
+                    GetDslStandard();
+                return _DSLStandard;
+            }
+            private set { this._DSLStandard = value; }
+        }
+
+        #endregion
+
         #region constructors
 
         public Bbox3Session(BackgroundWorker worker, List<ProximusLineProfile> profiles, bool debug = false)
@@ -22,6 +210,7 @@ namespace BBox3Tool
             //auth
             _sessionID = 0;
             _requestID = 0;
+            _notificationID = 1;
             _basicAuth = false;
             _serverNonce = "";
             _localNonce = "";
@@ -45,9 +234,9 @@ namespace BBox3Tool
             LinkUptime = new TimeSpan(0);
 
             CurrentProfile = new ProximusLineProfile();
-            Distance = -1;
-            VectoringEnabled = false;
-            DslStandard = DSLStandard.unknown;
+            Distance = null;
+            Vectoring = null;
+            DSLStandard = DSLStandard.unknown;
 
             //load profiles
             _profiles = profiles;
@@ -115,6 +304,7 @@ namespace BBox3Tool
         #endregion
 
         #region test
+
         public int getDownstreamMaxBitRate2()
         {
             DownstreamMaxBitRate =
@@ -127,166 +317,18 @@ namespace BBox3Tool
             var valuesToCheck = Enumerable.Range(0, 2500).ToList();
             var test = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "CurrentProfile", valuesToCheck, 50);
         }
-        #endregion
 
-        #region private members
-
-        //worker thread
-        private BackgroundWorker _worker;
-
-        //bbox url
-        private Uri _bboxUrl;
-        private Uri _cgiReq;
-
-        //authentication
-        private string _serverNonce;
-        private string _localNonce;
-        private int _sessionID;
-        private int _requestID;
-        private string _username;
-        private string _password;
-        private bool _basicAuth;
-        private readonly bool _debug;
-
-        //profiles
-        private readonly List<ProximusLineProfile> _profiles;
-
-        //stats
-        private int _downstreamCurrentBitRate;
-        private int _upstreamCurrentBitRate;
-        private int _downstreamMaxBitRate;
-        private int _upstreamMaxBitRate;
-        private decimal _downstreamAttenuation;
-        private decimal _upstreamAttenuation;
-        private decimal _downstreamNoiseMargin;
-        private decimal _upstreamNoiseMargin;
-        private decimal _distance;
-
-        //booleans for stats
-        private bool dsCurrBitRateDone, usCurrBitRateDone;
-        private bool dsMaxBitRateDone, usMaxBitRateDone;
-        private bool dsAttenuationDone, usAttenuationDone;
-        private bool dsNoiseMarginDone, usNoiseMarginDone;
-        private bool distanceDone;
+        public void getGINP()
+        {
+            var valuesToCheck = new List<int> { };
+            valuesToCheck.AddRange(Enumerable.Range(1, 10000).ToList());
+            decimal d = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "Alias=\"DSL0\" and ../../Channels/Channel/ACTINP", valuesToCheck, 100);
+            d = d + 0;
+            //Device/DSL/Channels/Channel[Alias='DSL0']/GINPEnabledds
+        }
 
         #endregion
 
-        #region getters&setters
-
-        public bool LoggedIn { get; private set; }
-
-        public decimal DownstreamAttenuation {
-            get
-            {
-                if (!dsAttenuationDone)
-                    GetDownstreamAttenuation();
-                return _downstreamAttenuation;
-            }
-            set { this._downstreamAttenuation = value; }
-        }
-
-        public decimal UpstreamAttenuation {
-            get
-            {
-                if (!usAttenuationDone)
-                    GetUpstreamAttenuation();
-                return _upstreamAttenuation;
-            }
-            set { this._upstreamAttenuation = value; }
-        }
-
-        public decimal DownstreamNoiseMargin
-        {
-            get
-            {
-                if (!dsNoiseMarginDone)
-                    GetDownstreamNoiseMargin();
-                return _downstreamNoiseMargin;
-            }
-            set { this._downstreamNoiseMargin = value; }
-        }
-
-        public decimal UpstreamNoiseMargin {
-            get
-            {
-                if (!usNoiseMarginDone)
-                    GetUpstreamNoiseMargin();
-                return _upstreamNoiseMargin;
-            }
-            set { this._upstreamNoiseMargin = value; }
-        }
-
-        public int DownstreamMaxBitRate
-        {
-            get
-            {
-                if (!dsMaxBitRateDone)
-                    GetDownstreamMaxBitRate();
-                return _downstreamMaxBitRate;
-            }
-            set { this._downstreamMaxBitRate = value; }
-        }
-
-        public int UpstreamMaxBitRate {
-            get
-            {
-                if (!usMaxBitRateDone)
-                    GetUpstreamMaxBitRate();
-                return _upstreamMaxBitRate;
-            }
-            set { this._upstreamMaxBitRate = value; }
-        }
-
-        public int DownstreamCurrentBitRate {
-            get
-            {
-                if (!dsCurrBitRateDone)
-                    GetDownstreamCurrentBitRate();
-                return _downstreamCurrentBitRate;
-            }
-            set { this._downstreamCurrentBitRate = value; }
-        }
-
-        public int UpstreamCurrentBitRate {
-            get
-            {
-                if (!usCurrBitRateDone)
-                    GetUpstreamCurrentBitRate();
-                return _upstreamCurrentBitRate;
-            }
-            set { this._upstreamCurrentBitRate = value; }
-        }
-        
-        public decimal Distance
-        {
-            get
-            {
-                if (!distanceDone)
-                    GetEstimatedDistance();
-                return _distance;
-            }
-            set { this._distance = value; }
-        }
-
-        public string DeviceName { get; private set; }
-
-        public ProximusLineProfile CurrentProfile { get; private set; }
-
-        public bool VectoringEnabled { get; private set; }
-
-        public string HardwareVersion { get; private set; }
-
-        public string GUIFirmwareVersion { get; private set; }
-
-        public string InternalFirmwareVersion { get; private set; }
-
-        public TimeSpan DeviceUptime { get; private set; }
-
-        public TimeSpan LinkUptime { get; private set; }
-
-        public DSLStandard DslStandard { get; private set; }
-
-        #endregion
 
         #region login&logout
 
@@ -404,8 +446,7 @@ namespace BBox3Tool
                 //successfully logged in
                 LoggedIn = true;
 
-                //BBoxSubscribeForNotification(new List<string> { "Device/PPP/Interfaces/Interface[Alias=\"PPP_DATA_BACKUP\"]/Status" });
-
+                dynamic d = BBoxSubscribeForNotification(new List<string> { "Device/DSL/Lines/Line[Alias=\"DSL0\"]/Status", "Device/DSL/Lines/Line[Alias=\"DSL0\"]/VectoringState" });
 
                 return true;
             }
@@ -550,7 +591,7 @@ namespace BBox3Tool
         /// <summary>
         ///     Get DSL standard (VDSL2 / ADSL2+ / ADSL2 / ADSL
         /// </summary>
-        public DSLStandard GetDslStandard()
+        public void GetDslStandard()
         {
             dynamic jsonObject = BBoxGetValue(new List<string>
             {
@@ -579,33 +620,34 @@ namespace BBox3Tool
                         case 0:
                         case 1:
                         case 2:
-                            DslStandard = DSLStandard.VDSL2;
+                            DSLStandard = DSLStandard.VDSL2;
                             break;
                         case 3:
                         case 4:
                         case 5:
-                            DslStandard = DSLStandard.ADSL2plus;
+                            DSLStandard = DSLStandard.ADSL2plus;
                             break;
                         case 6:
                         case 7:
                         case 8:
-                            DslStandard = DSLStandard.ADSL2;
+                            DSLStandard = DSLStandard.ADSL2;
                             break;
                         case 9:
                         case 10:
                         case 11:
                         case 12:
-                            DslStandard = DSLStandard.ADSL;
+                            DSLStandard = DSLStandard.ADSL;
                             break;
                         default:
-                            DslStandard = DSLStandard.unknown;
+                            DSLStandard = DSLStandard.unknown;
                             break;
                     }
                     break;
                 }
             }
 
-            return DslStandard;
+            DSLStandardDone = true;
+
         }
 
         /// <summary>
@@ -613,9 +655,19 @@ namespace BBox3Tool
         /// </summary>
         public void GetVectoringEnabled()
         {
-            dynamic jsonObject =
-                BBoxGetValue(new List<string> { "Device/DSL/Lines/Line[VectoringState=\"RUNNING\"]/Status", "Device/DSL/Lines/Line[VectoringState=\"DISABLED\"]/Status" });
-            VectoringEnabled = (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied" || jsonObject["reply"]["actions"][1]["error"]["description"] == "Applied");
+            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            {
+                //only correct after line reset
+                dynamic jsonObject = BBoxGetValue(new List<string> { "Device/DSL/Lines/Line[VectoringState=\"RUNNING\"]/Status" });
+                if (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied")
+                    Vectoring = true;
+                else
+                    Vectoring = null; // !! not false, because vectored lines can also return 'disabled'
+            }
+            else
+                Vectoring = false;
+
+            vectoringDone = true;
         }
 
         #endregion profile
@@ -729,15 +781,35 @@ namespace BBox3Tool
             usMaxBitRateDone = true;
         }
 
+        /// <summary>
+        /// Get estimated distande, based on UPBOKLE
+        /// </summary>
         public void GetEstimatedDistance()
         {
-            var valuesToCheck = Enumerable.Range(0, 1280).ToList();
-            valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
-            decimal upbokle = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck) / 100;
-            /*if (upbokle > 0)
-                Distance = (upbokle / 13.81m) * 1000;*/
-            if (upbokle > 0)
-                Distance = (upbokle / (20m + (upbokle/3m))) * 1000;
+            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            {
+                var valuesToCheck = Enumerable.Range(0, 1280).ToList();
+                valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
+                decimal upbokle = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck) / 100;
+                
+                decimal DistanceV9 = 0;
+                decimal DistanceV7 = 0;
+
+                //v0.9
+                if (upbokle > 0)
+                    DistanceV9 = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
+                //v0.8
+                /*if (upbokle > 0)
+                    Distance = (upbokle / (20m + (upbokle/3m))) * 1000;*/
+                //v0.7
+                if (upbokle > 0)
+                    DistanceV7 = (upbokle / 20m) * 1000;
+
+                Distance = Math.Min(DistanceV9, DistanceV7);
+            }
+            else
+                Distance = null;
+
             distanceDone = true;
         }
 
@@ -894,7 +966,7 @@ namespace BBox3Tool
         }
 
         /// <summary>
-        ///     Make request to bbox and return the JSON-object as a dynamic
+        ///     Make request for getValue to bbox and return the JSON-object as a dynamic
         /// </summary>
         /// <param name="xpaths">Xpaths to check</param>
         /// <returns>JSON reply from bbox</returns>
@@ -920,7 +992,41 @@ namespace BBox3Tool
             var serializer = new JavaScriptSerializer();
             return serializer.Deserialize<dynamic>(response);
         }
+        
+        /// <summary>
+        ///     Make request for SubscribeForNotification to bbox and return the JSON-object as a dynamic
+        /// </summary>
+        /// <param name="xpaths">Xpaths to check</param>
+        /// <returns>JSON reply from bbox</returns>
+        private dynamic BBoxSubscribeForNotification(List<string> xpaths)
+        {
+            //prepare actions
+            var actions = new List<Dictionary<string, object>>();
+            var i = 0;
+            foreach (var xpath in xpaths)
+            {
+                actions.Add(new Dictionary<string, object>
+                {
+                    {"id", i},
+                    {"method", "subscribeForNotification"},
+                    {"xpath", xpath},
+                    {"parameters", new Dictionary<string, object> {
+                        {"id", _notificationID},
+                        {"type", "value-change"},
+                        {"current-value", true}
+                    }}
+                });
+                i++;
+                _notificationID++;
+            }
 
+            var response = sendActionsToBBox(actions);
+
+            //deserialize object
+            var serializer = new JavaScriptSerializer();
+            return serializer.Deserialize<dynamic>(response);
+        }
+       
         /// <summary>
         ///     Make request to bbox and return the JSON-object as a string
         /// </summary>

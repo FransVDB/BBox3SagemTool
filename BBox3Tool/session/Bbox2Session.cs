@@ -8,7 +8,6 @@ namespace BBox3Tool
     internal class Bbox2Session : IModemSession
     {
         private VDSL2Profile _vdslProfile;
-        private DSLStandard _dslStandard;
         private TelnetConnection tc;
 
         public int DownstreamCurrentBitRate { get; private set; }
@@ -19,12 +18,16 @@ namespace BBox3Tool
         public decimal UpstreamAttenuation { get; private set; }
         public decimal DownstreamNoiseMargin { get; private set; }
         public decimal UpstreamNoiseMargin { get; private set; }
-        public decimal Distance { get; private set; }
+        public decimal? Distance { get; private set; }
         public string DeviceName { get; private set; }
+        public bool? Vectoring { get; private set; }
+        public DSLStandard DSLStandard { get; private set; }
 
         public Bbox2Session ()
 	    {
             DeviceName = "B-Box 2";
+            Distance = null;
+            Vectoring = false;
 	    }
 
         public bool OpenSession(String host, String username, String password)
@@ -113,11 +116,6 @@ namespace BBox3Tool
             }
         }
 
-        public DSLStandard GetDslStandard()
-        {
-            return _dslStandard;
-        }
-
         public DeviceInfo GetDeviceInfo()
         {
             var deviceInfo = new DeviceInfo();
@@ -169,9 +167,9 @@ namespace BBox3Tool
                             break;
                         case "Line Type":
                             if (array[1].Trim() == "0x00800000#" || array[1].Trim() == "0x04000000#")
-                                _dslStandard = DSLStandard.VDSL2;
+                                DSLStandard = DSLStandard.VDSL2;
                             else
-                                _dslStandard = DSLStandard.unknown;
+                                DSLStandard = DSLStandard.unknown;
                             break;
                         case "Far-end ITU Vendor Id":
                             break;
