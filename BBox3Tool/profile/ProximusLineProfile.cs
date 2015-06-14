@@ -19,6 +19,8 @@ namespace BBox3Tool
         private bool _provisioningProfile;
         private bool _vectoringEnabled;
         private VDSL2Profile _profileVDSL2;
+        private decimal _distanceMin;
+        private decimal _distanceMax;
 
         #region getters&setters
 
@@ -103,6 +105,16 @@ namespace BBox3Tool
             set { _profileVDSL2 = value; }
         }
 
+        public decimal DistanceMin
+        {
+            get { return _distanceMin; }
+        }
+
+        public decimal DictanceMax
+        {
+            get { return _distanceMax; }
+        }
+
         #endregion
 
         #region constructors
@@ -121,6 +133,8 @@ namespace BBox3Tool
             _confirmedDownloadSpeeds = new List<int>();
             _confirmedUploadSpeeds = new List<int>();
             _profileVDSL2 = VDSL2Profile.unknown;
+            _distanceMax = 0;
+            _distanceMin = 0;
         }
 
         /// <summary>
@@ -136,7 +150,7 @@ namespace BBox3Tool
         /// <param name="profile">VDSL2 profile (17a or 8d)</param>
         /// <param name="confirmedDownloadSpeeds">List of confirmed download speeds (feedback from users)</param>
         /// <param name="confirmedUploadSpeeds">List of confirmed upload speeds (feedback from users)</param>
-        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool provisioning, bool dlm, bool repair, bool vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds)
+        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool provisioning, bool dlm, bool repair, bool vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds, decimal distanceMin, decimal distanceMax)
         {
             _name = name;
             _downloadSpeed =downloadSpeed;
@@ -148,6 +162,8 @@ namespace BBox3Tool
             _profileVDSL2 = profile;
             _confirmedDownloadSpeeds = confirmedDownloadSpeeds;
             _confirmedUploadSpeeds = confirmedUploadSpeeds;
+            _distanceMin = distanceMin;
+            _distanceMax = distanceMax;
         }
   
         #endregion

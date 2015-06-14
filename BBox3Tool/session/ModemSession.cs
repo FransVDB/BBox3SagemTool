@@ -6,9 +6,9 @@ namespace BBox3Tool
     {
         bool OpenSession(String host, String username, String password);
         bool CloseSession();
+        
         void GetLineData();
 
-        DSLStandard GetDslStandard();
         DeviceInfo GetDeviceInfo();
         String GetDebugValue(String debugValue);
 
@@ -20,7 +20,9 @@ namespace BBox3Tool
         decimal UpstreamAttenuation { get; }
         decimal DownstreamNoiseMargin { get; }
         decimal UpstreamNoiseMargin { get; }
-        decimal Distance { get; }
+        decimal? Distance { get; }
         string DeviceName { get; }
+        bool? Vectoring { get; }
+        DSLStandard DSLStandard { get; }
     }
 }
