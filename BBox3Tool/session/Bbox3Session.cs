@@ -791,15 +791,21 @@ namespace BBox3Tool
                 var valuesToCheck = Enumerable.Range(0, 1280).ToList();
                 valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
                 decimal upbokle = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck) / 100;
+                
+                decimal DistanceV9 = 0;
+                decimal DistanceV7 = 0;
+
                 //v0.9
                 if (upbokle > 0)
-                    Distance = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
+                    DistanceV9 = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
                 //v0.8
                 /*if (upbokle > 0)
                     Distance = (upbokle / (20m + (upbokle/3m))) * 1000;*/
                 //v0.7
-                /*if (upbokle > 0)
-                    Distance = (upbokle / 20m) * 1000;*/
+                if (upbokle > 0)
+                    DistanceV7 = (upbokle / 20m) * 1000;
+
+                Distance = Math.Min(DistanceV9, DistanceV7);
             }
             else
                 Distance = null;
