@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -298,6 +299,7 @@ namespace BBox3Tool
                 {"method", "getValue"},
                 {"xpath", xpath}
             });
+
             return sendActionsToBBox(actions);
         }
 
@@ -314,17 +316,52 @@ namespace BBox3Tool
 
         public void getTest()
         {
-            var valuesToCheck = Enumerable.Range(0, 2500).ToList();
-            var test = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "CurrentProfile", valuesToCheck, 50);
-        }
+            //Stopwatch watch = new Stopwatch();
 
-        public void getGINP()
-        {
-            var valuesToCheck = new List<int> { };
-            valuesToCheck.AddRange(Enumerable.Range(1, 10000).ToList());
-            decimal d = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "Alias=\"DSL0\" and ../../Channels/Channel/ACTINP", valuesToCheck, 100);
-            d = d + 0;
-            //Device/DSL/Channels/Channel[Alias='DSL0']/GINPEnabledds
+            //var valuesToCheck = Enumerable.Range(0, 1000).ToList();
+
+            //watch.Start();
+            //var test = getDslValueLinear("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck, 5) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueLinear 5: " + watch.Elapsed.ToString());
+
+            //watch.Restart();
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck, 5, 5) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueParallel 5 5: " + watch.Elapsed.ToString());
+
+            //watch.Restart();
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck, 10, 5) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueParallel 10 5: " + watch.Elapsed.ToString());
+
+            //watch.Restart();
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck, 20, 5) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueParallel 20 5: " + watch.Elapsed.ToString());
+
+            //watch.Restart();
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck, 50, 5) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueParallel 50 5: " + watch.Elapsed.ToString());
+            
+            //watch.Restart();
+            //valuesToCheck.Clear();
+            //valuesToCheck.AddRange(Enumerable.Range(90000, 10000).ToList());
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck, 75, 5);
+            //watch.Stop();
+            //Debug.WriteLine(" DownstreamMaxBitRate getDslValueParallel2: " + test + ", " + watch.Elapsed.ToString());
+
+
+            //watch.Restart();
+            //test = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 90000, 100000, 1000);
+            //watch.Stop();
+            //Debug.WriteLine(" DownstreamMaxBitRate getDslValueParallel: " + test + ", " + watch.Elapsed.ToString());
+
+            //watch.Restart();
+            //test = getDslValueSingleLinear("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck) / 10;
+            //watch.Stop();
+            //Debug.WriteLine("getDslValueSingleLinear: " + watch.Elapsed.ToString());
         }
 
         #endregion
@@ -391,12 +428,12 @@ namespace BBox3Tool
                                                     {
                                                         "context-flags", new Dictionary<string, object>
                                                         {
-                                                            {"get-content-name", true},
-                                                            {"local-time", true},
-                                                            {"no-default", false}
+                                                            {"get-content-name", true}, //default true
+                                                            {"local-time", true},//default true
+                                                            {"no-default", true} //default false
                                                         }
                                                     },
-                                                    {"capability-depth", 1}, //default 1
+                                                    {"capability-depth", 0}, //default 1
                                                     {
                                                         "capability-flags", new Dictionary<string, object>
                                                         {
@@ -405,11 +442,12 @@ namespace BBox3Tool
                                                             {"restriction", false}, //default true
                                                             {"description", false}, //default false
                                                             {"flags", false}, //default true
-                                                            {"type", false} //default true
+                                                            {"type", false}, //default true
+                                                            
                                                         }
                                                     },
                                                     {"time-format", "ISO_8601"},
-                                                    {"depth", _debug ? 99 : 2}, //default 2
+                                                    {"depth", _debug ? 2 : -1}, //default 2
                                                     {"max-add-events", 5},
                                                     {"write-only-string", "_XMO_WRITE_ONLY_"},
                                                     {"undefined-write-only-string", "_XMO_UNDEFINED_WRITE_ONLY_"}
@@ -446,8 +484,7 @@ namespace BBox3Tool
                 //successfully logged in
                 LoggedIn = true;
 
-                dynamic d = BBoxSubscribeForNotification(new List<string> { "Device/DSL/Lines/Line[Alias=\"DSL0\"]/Status", "Device/DSL/Lines/Line[Alias=\"DSL0\"]/VectoringState" });
-
+                //getTest();
                 return true;
             }
             catch (Exception ex)
@@ -537,7 +574,7 @@ namespace BBox3Tool
             var knownDownloadBitrates = _profiles.SelectMany(x => x.ConfirmedDownloadSpeeds).ToList();
             knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed));
             knownDownloadBitrates = knownDownloadBitrates.Distinct().OrderByDescending(x => x).ToList();
-            _downstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 10));
+            _downstreamCurrentBitRate = Convert.ToInt32(getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 10, 5));
 
             //speed found, return
             if (_downstreamCurrentBitRate >= 0)
@@ -550,11 +587,14 @@ namespace BBox3Tool
             knownDownloadBitrates.Clear();
             knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed).SelectMany(x => Enumerable.Range(x - 64, 128)));
             knownDownloadBitrates = knownDownloadBitrates.Distinct().ToList();
-            _downstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates));
+            _downstreamCurrentBitRate = Convert.ToInt32(getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 5));
 
             //fallback: speed not found in profile list, check every speed (very slow)
             if (_downstreamCurrentBitRate < 0)
-                _downstreamCurrentBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", 0, 100000, 1000);
+            {
+                var valuesToCheck = Enumerable.Range(0, 100000).ToList();
+                _downstreamCurrentBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);
+            }
             dsCurrBitRateDone = true;
         }
 
@@ -567,7 +607,7 @@ namespace BBox3Tool
             var knownUploadBitrates = _profiles.SelectMany(x => x.ConfirmedUploadSpeeds).ToList();
             knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed));
             knownUploadBitrates = knownUploadBitrates.Distinct().OrderByDescending(x => x).ToList();
-            _upstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 1));
+            _upstreamCurrentBitRate = Convert.ToInt32(getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 10, 5));
 
             //speed found, return
             if (_upstreamCurrentBitRate >= 0)
@@ -580,11 +620,14 @@ namespace BBox3Tool
             knownUploadBitrates.Clear();
             knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed).SelectMany(x => Enumerable.Range(x - 64, 128)));
             knownUploadBitrates = knownUploadBitrates.Distinct().ToList();
-            _upstreamCurrentBitRate = Convert.ToInt32(getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates));
+            _upstreamCurrentBitRate = Convert.ToInt32(getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 10 ,5));
 
             //fallback: speed not found in profile list, check every speed (slow)
             if (_upstreamCurrentBitRate < 0)
-                _upstreamCurrentBitRate =(int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", 0, 20000, 1000);
+            {
+                var valuesToCheck = Enumerable.Range(0, 50000).ToList();
+                _upstreamCurrentBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
+            }
             usCurrBitRateDone = true;
         }
 
@@ -595,19 +638,19 @@ namespace BBox3Tool
         {
             dynamic jsonObject = BBoxGetValue(new List<string>
             {
-                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2_ANNEX_A\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_993_2_ANNEX_B\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5_ANNEX_A\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_5_ANNEX_B\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_A\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_B\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1_ANNEX_A\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_1_ANNEX_B\"]/Status",
-                "Device/DSL/Lines/Line[StandardUsed=\"G_992_3_ANNEX_L\"]/Status"
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_993_2\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_993_2_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_993_2_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_5\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_5_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_5_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1_ANNEX_A\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_L\"]/Status"
             });
 
             //check standard
@@ -645,7 +688,6 @@ namespace BBox3Tool
                     break;
                 }
             }
-
             DSLStandardDone = true;
 
         }
@@ -662,7 +704,15 @@ namespace BBox3Tool
                 if (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied")
                     Vectoring = true;
                 else
-                    Vectoring = null; // !! not false, because vectored lines can also return 'disabled'
+                {
+                    var valuesToCheck = new List<int> { };
+                    valuesToCheck.AddRange(Enumerable.Range(0, 50).ToList());
+                    var inpDownstream = getDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINP", valuesToCheck, 10, 5);
+                    if (inpDownstream > 30)
+                        Vectoring = true;
+                    else
+                        Vectoring = null; // !! not false, because the above checks don't always return correct values
+                }  
             }
             else
                 Vectoring = false;
@@ -681,7 +731,7 @@ namespace BBox3Tool
         {
             //check attenuation from 0.0 to 100.0
             var valuesToCheck = Enumerable.Range(0, 1000).ToList();
-            _downstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "DownstreamAttenuation", valuesToCheck, 20)/10;
+            _downstreamAttenuation = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamAttenuation", valuesToCheck, 10, 5) / 10;
             dsAttenuationDone = true;
         }
 
@@ -692,13 +742,13 @@ namespace BBox3Tool
         {
             //special case, upstream attenuation always seems to be 0, so check 0 first to save requests
             var valuesToCheck = new List<int> {0};
-            _upstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamAttenuation", valuesToCheck, 20)/10;
+            _upstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamAttenuation", valuesToCheck, 1) / 10;
 
             if (_upstreamAttenuation < 0)
             {
                 //check attenuation from 0.1 to 100.0
                 valuesToCheck = Enumerable.Range(1, 1000).ToList();
-                _upstreamAttenuation = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamAttenuation", valuesToCheck, 20)/10;
+                _upstreamAttenuation = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamAttenuation", valuesToCheck, 10, 5) / 10;
             }
             usAttenuationDone = true;
         }
@@ -710,9 +760,9 @@ namespace BBox3Tool
         {
             //check noise margin from 0.0 to 50.0
             var valuesToCheck = new List<int> {0};
-            valuesToCheck.AddRange(Enumerable.Range(50, 500).ToList());
-            valuesToCheck.AddRange(Enumerable.Range(1, 49).ToList());
-            _downstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UpstreamNoiseMargin", valuesToCheck, 20)/10;
+            valuesToCheck.AddRange(Enumerable.Range(60, 500).ToList());
+            valuesToCheck.AddRange(Enumerable.Range(1, 59).ToList());
+            _downstreamNoiseMargin = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamNoiseMargin", valuesToCheck, 10, 5) / 10;
             dsNoiseMarginDone = true;
         }
 
@@ -723,11 +773,13 @@ namespace BBox3Tool
         {
             //check noise margin from 0.0 to 50.0
             var valuesToCheck = new List<int> {0};
-            valuesToCheck.AddRange(Enumerable.Range(50, 500).ToList());
-            valuesToCheck.AddRange(Enumerable.Range(1, 49).ToList());
-            _upstreamNoiseMargin = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "DownstreamNoiseMargin", valuesToCheck)/10;
+            valuesToCheck.AddRange(Enumerable.Range(60, 500).ToList());
+            valuesToCheck.AddRange(Enumerable.Range(1, 59).ToList());
+            _upstreamNoiseMargin = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamNoiseMargin", valuesToCheck, 10, 5) / 10;
             usNoiseMarginDone = true;
         }
+
+        //---
 
         /// <summary>
         ///     Get downstream max bit rate, check from 0 to 150.000 kbps
@@ -735,33 +787,53 @@ namespace BBox3Tool
         /// <returns>Downstream max bit rate in kbps, or 'unknown' if not found</returns>
         public void GetDownstreamMaxBitRate()
         {
-            var startValue = (_downstreamCurrentBitRate > 0) ? _downstreamCurrentBitRate : 0;
-
-            //download profiles 70 vectoring
-            if (_downstreamCurrentBitRate >= 69990 && CurrentProfile.VectoringEnabled)
+            var valuesToCheck = new List<int>();
+            
+            //17a profiles
+            if (_downstreamCurrentBitRate >= 39990)
             {
                 var restMarginDown = _downstreamNoiseMargin - 6m;
-                startValue = _downstreamCurrentBitRate + (int) Math.Floor(restMarginDown*2900);
-                if (startValue < _downstreamCurrentBitRate)
-                    startValue = _downstreamCurrentBitRate;
+                var startValue = _downstreamCurrentBitRate + Convert.ToInt32(restMarginDown*3000);
 
-                startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1)/1000)*1000);
-                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, startValue + 15000, 1000);
-
+                //check range + - 15.000 of predicted value
+                for (int i = 0; i < 30; i++)
+                {
+                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 500), 500));
+                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 500), 500));
+                }
+                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+                
+                //out of predicted range
+                
                 if (_downstreamMaxBitRate < 0)
-                    _downstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue - 10000, startValue, 1000);
+                {
+                    valuesToCheck.Clear();
 
-                if (_downstreamMaxBitRate < 0)
-                    _downstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue - 10000, 1000);
+                    //add values form predicted value +15.000 to 150.000
+                    if (startValue + 15000 < 150000)
+                        valuesToCheck.AddRange(Enumerable.Range(startValue + 15000, 150000 - (startValue + 15000)));
+
+                    //add values from predicted value -15.000 to 0
+                    if (startValue - 15000 > 0)
+                        valuesToCheck.AddRange(Enumerable.Range(0, startValue - 15000).OrderByDescending(x => x));
+
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+                }
             }
             //other profiles
             else
             {
-                startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1)/1000)*1000);
-                _downstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", startValue, 150000, 1000);
+                
+                valuesToCheck.AddRange(Enumerable.Range(_downstreamCurrentBitRate, 150000 - _downstreamCurrentBitRate));
+                _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
 
                 if (_downstreamMaxBitRate < 0)
-                    _downstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", 0, startValue, 1000);
+                {
+                    valuesToCheck.Clear();
+                    valuesToCheck.AddRange(Enumerable.Range(0, _downstreamCurrentBitRate));
+                    _downstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+                }
+                    
             }
             dsMaxBitRateDone = true;
         }
@@ -772,12 +844,14 @@ namespace BBox3Tool
         /// <returns>Upstream max bit rate in kbps, or 'unknown' if not found</returns>
         public void GetUpstreamMaxBitRate()
         {
+            //TODO prediction
             var startValue = (_upstreamCurrentBitRate > 0) ? _upstreamCurrentBitRate : 0;
             startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1)/1000)*1000);
             _upstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", startValue, 50000, 1000);
 
             if (_upstreamMaxBitRate < 0)
                 _upstreamMaxBitRate = (int) getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", 0, startValue, 1000);
+
             usMaxBitRateDone = true;
         }
 
@@ -790,7 +864,7 @@ namespace BBox3Tool
             {
                 var valuesToCheck = Enumerable.Range(0, 1280).ToList();
                 valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
-                decimal upbokle = getDslValueLinear("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck) / 100;
+                decimal upbokle = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck, 10, 5) / 100;
                 
                 decimal DistanceV9 = 0;
                 decimal DistanceV7 = 0;
@@ -890,6 +964,60 @@ namespace BBox3Tool
             return dslValue;
         }
 
+        private decimal getDslValueParallel(string xpathBase, string node, List<int> valuesToCheck, int orCount = 75, int xpathCount = 5)
+        {
+            var index = 0;
+            var preciseRange = new List<int>();
+            do
+            {
+                //prepare requests
+                var range = Math.Min(orCount * xpathCount, valuesToCheck.Count - index);
+                var rangeValues = valuesToCheck.GetRange(index, range);
+
+                var actions = new List<string>();
+                for (var i = 0; i < xpathCount; i++)
+                {
+                    var xpathSub = string.Empty;
+                    var list = new List<string>();
+                    for (var j = 0; j < orCount; j++)
+                    {
+                        var rangeIndex = ((i * orCount) + j);
+                        if (rangeIndex >= rangeValues.Count)
+                            break;
+                        list.Add(node + "=" + rangeValues[rangeIndex]);
+                    }
+                    xpathSub = string.Join(" or ", list);
+                    if (xpathSub != string.Empty)
+                        actions.Add(string.Format(xpathBase, xpathSub));
+                }
+
+                //get values from bbox
+                dynamic jsonObject = BBoxGetValue(actions);
+
+                //check values
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    if (jsonObject["reply"]["actions"][i]["error"]["description"] == "Applied")
+                    {
+                        preciseRange = rangeValues.GetRange(i*orCount, Math.Min(orCount, rangeValues.Count - (i*orCount)));
+                        break;
+                    }
+                }
+
+                //increase start
+                index += range;
+
+            }
+            while (preciseRange.Count == 0 && index < valuesToCheck.Count());
+
+            //not found
+            if (preciseRange.Count == 0)
+                return -1;
+
+            //get precise value
+            return getDslValueLinear(xpathBase, node, preciseRange, 5);
+        }
+
         /// <summary>
         ///     Get DSL value using linear algorithm
         /// </summary>
@@ -987,7 +1115,7 @@ namespace BBox3Tool
             }
 
             var response = sendActionsToBBox(actions);
-
+            response = response.Replace(",}", "}");
             //deserialize object
             var serializer = new JavaScriptSerializer();
             return serializer.Deserialize<dynamic>(response);
@@ -1026,7 +1154,7 @@ namespace BBox3Tool
             var serializer = new JavaScriptSerializer();
             return serializer.Deserialize<dynamic>(response);
         }
-       
+
         /// <summary>
         ///     Make request to bbox and return the JSON-object as a string
         /// </summary>
