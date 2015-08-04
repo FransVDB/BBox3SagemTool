@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using BBox3Tool.objects;
 using System.Net.NetworkInformation;
 using System.Globalization;
+using System.Net;
 
 namespace BBox3Tool
 {
@@ -17,6 +18,11 @@ namespace BBox3Tool
     {
         private IModemSession _session;
         private List<ProximusLineProfile> _profiles;
+
+        private Modem _selectedModem = Modem.unknown;
+
+        private Color _colorSelected = Color.FromArgb(174, 204, 237);
+        private Color _colorMouseOver = Color.FromArgb(235, 228, 241);
 
         private readonly Uri _liveUpdateCheck = new Uri("http://www.cloudscape.be/userbasepyro85/latest.xml");
         private readonly Uri _liveUpdateProfiles = new Uri("http://www.cloudscape.be/userbasepyro85/profiles.xml");
@@ -35,52 +41,69 @@ namespace BBox3Tool
             //load embedded xml profiles
             _profiles = loadEmbeddedProfiles();
 
-            //do live update
+            //do live update, update profiles
             backgroundWorkerLiveUpdate.RunWorkerAsync();
+            
+            //detect device
+            _selectedModem = detectDevice();
 
             //load settings if saved
             if (loadSettings())
                 checkBoxSave.Checked = true;
             else
-            {
-                // Init for bbox3 if not found
-                _session = new Bbox3Session(backgroundWorker, _profiles);
                 checkBoxSave.Checked = false;
+            
+            //select modem
+            switch (_selectedModem)
+            {
+                case Modem.BBOX3S:
+                    panelBBox3S.BackColor = _colorSelected;
+                    break;
+                case Modem.BBOX2:
+                    panelThumb_Click(panelBBox2, null);
+                    break;
+                case Modem.FritzBox7390:
+                    panelThumb_Click(panelFritzBox, null);
+                    break;
+                case Modem.BBOX3T:
+                    //TODO alert
+                    break;
+                case Modem.unknown:
+                default:
+                    break;
             }
         }
 
         //buttons
         //-------
-
-        private void bbox2button_Click(object sender, EventArgs e)
-        {
-            _session = new Bbox2Session();
-
-            // Set default username
-            textBoxUsername.Text = "admin";
-            textBoxUsername.Enabled = true;
-        }
-
-        private void bbox3button_Click(object sender, EventArgs e)
-        {
-            _session = new Bbox3Session(backgroundWorker, _profiles);
-
-            // Set default username
-            textBoxUsername.Text = "User";
-            textBoxUsername.Enabled = true;
-        }
-
-        private void fritzboxButton_Click(object sender, EventArgs e)
-        {
-            _session = new FritzBoxSession();
-
-            // Disable username textBox
-            textBoxUsername.Text = "N/A";
-            textBoxUsername.Enabled = false;
-        }
-
         private void buttonConnect_Click(object sender, EventArgs e)
         {
+            //set session
+            switch (_selectedModem)
+            {
+                case Modem.BBOX3S:
+                    _session = new Bbox3Session(backgroundWorker, _profiles);
+                    break;
+                case Modem.BBOX2:
+                    _session = new Bbox2Session();
+                    break;
+                case Modem.FritzBox7390:
+                    _session = new FritzBoxSession();
+                    break;
+                case Modem.BBOX3T:
+                    _session = null; 
+                    break;
+                case Modem.unknown:
+                default:
+                    _session = null; 
+                    break;
+            }
+
+            if (_session == null)
+            {
+                //alert
+            }
+
             //check mode
             bool debug = (textBoxUsername.Text.ToLower() == "debug");
             if (debug)
@@ -392,6 +415,49 @@ namespace BBox3Tool
             });
         }
 
+        private Modem detectDevice()
+        {
+            Uri host = new Uri("http://" + textBoxIpAddress.Text);
+            Uri uriBbox3S = new Uri(host, Path.Combine("cgi", "json-req"));
+            Uri uriBbox3T = new Uri(host, "login.lua");
+            Uri uriBbox3T2 = new Uri(host, "login.lp");
+            Uri uriBbox2 = new Uri(host, "index.cgi");
+
+            if (detectDeviceGetStatusCode(uriBbox3S) == 200)
+                return Modem.BBOX3S;
+            else if (detectDeviceGetStatusCode(uriBbox3T) == 200 || detectDeviceGetStatusCode(uriBbox3T2) == 200)
+                return Modem.BBOX3T;
+            else if (detectDeviceGetStatusCode(uriBbox2) == 200)
+                return Modem.BBOX2;
+            else
+                return Modem.unknown;
+        }
+
+        private int detectDeviceGetStatusCode(Uri url)
+        {
+            int status = 0;
+            try
+            {
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                request.AllowAutoRedirect = false;
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                status = (int) response.StatusCode;
+                response.Close();
+            }
+            catch (WebException ex) 
+            {
+                status = (int) ((HttpWebResponse)ex.Response).StatusCode;
+                if (status == 400 && url.ToString().EndsWith("json-req")) //bad request bbox3/s
+                    status = 200;
+            }
+            catch (Exception) 
+            {
+                status = 0;
+            }
+            return status;
+        }
+
+
         //profiles
         //--------
 
@@ -571,15 +637,16 @@ namespace BBox3Tool
                     switch (settingsDoc.SelectSingleNode("//document/login/device").InnerText)
                     {
                         case "BBOX3S":
-                            _session = new Bbox3Session(backgroundWorker, _profiles);
+                            _selectedModem = Modem.BBOX3S;
                             break;
                         case "BBOX2":
-                            _session = new Bbox2Session();
+                            _selectedModem = Modem.BBOX2;
                             break;
                         case "FRITZBOX":
-                            _session = new FritzBoxSession();
+                            _selectedModem = Modem.FritzBox7390;
                             break;
                         default:
+                            _selectedModem = Modem.unknown;
                             break;
                     }
                     return true;
@@ -685,6 +752,102 @@ namespace BBox3Tool
         private void backgroundWorkerLiveUpdate_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             buttonConnect.Enabled = true;
+        }
+
+        //gui
+        //---
+
+        private void panelThumb_MouseEnter(object sender, EventArgs e)
+        {
+            Panel panel = getPanelFromThumb(sender);
+            if (panel == null)
+                return;
+
+            Color color = _colorMouseOver;
+            if (checkPanelSelected(panel))
+                color = _colorSelected;
+            panel.BackColor = color;
+        }
+
+        private void panelThumb_MouseLeave(object sender, EventArgs e)
+        {
+            Panel panel = getPanelFromThumb(sender);
+            if (panel == null)
+                return;
+
+            Color color = Color.WhiteSmoke;
+            if (checkPanelSelected(panel))
+                color = _colorSelected;
+
+            panel.BackColor = color;
+        }
+
+        private void panelThumb_Click(object sender, EventArgs e)
+        {
+            //reset colors
+            panelBBox3S.BackColor = Color.WhiteSmoke;
+            panelBBox2.BackColor = Color.WhiteSmoke;
+            panelFritzBox.BackColor = Color.WhiteSmoke;
+            
+            //set color
+            Panel panel = getPanelFromThumb(sender);
+            if (panel == null)
+                return;
+            panel.BackColor = _colorSelected;
+            
+            //select modem
+            if (panel == panelBBox3S)
+            {
+                _selectedModem = Modem.BBOX3S;
+                textBoxUsername.Text = "User";
+                textBoxUsername.Enabled = true;
+            }
+            else if (panel == panelBBox2)
+            {
+                _selectedModem = Modem.BBOX2;
+                textBoxUsername.Text = "admin";
+                textBoxUsername.Enabled = true;
+            }
+            else if (panel == panelFritzBox)
+            {
+                _selectedModem = Modem.FritzBox7390;
+                textBoxUsername.Text = "N/A";
+                textBoxUsername.Enabled = false;
+            }
+            else
+            {
+                textBoxUsername.Text = "";
+                textBoxUsername.Enabled = true;
+                _selectedModem = Modem.unknown;
+            }
+        }
+
+        private Panel getPanelFromThumb(object sender)
+        {
+            Panel panel = null;
+
+            if (sender is Panel)
+                panel = (Panel)sender;
+            else if (sender is Label)
+                panel = (Panel)((Label)sender).Parent;
+            else if (sender is PictureBox)
+                panel = (Panel)((PictureBox)sender).Parent;
+
+            return panel;
+        }
+
+        private bool checkPanelSelected(Panel panel)
+        {
+            if (panel == panelBBox3S && _selectedModem == Modem.BBOX3S)
+                return true;
+
+            if (panel == panelBBox2 && _selectedModem == Modem.BBOX2)
+                return true;
+
+            if (panel == panelFritzBox && _selectedModem == Modem.FritzBox7390)
+                return true;
+
+            return false;
         }
     }
 }

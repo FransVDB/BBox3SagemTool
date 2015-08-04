@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -316,7 +317,29 @@ namespace BBox3Tool
 
         public void getTest()
         {
-            //Stopwatch watch = new Stopwatch();
+            var valuesToCheck = new List<string>();
+            CultureInfo enUS = new CultureInfo("en-US");
+            decimal marginBase = 10m;
+            for (int i = 0; i < 150; i++)
+            {
+                for (int j = -10; j < 10; j++)
+                {
+                    for (int k = -10; k < 10; k++)
+                    {
+                        decimal m1 = marginBase + Convert.ToDecimal(i) / 10m;
+                        decimal m2 = m1 + Convert.ToDecimal(j) / 10m;
+                        decimal m3 = m1 + Convert.ToDecimal(k) / 10m;
+                        valuesToCheck.Add(m1.ToString("0.0", enUS) + "," + m2.ToString("0.0", enUS) + "," + m3.ToString("0.0", enUS));
+                    }
+                }
+            }
+
+            Stopwatch watch = new Stopwatch();
+
+            watch.Start();
+            var test = getDslValueLinear("Device/DSL/Lines/Line[{0}]/LastChange", "SNRMpbds", valuesToCheck, 5);
+            watch.Stop();
+            Debug.WriteLine("getDslValueLinear 5: " + watch.Elapsed.ToString());
 
             //var valuesToCheck = Enumerable.Range(0, 1000).ToList();
 
@@ -1063,6 +1086,45 @@ namespace BBox3Tool
 
             return dslValue;
         }
+
+        private string getDslValueLinear(string xpathBase, string node, List<string> valuesToCheck, int requestRange = 80)
+        {
+            string dslValue = "";
+
+            var from = 0;
+            var ammount = 0;
+
+            do
+            {
+                ammount = Math.Min(requestRange, valuesToCheck.Count() - from);
+
+                //get subrange from list
+                var subrange = valuesToCheck.GetRange(from, ammount);
+
+                //prepare requests
+                var actions =
+                    subrange.Select(x => string.Format(xpathBase, node + "=\"" + x + "\"")).ToList();
+
+                //get values from bbox
+                dynamic jsonObject = BBoxGetValue(actions);
+
+                //check values
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    if (jsonObject["reply"]["actions"][i]["error"]["description"] == "Applied")
+                    {
+                        dslValue = subrange[i];
+                        break; //from loop
+                    }
+                }
+
+                //increase from
+                from += ammount;
+            } while (dslValue == "" && from < valuesToCheck.Count());
+
+            return dslValue;
+        }
+
 
         /// <summary>
         ///     Get DSL value using exponential algorithm

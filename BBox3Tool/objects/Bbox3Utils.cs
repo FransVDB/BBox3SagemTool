@@ -70,14 +70,14 @@ namespace BBox3Tool
         }
 
         /// <summary>
-        /// 
+        /// Calculate Authkey for json request
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="password"></param>
-        /// <param name="requestId"></param>
-        /// <param name="nonce"></param>
-        /// <param name="cNonce"></param>
-        /// <returns></returns>
+        /// <param name="user">Current user's usernam</param>
+        /// <param name="password">Current user's password</param>
+        /// <param name="requestId">Session's request ID</param>
+        /// <param name="nonce">Session's nonce</param>
+        /// <param name="cNonce">Session's cnonce</param>
+        /// <returns>Calculated auth key</returns>
         public static string calcAuthKey(string user, string password, int requestId, string nonce, string cNonce)
         {
             string ha1 = calcHa1(user, password, nonce);
@@ -85,13 +85,13 @@ namespace BBox3Tool
         }
 
         /// <summary>
-        /// 
+        /// Send http request to BBox
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="cookies"></param>
-        /// <param name="data"></param>
-        /// <param name="mode"></param>
-        /// <returns></returns>
+        /// <param name="url">Url to send request to</param>
+        /// <param name="cookies">cookies to send with request (optional)</param>
+        /// <param name="data">Data to send to Bbox (post or get data)</param>
+        /// <param name="mode">Request mode: post or get</param>
+        /// <returns>Reply as string</returns>
         public static string sendRequest(Uri url, CookieCollection cookies = null, Dictionary<string, string> data = null, WebRequestMode mode = WebRequestMode.Get)
         {
             try
@@ -100,6 +100,7 @@ namespace BBox3Tool
 
                 //set data
                 if (data != null)
+                
                 {
                     string dataStr = String.Join("&", data.Select(x => HttpUtility.UrlEncode(x.Key) + "=" + HttpUtility.UrlEncode(x.Value)));        
                     switch (mode)
@@ -120,7 +121,8 @@ namespace BBox3Tool
                             //thank you stackoverflow!
                             //http://stackoverflow.com/questions/566437/http-post-returns-the-error-417-expectation-failed-c
                             ServicePointManager.Expect100Continue = false;
-                            
+                            request.ServicePoint.Expect100Continue = false;
+
                             // add post data to request
                             byte[] postBytes = Encoding.UTF8.GetBytes(dataStr);
                             request.ContentLength = postBytes.Length;

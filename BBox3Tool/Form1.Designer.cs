@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.panelDebug = new System.Windows.Forms.Panel();
             this.label14 = new System.Windows.Forms.Label();
@@ -67,20 +68,18 @@
             this.labelHardwareVersion = new System.Windows.Forms.Label();
             this.labelSoftwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
-            this.checkBoxSave = new System.Windows.Forms.CheckBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.fritzboxButton = new System.Windows.Forms.Button();
-            this.bbox3button = new System.Windows.Forms.Button();
+            this.panelFritzBox = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.panelBBox2 = new System.Windows.Forms.Panel();
+            this.label9 = new System.Windows.Forms.Label();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.panelBBox3S = new System.Windows.Forms.Panel();
+            this.label8 = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.bbox2button = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBoxIpAddress = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBoxUsername = new System.Windows.Forms.TextBox();
-            this.textBoxPassword = new System.Windows.Forms.TextBox();
             this.buttonConnect = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.hwVersionLabel = new System.Windows.Forms.Label();
             this.guiVersionLabel = new System.Windows.Forms.Label();
@@ -96,8 +95,22 @@
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
+            this.label1 = new System.Windows.Forms.Label();
+            this.labelRemember = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxPassword = new System.Windows.Forms.TextBox();
+            this.textBoxUsername = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.checkBoxSave = new System.Windows.Forms.CheckBox();
+            this.textBoxIpAddress = new System.Windows.Forms.TextBox();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
+            this.panelFritzBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            this.panelBBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            this.panelBBox3S.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panelInfo.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -464,175 +477,177 @@
             // panelLogin
             // 
             this.panelLogin.BackColor = System.Drawing.Color.Transparent;
+            this.panelLogin.Controls.Add(this.label1);
+            this.panelLogin.Controls.Add(this.labelRemember);
+            this.panelLogin.Controls.Add(this.label2);
+            this.panelLogin.Controls.Add(this.textBoxPassword);
+            this.panelLogin.Controls.Add(this.textBoxUsername);
+            this.panelLogin.Controls.Add(this.label3);
             this.panelLogin.Controls.Add(this.checkBoxSave);
-            this.panelLogin.Controls.Add(this.label7);
-            this.panelLogin.Controls.Add(this.fritzboxButton);
-            this.panelLogin.Controls.Add(this.bbox3button);
+            this.panelLogin.Controls.Add(this.textBoxIpAddress);
+            this.panelLogin.Controls.Add(this.panelFritzBox);
+            this.panelLogin.Controls.Add(this.panelBBox2);
+            this.panelLogin.Controls.Add(this.panelBBox3S);
             this.panelLogin.Controls.Add(this.label5);
             this.panelLogin.Controls.Add(this.label4);
-            this.panelLogin.Controls.Add(this.bbox2button);
-            this.panelLogin.Controls.Add(this.label1);
-            this.panelLogin.Controls.Add(this.textBoxIpAddress);
-            this.panelLogin.Controls.Add(this.label3);
-            this.panelLogin.Controls.Add(this.textBoxUsername);
-            this.panelLogin.Controls.Add(this.textBoxPassword);
             this.panelLogin.Controls.Add(this.buttonConnect);
-            this.panelLogin.Controls.Add(this.label2);
             this.panelLogin.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLogin.Location = new System.Drawing.Point(0, 0);
             this.panelLogin.Name = "panelLogin";
             this.panelLogin.Size = new System.Drawing.Size(699, 316);
             this.panelLogin.TabIndex = 7;
             // 
-            // checkBoxSave
+            // panelFritzBox
             // 
-            this.checkBoxSave.AutoSize = true;
-            this.checkBoxSave.Location = new System.Drawing.Point(304, 255);
-            this.checkBoxSave.Name = "checkBoxSave";
-            this.checkBoxSave.Size = new System.Drawing.Size(77, 17);
-            this.checkBoxSave.TabIndex = 13;
-            this.checkBoxSave.Text = "Remember";
-            this.checkBoxSave.UseVisualStyleBackColor = true;
+            this.panelFritzBox.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelFritzBox.Controls.Add(this.label10);
+            this.panelFritzBox.Controls.Add(this.pictureBox3);
+            this.panelFritzBox.Location = new System.Drawing.Point(261, 76);
+            this.panelFritzBox.Name = "panelFritzBox";
+            this.panelFritzBox.Size = new System.Drawing.Size(110, 121);
+            this.panelFritzBox.TabIndex = 16;
+            this.panelFritzBox.Click += new System.EventHandler(this.panelThumb_Click);
+            this.panelFritzBox.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.panelFritzBox.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
             // 
-            // label7
+            // label10
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(185)))), ((int)(((byte)(255)))));
-            this.label7.Location = new System.Drawing.Point(511, 24);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(86, 20);
-            this.label7.TabIndex = 12;
-            this.label7.Text = "3. Connect";
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(10, 76);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(89, 32);
+            this.label10.TabIndex = 15;
+            this.label10.Text = "Fritz!Box 7390\r\n(telnet only)";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label10.Click += new System.EventHandler(this.panelThumb_Click);
+            this.label10.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.label10.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
             // 
-            // fritzboxButton
+            // pictureBox3
             // 
-            this.fritzboxButton.Location = new System.Drawing.Point(36, 212);
-            this.fritzboxButton.Margin = new System.Windows.Forms.Padding(2);
-            this.fritzboxButton.Name = "fritzboxButton";
-            this.fritzboxButton.Size = new System.Drawing.Size(130, 53);
-            this.fritzboxButton.TabIndex = 11;
-            this.fritzboxButton.Text = "Fritz!Box";
-            this.fritzboxButton.UseVisualStyleBackColor = true;
-            this.fritzboxButton.Click += new System.EventHandler(this.fritzboxButton_Click);
+            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.pictureBox3.Location = new System.Drawing.Point(8, 7);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(93, 66);
+            this.pictureBox3.TabIndex = 0;
+            this.pictureBox3.TabStop = false;
+            this.pictureBox3.Click += new System.EventHandler(this.panelThumb_Click);
+            this.pictureBox3.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.pictureBox3.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
             // 
-            // bbox3button
+            // panelBBox2
             // 
-            this.bbox3button.Location = new System.Drawing.Point(36, 137);
-            this.bbox3button.Margin = new System.Windows.Forms.Padding(2);
-            this.bbox3button.Name = "bbox3button";
-            this.bbox3button.Size = new System.Drawing.Size(130, 53);
-            this.bbox3button.TabIndex = 10;
-            this.bbox3button.Text = "BBOX3";
-            this.bbox3button.UseVisualStyleBackColor = true;
-            this.bbox3button.Click += new System.EventHandler(this.bbox3button_Click);
+            this.panelBBox2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelBBox2.Controls.Add(this.label9);
+            this.panelBBox2.Controls.Add(this.pictureBox2);
+            this.panelBBox2.Location = new System.Drawing.Point(141, 76);
+            this.panelBBox2.Name = "panelBBox2";
+            this.panelBBox2.Size = new System.Drawing.Size(110, 121);
+            this.panelBBox2.TabIndex = 15;
+            this.panelBBox2.Click += new System.EventHandler(this.panelThumb_Click);
+            this.panelBBox2.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.panelBBox2.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(28, 76);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(54, 16);
+            this.label9.TabIndex = 15;
+            this.label9.Text = "B-Box 2";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label9.Click += new System.EventHandler(this.panelThumb_Click);
+            this.label9.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.label9.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(8, 7);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(93, 66);
+            this.pictureBox2.TabIndex = 0;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Click += new System.EventHandler(this.panelThumb_Click);
+            this.pictureBox2.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.pictureBox2.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
+            // 
+            // panelBBox3S
+            // 
+            this.panelBBox3S.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelBBox3S.Controls.Add(this.label8);
+            this.panelBBox3S.Controls.Add(this.pictureBox1);
+            this.panelBBox3S.Location = new System.Drawing.Point(21, 76);
+            this.panelBBox3S.Name = "panelBBox3S";
+            this.panelBBox3S.Size = new System.Drawing.Size(110, 121);
+            this.panelBBox3S.TabIndex = 14;
+            this.panelBBox3S.Click += new System.EventHandler(this.panelThumb_Click);
+            this.panelBBox3S.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.panelBBox3S.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(28, 76);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(54, 32);
+            this.label8.TabIndex = 15;
+            this.label8.Text = "B-Box 3\r\nSagem";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label8.Click += new System.EventHandler(this.panelThumb_Click);
+            this.label8.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.label8.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(8, 7);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(93, 66);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.panelThumb_Click);
+            this.pictureBox1.MouseEnter += new System.EventHandler(this.panelThumb_MouseEnter);
+            this.pictureBox1.MouseLeave += new System.EventHandler(this.panelThumb_MouseLeave);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(185)))), ((int)(((byte)(255)))));
-            this.label5.Location = new System.Drawing.Point(272, 24);
+            this.label5.Location = new System.Drawing.Point(454, 24);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(165, 20);
+            this.label5.Size = new System.Drawing.Size(81, 24);
             this.label5.TabIndex = 9;
-            this.label5.Text = "2. Specify login details";
+            this.label5.Text = "Connect";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(185)))), ((int)(((byte)(255)))));
-            this.label4.Location = new System.Drawing.Point(39, 24);
+            this.label4.Location = new System.Drawing.Point(17, 24);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(128, 20);
+            this.label4.Size = new System.Drawing.Size(132, 24);
             this.label4.TabIndex = 8;
-            this.label4.Text = "1. Select modem";
-            // 
-            // bbox2button
-            // 
-            this.bbox2button.Location = new System.Drawing.Point(36, 66);
-            this.bbox2button.Margin = new System.Windows.Forms.Padding(2);
-            this.bbox2button.Name = "bbox2button";
-            this.bbox2button.Size = new System.Drawing.Size(130, 53);
-            this.bbox2button.TabIndex = 7;
-            this.bbox2button.Text = "BBOX2";
-            this.bbox2button.UseVisualStyleBackColor = true;
-            this.bbox2button.Click += new System.EventHandler(this.bbox2button_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label1.Location = new System.Drawing.Point(308, 70);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 15);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "IP address";
-            // 
-            // textBoxIpAddress
-            // 
-            this.textBoxIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxIpAddress.Location = new System.Drawing.Point(294, 88);
-            this.textBoxIpAddress.Name = "textBoxIpAddress";
-            this.textBoxIpAddress.Size = new System.Drawing.Size(100, 21);
-            this.textBoxIpAddress.TabIndex = 1;
-            this.textBoxIpAddress.Text = "192.168.1.1";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label3.Location = new System.Drawing.Point(312, 193);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(61, 15);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "Password";
-            // 
-            // textBoxUsername
-            // 
-            this.textBoxUsername.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxUsername.Location = new System.Drawing.Point(294, 148);
-            this.textBoxUsername.Name = "textBoxUsername";
-            this.textBoxUsername.Size = new System.Drawing.Size(100, 21);
-            this.textBoxUsername.TabIndex = 4;
-            this.textBoxUsername.Text = "User";
-            // 
-            // textBoxPassword
-            // 
-            this.textBoxPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxPassword.Location = new System.Drawing.Point(294, 212);
-            this.textBoxPassword.Name = "textBoxPassword";
-            this.textBoxPassword.PasswordChar = '*';
-            this.textBoxPassword.Size = new System.Drawing.Size(100, 21);
-            this.textBoxPassword.TabIndex = 6;
+            this.label4.Text = "Select modem";
             // 
             // buttonConnect
             // 
             this.buttonConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonConnect.Location = new System.Drawing.Point(494, 119);
+            this.buttonConnect.Location = new System.Drawing.Point(458, 205);
             this.buttonConnect.Name = "buttonConnect";
-            this.buttonConnect.Size = new System.Drawing.Size(120, 71);
+            this.buttonConnect.Size = new System.Drawing.Size(196, 49);
             this.buttonConnect.TabIndex = 0;
             this.buttonConnect.Text = "Connect";
             this.buttonConnect.UseVisualStyleBackColor = true;
             this.buttonConnect.Click += new System.EventHandler(this.buttonConnect_Click);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label2.Location = new System.Drawing.Point(310, 132);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 15);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Username";
             // 
             // label6
             // 
@@ -826,6 +841,86 @@
             this.backgroundWorkerLiveUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerLiveUpdate_DoWork);
             this.backgroundWorkerLiveUpdate.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerLiveUpdate_RunWorkerCompleted);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label1.Location = new System.Drawing.Point(455, 83);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 15);
+            this.label1.TabIndex = 20;
+            this.label1.Text = "IP address";
+            // 
+            // labelRemember
+            // 
+            this.labelRemember.AutoSize = true;
+            this.labelRemember.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelRemember.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.labelRemember.Location = new System.Drawing.Point(455, 176);
+            this.labelRemember.Name = "labelRemember";
+            this.labelRemember.Size = new System.Drawing.Size(70, 15);
+            this.labelRemember.TabIndex = 26;
+            this.labelRemember.Text = "Remember";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label2.Location = new System.Drawing.Point(455, 115);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 15);
+            this.label2.TabIndex = 21;
+            this.label2.Text = "Username";
+            // 
+            // textBoxPassword
+            // 
+            this.textBoxPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxPassword.Location = new System.Drawing.Point(554, 143);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.PasswordChar = '*';
+            this.textBoxPassword.Size = new System.Drawing.Size(100, 21);
+            this.textBoxPassword.TabIndex = 24;
+            // 
+            // textBoxUsername
+            // 
+            this.textBoxUsername.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxUsername.Location = new System.Drawing.Point(554, 112);
+            this.textBoxUsername.Name = "textBoxUsername";
+            this.textBoxUsername.Size = new System.Drawing.Size(100, 21);
+            this.textBoxUsername.TabIndex = 22;
+            this.textBoxUsername.Text = "User";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label3.Location = new System.Drawing.Point(455, 146);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(61, 15);
+            this.label3.TabIndex = 23;
+            this.label3.Text = "Password";
+            // 
+            // checkBoxSave
+            // 
+            this.checkBoxSave.AutoSize = true;
+            this.checkBoxSave.Location = new System.Drawing.Point(555, 176);
+            this.checkBoxSave.Name = "checkBoxSave";
+            this.checkBoxSave.Size = new System.Drawing.Size(15, 14);
+            this.checkBoxSave.TabIndex = 25;
+            this.checkBoxSave.UseVisualStyleBackColor = true;
+            // 
+            // textBoxIpAddress
+            // 
+            this.textBoxIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxIpAddress.Location = new System.Drawing.Point(554, 80);
+            this.textBoxIpAddress.Name = "textBoxIpAddress";
+            this.textBoxIpAddress.Size = new System.Drawing.Size(100, 21);
+            this.textBoxIpAddress.TabIndex = 19;
+            this.textBoxIpAddress.Text = "192.168.1.1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -844,6 +939,15 @@
             this.panelDebug.PerformLayout();
             this.panelLogin.ResumeLayout(false);
             this.panelLogin.PerformLayout();
+            this.panelFritzBox.ResumeLayout(false);
+            this.panelFritzBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            this.panelBBox2.ResumeLayout(false);
+            this.panelBBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            this.panelBBox3S.ResumeLayout(false);
+            this.panelBBox3S.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panelInfo.ResumeLayout(false);
             this.panelInfo.PerformLayout();
             this.ResumeLayout(false);
@@ -884,13 +988,7 @@
         private System.Windows.Forms.Label labelDownstreamAttenuation;
         private System.Windows.Forms.Label labelUpstreamAttenuation;
         private System.Windows.Forms.Panel panelLogin;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBoxIpAddress;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBoxUsername;
-        private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.Button buttonConnect;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label labelDSLStandard;
         private System.Windows.Forms.Label labelGUIVersion;
@@ -913,13 +1011,25 @@
         private System.Windows.Forms.Panel panelInfo;
         private System.Windows.Forms.Label labelDistance;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button bbox2button;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button fritzboxButton;
-        private System.Windows.Forms.Button bbox3button;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox checkBoxSave;
         private System.ComponentModel.BackgroundWorker backgroundWorkerLiveUpdate;
+        private System.Windows.Forms.Panel panelBBox3S;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Panel panelBBox2;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Panel panelFritzBox;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelRemember;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxPassword;
+        private System.Windows.Forms.TextBox textBoxUsername;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox checkBoxSave;
+        private System.Windows.Forms.TextBox textBoxIpAddress;
     }
 }
 

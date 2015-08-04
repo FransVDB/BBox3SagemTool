@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="enum\Modem.cs" />
     <Compile Include="objects\Crypto.cs" />
     <Compile Include="session\Bbox2Session.cs" />
     <Compile Include="session\Bbox3Session.cs" />
