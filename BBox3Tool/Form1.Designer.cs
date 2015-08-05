@@ -68,6 +68,14 @@
             this.labelHardwareVersion = new System.Windows.Forms.Label();
             this.labelSoftwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.labelRemember = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxPassword = new System.Windows.Forms.TextBox();
+            this.textBoxUsername = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.checkBoxSave = new System.Windows.Forms.CheckBox();
+            this.textBoxIpAddress = new System.Windows.Forms.TextBox();
             this.panelFritzBox = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
@@ -95,14 +103,9 @@
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
-            this.label1 = new System.Windows.Forms.Label();
-            this.labelRemember = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBoxPassword = new System.Windows.Forms.TextBox();
-            this.textBoxUsername = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.checkBoxSave = new System.Windows.Forms.CheckBox();
-            this.textBoxIpAddress = new System.Windows.Forms.TextBox();
+            this.labelUnsupported = new System.Windows.Forms.Label();
+            this.panelUnsupported = new System.Windows.Forms.Panel();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelFritzBox.SuspendLayout();
@@ -112,6 +115,8 @@
             this.panelBBox3S.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panelInfo.SuspendLayout();
+            this.panelUnsupported.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.SuspendLayout();
             // 
             // backgroundWorker
@@ -477,6 +482,7 @@
             // panelLogin
             // 
             this.panelLogin.BackColor = System.Drawing.Color.Transparent;
+            this.panelLogin.Controls.Add(this.panelUnsupported);
             this.panelLogin.Controls.Add(this.label1);
             this.panelLogin.Controls.Add(this.labelRemember);
             this.panelLogin.Controls.Add(this.label2);
@@ -496,6 +502,86 @@
             this.panelLogin.Name = "panelLogin";
             this.panelLogin.Size = new System.Drawing.Size(699, 316);
             this.panelLogin.TabIndex = 7;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label1.Location = new System.Drawing.Point(455, 83);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 15);
+            this.label1.TabIndex = 20;
+            this.label1.Text = "IP address";
+            // 
+            // labelRemember
+            // 
+            this.labelRemember.AutoSize = true;
+            this.labelRemember.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelRemember.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.labelRemember.Location = new System.Drawing.Point(455, 176);
+            this.labelRemember.Name = "labelRemember";
+            this.labelRemember.Size = new System.Drawing.Size(70, 15);
+            this.labelRemember.TabIndex = 26;
+            this.labelRemember.Text = "Remember";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label2.Location = new System.Drawing.Point(455, 115);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 15);
+            this.label2.TabIndex = 21;
+            this.label2.Text = "Username";
+            // 
+            // textBoxPassword
+            // 
+            this.textBoxPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxPassword.Location = new System.Drawing.Point(554, 143);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.PasswordChar = '*';
+            this.textBoxPassword.Size = new System.Drawing.Size(100, 21);
+            this.textBoxPassword.TabIndex = 24;
+            // 
+            // textBoxUsername
+            // 
+            this.textBoxUsername.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxUsername.Location = new System.Drawing.Point(554, 112);
+            this.textBoxUsername.Name = "textBoxUsername";
+            this.textBoxUsername.Size = new System.Drawing.Size(100, 21);
+            this.textBoxUsername.TabIndex = 22;
+            this.textBoxUsername.Text = "User";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label3.Location = new System.Drawing.Point(455, 146);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(61, 15);
+            this.label3.TabIndex = 23;
+            this.label3.Text = "Password";
+            // 
+            // checkBoxSave
+            // 
+            this.checkBoxSave.AutoSize = true;
+            this.checkBoxSave.Location = new System.Drawing.Point(555, 176);
+            this.checkBoxSave.Name = "checkBoxSave";
+            this.checkBoxSave.Size = new System.Drawing.Size(15, 14);
+            this.checkBoxSave.TabIndex = 25;
+            this.checkBoxSave.UseVisualStyleBackColor = true;
+            // 
+            // textBoxIpAddress
+            // 
+            this.textBoxIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxIpAddress.Location = new System.Drawing.Point(554, 80);
+            this.textBoxIpAddress.Name = "textBoxIpAddress";
+            this.textBoxIpAddress.Size = new System.Drawing.Size(100, 21);
+            this.textBoxIpAddress.TabIndex = 19;
+            this.textBoxIpAddress.Text = "192.168.1.1";
             // 
             // panelFritzBox
             // 
@@ -841,85 +927,36 @@
             this.backgroundWorkerLiveUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerLiveUpdate_DoWork);
             this.backgroundWorkerLiveUpdate.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerLiveUpdate_RunWorkerCompleted);
             // 
-            // label1
+            // labelUnsupported
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label1.Location = new System.Drawing.Point(455, 83);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 15);
-            this.label1.TabIndex = 20;
-            this.label1.Text = "IP address";
+            this.labelUnsupported.AutoSize = true;
+            this.labelUnsupported.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUnsupported.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(140)))), ((int)(((byte)(46)))), ((int)(((byte)(17)))));
+            this.labelUnsupported.Location = new System.Drawing.Point(55, 8);
+            this.labelUnsupported.Name = "labelUnsupported";
+            this.labelUnsupported.Size = new System.Drawing.Size(237, 32);
+            this.labelUnsupported.TabIndex = 27;
+            this.labelUnsupported.Text = "B-Box 3 Technicolor detected.\r\nThis tool does not support this modem.";
             // 
-            // labelRemember
+            // panelUnsupported
             // 
-            this.labelRemember.AutoSize = true;
-            this.labelRemember.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelRemember.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.labelRemember.Location = new System.Drawing.Point(455, 176);
-            this.labelRemember.Name = "labelRemember";
-            this.labelRemember.Size = new System.Drawing.Size(70, 15);
-            this.labelRemember.TabIndex = 26;
-            this.labelRemember.Text = "Remember";
+            this.panelUnsupported.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(245)))), ((int)(((byte)(241)))));
+            this.panelUnsupported.Controls.Add(this.pictureBox4);
+            this.panelUnsupported.Controls.Add(this.labelUnsupported);
+            this.panelUnsupported.Location = new System.Drawing.Point(21, 205);
+            this.panelUnsupported.Name = "panelUnsupported";
+            this.panelUnsupported.Size = new System.Drawing.Size(350, 49);
+            this.panelUnsupported.TabIndex = 28;
+            this.panelUnsupported.Visible = false;
             // 
-            // label2
+            // pictureBox4
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label2.Location = new System.Drawing.Point(455, 115);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 15);
-            this.label2.TabIndex = 21;
-            this.label2.Text = "Username";
-            // 
-            // textBoxPassword
-            // 
-            this.textBoxPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxPassword.Location = new System.Drawing.Point(554, 143);
-            this.textBoxPassword.Name = "textBoxPassword";
-            this.textBoxPassword.PasswordChar = '*';
-            this.textBoxPassword.Size = new System.Drawing.Size(100, 21);
-            this.textBoxPassword.TabIndex = 24;
-            // 
-            // textBoxUsername
-            // 
-            this.textBoxUsername.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxUsername.Location = new System.Drawing.Point(554, 112);
-            this.textBoxUsername.Name = "textBoxUsername";
-            this.textBoxUsername.Size = new System.Drawing.Size(100, 21);
-            this.textBoxUsername.TabIndex = 22;
-            this.textBoxUsername.Text = "User";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label3.Location = new System.Drawing.Point(455, 146);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(61, 15);
-            this.label3.TabIndex = 23;
-            this.label3.Text = "Password";
-            // 
-            // checkBoxSave
-            // 
-            this.checkBoxSave.AutoSize = true;
-            this.checkBoxSave.Location = new System.Drawing.Point(555, 176);
-            this.checkBoxSave.Name = "checkBoxSave";
-            this.checkBoxSave.Size = new System.Drawing.Size(15, 14);
-            this.checkBoxSave.TabIndex = 25;
-            this.checkBoxSave.UseVisualStyleBackColor = true;
-            // 
-            // textBoxIpAddress
-            // 
-            this.textBoxIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxIpAddress.Location = new System.Drawing.Point(554, 80);
-            this.textBoxIpAddress.Name = "textBoxIpAddress";
-            this.textBoxIpAddress.Size = new System.Drawing.Size(100, 21);
-            this.textBoxIpAddress.TabIndex = 19;
-            this.textBoxIpAddress.Text = "192.168.1.1";
+            this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
+            this.pictureBox4.Location = new System.Drawing.Point(8, 7);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(41, 39);
+            this.pictureBox4.TabIndex = 29;
+            this.pictureBox4.TabStop = false;
             // 
             // Form1
             // 
@@ -950,6 +987,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panelInfo.ResumeLayout(false);
             this.panelInfo.PerformLayout();
+            this.panelUnsupported.ResumeLayout(false);
+            this.panelUnsupported.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1030,6 +1070,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkBoxSave;
         private System.Windows.Forms.TextBox textBoxIpAddress;
+        private System.Windows.Forms.Panel panelUnsupported;
+        private System.Windows.Forms.PictureBox pictureBox4;
+        private System.Windows.Forms.Label labelUnsupported;
     }
 }
 

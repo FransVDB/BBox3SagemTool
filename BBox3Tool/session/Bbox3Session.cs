@@ -883,29 +883,43 @@ namespace BBox3Tool
         /// </summary>
         public void GetEstimatedDistance()
         {
-            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            switch (DSLStandard)
             {
-                var valuesToCheck = Enumerable.Range(0, 1280).ToList();
-                valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
-                decimal upbokle = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck, 10, 5) / 100;
+                case DSLStandard.ADSL:
+                    //based on stats
+                    Distance = (1000m / 8.75m) * DownstreamAttenuation;
+                    break;
+                case DSLStandard.ADSL2:
+                    Distance = null;
+                    break;
+                case DSLStandard.ADSL2plus:
+                    Distance = null;
+                    break;
+                case DSLStandard.VDSL2:
+                    var valuesToCheck = Enumerable.Range(0, 1280).ToList();
+                    valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
+                    decimal upbokle = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck, 10, 5) / 100;
                 
-                decimal DistanceV9 = 0;
-                decimal DistanceV7 = 0;
+                    decimal DistanceV9 = 0;
+                    decimal DistanceV7 = 0;
 
-                //v0.9
-                if (upbokle > 0)
-                    DistanceV9 = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
-                //v0.8
-                /*if (upbokle > 0)
-                    Distance = (upbokle / (20m + (upbokle/3m))) * 1000;*/
-                //v0.7
-                if (upbokle > 0)
-                    DistanceV7 = (upbokle / 20m) * 1000;
+                    //v0.9
+                    if (upbokle > 0)
+                        DistanceV9 = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
+                    //v0.8
+                    /*if (upbokle > 0)
+                        Distance = (upbokle / (20m + (upbokle/3m))) * 1000;*/
+                    //v0.7
+                    if (upbokle > 0)
+                        DistanceV7 = (upbokle / 20m) * 1000;
 
-                Distance = Math.Min(DistanceV9, DistanceV7);
+                    Distance = Math.Min(DistanceV9, DistanceV7);
+                    break;
+                case DSLStandard.unknown:
+                default:
+                    Distance = null;
+                    break;
             }
-            else
-                Distance = null;
 
             distanceDone = true;
         }

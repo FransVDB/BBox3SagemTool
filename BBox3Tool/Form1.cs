@@ -53,11 +53,11 @@ namespace BBox3Tool
             else
                 checkBoxSave.Checked = false;
             
-            //select modem
+            //preselect modem
             switch (_selectedModem)
             {
                 case Modem.BBOX3S:
-                    panelBBox3S.BackColor = _colorSelected;
+                    panelThumb_Click(panelBBox3S, null);
                     break;
                 case Modem.BBOX2:
                     panelThumb_Click(panelBBox2, null);
@@ -66,7 +66,7 @@ namespace BBox3Tool
                     panelThumb_Click(panelFritzBox, null);
                     break;
                 case Modem.BBOX3T:
-                    //TODO alert
+                    panelUnsupported.Visible = true;
                     break;
                 case Modem.unknown:
                 default:
@@ -101,7 +101,8 @@ namespace BBox3Tool
 
             if (_session == null)
             {
-                //alert
+                MessageBox.Show("Please select a modem.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
             //check mode
@@ -130,7 +131,7 @@ namespace BBox3Tool
             }
             else
             {
-                MessageBox.Show("Login incorrect.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Could not connect to modem.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -383,7 +384,7 @@ namespace BBox3Tool
             }
             catch (ThreadCancelledException)
             {
-                //MessageBox.Show("Request cancelled.", "Info", MessageBoxButtons.OK);
+
             }
             catch (Exception ex)
             {
@@ -603,13 +604,22 @@ namespace BBox3Tool
             }
             catch { }
 
-            if (_session is Bbox3Session)
-                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX3S";
-            else if (_session is Bbox2Session)
-                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX2";
-            else if (_session is FritzBoxSession)
-                settingsDoc.SelectSingleNode("//document/login/device").InnerText = "FRITZBOX";
-
+            switch (_selectedModem)
+            {
+                case Modem.BBOX3S:
+                    settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX3S";
+                    break;
+                case Modem.BBOX2:
+                    settingsDoc.SelectSingleNode("//document/login/device").InnerText = "BBOX2";
+                    break;
+                case Modem.FritzBox7390:
+                    settingsDoc.SelectSingleNode("//document/login/device").InnerText = "FRITZBOX";
+                    break;
+                case Modem.unknown:
+                case Modem.BBOX3T:
+                default:
+                    break;
+            }
             settingsDoc.Save("BBox3Tool.settings.xml");
         }
 
