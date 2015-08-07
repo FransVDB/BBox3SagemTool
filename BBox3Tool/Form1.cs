@@ -275,13 +275,11 @@ namespace BBox3Tool
                     if (_session is Bbox3Session)
                         ThreadUtils.setLabelTextFromThread(distanceLabel, distanceLabel.Text + "\r\n(estimated)");
 
-                    //start gathering data
-                    //--------------------
-
                     // Get line data
                     _session.GetLineData();
 
                     // Get device info
+                    //----------------
                     DeviceInfo deviceInfo = _session.GetDeviceInfo();
                     ThreadUtils.setLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
                     ThreadUtils.setLabelTextFromThread(labelSoftwareVersion, deviceInfo.FirmwareVersion);
@@ -293,17 +291,19 @@ namespace BBox3Tool
                     ThreadUtils.setLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
 
                     // Get sync values
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamCurrentBitRate, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
-
-                    ThreadUtils.setLabelTextFromThread(labelUpstreamCurrentBitRate, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'"));
-
+                    //----------------
+                    setLabelValueLoading(labelDownstreamCurrentBitRate);
+                    setLabelValueAsDecimal(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate, "###,###,##0 'kbps'");
+                    setLabelValueLoading(labelUpstreamCurrentBitRate);
+                    setLabelValueAsDecimal(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate, "###,###,##0 'kbps'");
+                    
                     //distance
-                    ThreadUtils.setLabelTextFromThread(labelDistance, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelDistance, (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
-
-                    // Get profile info
+                    //--------
+                    setLabelValueLoading(labelDistance);
+                    setLabelValueAsDecimal(labelDistance, _session.Distance, "0 'm'");
+                    
+                    //Proximus profile
+                    //----------------
                     if (_session.DSLStandard == DSLStandard.VDSL2)
                     {
                         //TODO check why this is incorrect
@@ -338,41 +338,47 @@ namespace BBox3Tool
                         setLabelNotApplicable(proximusProfileLabel, labelProximusProfile);
                     }
 
-                    //downstream attenuation
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamAttenuation, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamAttenuation, _session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'"));
+                    //attenuation
+                    //-----------
+                    //downstream
+                    setLabelValueLoading(labelDownstreamAttenuation);
+                    setLabelValueAsDecimal(labelDownstreamAttenuation, _session.DownstreamAttenuation, "0.0 'dB'");
 
-                    //upstream attenuation: BBOX3 adsl only
+                    //upstream: BBOX3 adsl only
                     if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
                     {
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamAttenuation, "busy...");
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamAttenuation, _session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'"));
+                        setLabelValueLoading(labelUpstreamAttenuation);
+                        setLabelValueAsDecimal(labelUpstreamAttenuation, _session.UpstreamAttenuation, "0.0 'dB'");
                     }
                     else
                         setLabelNotApplicable(upstreamAttenuationLabel, labelUpstreamAttenuation);
+                    
+                    //noise margin
+                    //------------
+                    //downstream
+                    setLabelValueLoading(labelDownstreamNoiseMargin);
+                    setLabelValueAsDecimal(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin, "0.0 'dB'");
 
-                    //downstream noise margin
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamNoiseMargin, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'"));
-
-                    //upstream noise margin: not for BBOX2
+                    //upstream: not for BBOX2
                     if (_session is Bbox3Session || _session is FritzBoxSession)
                     {
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamNoiseMargin, "busy...");
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'"));
+                        setLabelValueLoading(labelUpstreamNoiseMargin);
+                        setLabelValueAsDecimal(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin, "0.0 'dB'");
                     }
                     else
                         setLabelNotApplicable(upstreamNoiseMarginLabel, labelUpstreamNoiseMargin);
+                    
+                    //max bitrate
+                    //-----------
+                    //downstream
+                    setLabelValueLoading(labelDownstreamMaxBitRate);
+                    setLabelValueAsDecimal(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate, "###,###,##0 'kbps'");
 
-                    //downstream max bitrate
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamMaxBitRate, "busy...");
-                    ThreadUtils.setLabelTextFromThread(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
-
-                    //upstream max bit rate: not for BBOX2
+                    //upstream: not for BBOX2
                     if (_session is Bbox3Session || _session is FritzBoxSession)
                     {
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamMaxBitRate, "busy...");
-                        ThreadUtils.setLabelTextFromThread(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'"));
+                        setLabelValueLoading(labelUpstreamMaxBitRate);
+                        setLabelValueAsDecimal(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate, "###,###,##0 'kbps'");
                     }
                     else
                         setLabelNotApplicable(upstreamMaxBitRateLabel, labelUpstreamMaxBitRate);
@@ -407,6 +413,20 @@ namespace BBox3Tool
             ThreadUtils.setLabelTextFromThread(value, "n/a");
             value.ForeColor = Color.Gray;
             label.ForeColor = Color.Gray;
+        }
+
+        private void setLabelValueLoading(Label label)
+        {
+            //TODO in later version, set text empty, and place loading icon over label
+            ThreadUtils.setLabelTextFromThread(label, "busy...");
+        }
+
+        private void setLabelValueAsDecimal(Label label, decimal? value, string formatter)
+        {   
+            if (value == null)
+                ThreadUtils.setLabelTextFromThread(label, "unknown");
+            else
+                ThreadUtils.setLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));              
         }
 
         //live update thread
