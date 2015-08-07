@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BBox3Tool.utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -410,7 +411,7 @@ namespace BBox3Tool
                 _requestID = 0;
                 _basicAuth = false;
                 _serverNonce = "";
-                _localNonce = Bbox3Utils.getLocalNonce();
+                _localNonce = SagemUtils.getLocalNonce();
 
                 //create json object
                 var jsonLogin = new
@@ -482,7 +483,7 @@ namespace BBox3Tool
                             }
                         },
                         {"cnonce", Convert.ToInt32(_localNonce)},
-                        {"auth-key", Bbox3Utils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
+                        {"auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
                     }
                 };
 
@@ -492,7 +493,7 @@ namespace BBox3Tool
                 data.Add("req", jsonString);
 
                 //send request & get response
-                var response = Bbox3Utils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+                var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
                 //deserialize object
                 var serializer = new JavaScriptSerializer();
@@ -526,7 +527,7 @@ namespace BBox3Tool
             try
             {
                 //calc local nonce
-                _localNonce = Bbox3Utils.getLocalNonce();
+                _localNonce = SagemUtils.getLocalNonce();
 
                 //create json object
                 var jsonLogout = new
@@ -548,7 +549,7 @@ namespace BBox3Tool
                         },
                         {"cnonce", Convert.ToUInt32(_localNonce)},
                         {
-                            "auth-key", Bbox3Utils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)
+                            "auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)
                         }
                     }
                 };
@@ -559,7 +560,7 @@ namespace BBox3Tool
                 data.Add("req", jsonString);
 
                 //send request & get response
-                var response = Bbox3Utils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+                var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
                 //deserialize object
                 var serializer = new JavaScriptSerializer();
@@ -1243,7 +1244,7 @@ namespace BBox3Tool
                 throw new ThreadCancelledException("Request cancelled.");
 
             //calc local nonce
-            _localNonce = Bbox3Utils.getLocalNonce();
+            _localNonce = SagemUtils.getLocalNonce();
 
             //create json object
             var jsonGetValue = new
@@ -1255,7 +1256,7 @@ namespace BBox3Tool
                     {"priority", false},
                     {"actions", actions.ToArray()},
                     {"cnonce", Convert.ToUInt32(_localNonce)},
-                    {"auth-key", Bbox3Utils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
+                    {"auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
                 }
             };
 
@@ -1265,7 +1266,7 @@ namespace BBox3Tool
             data.Add("req", jsonString);
 
             //send request & get response
-            var response = Bbox3Utils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+            var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
             //increase request id
             _requestID++;
@@ -1295,7 +1296,7 @@ namespace BBox3Tool
                     {"basic", _basicAuth},
                     {"user", _username},
                     {"nonce", _serverNonce},
-                    {"ha1", Bbox3Utils.calcHa1Cookie(_username, _password, _serverNonce)},
+                    {"ha1", SagemUtils.calcHa1Cookie(_username, _password, _serverNonce)},
                     {
                         "dataModel",
                         new

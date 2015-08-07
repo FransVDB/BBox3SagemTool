@@ -4,86 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
 
-namespace BBox3Tool
+namespace BBox3Tool.utils
 {
-    public class Bbox3Utils
+    public class NetworkUtils
     {
-        /// <summary>
-        /// Calculate md5 hash of a string
-        /// </summary>
-        /// <param name="input">string to be hashed</param>
-        /// <returns>MD5 hash as 32-length string</returns>
-        public static string Md5(string input)
-        {
-            MD5 md5Hash = MD5.Create();
-
-            // Convert the input string to a byte array and compute the hash.
-            byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-            // Loop through each byte of the hashed data 
-            // and format each one as a hexadecimal string.
-            StringBuilder sBuilder = new StringBuilder();
-            for (int i = 0; i < data.Length; i++)
-                sBuilder.Append(data[i].ToString("x2"));
-
-            // Return the hexadecimal string.
-            return sBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Generate random number for request 'cnonce'
-        /// </summary>
-        /// <returns>random unsigned int</returns>
-        public static string getLocalNonce()
-        {
-            return ((uint) new Random(DateTime.Now.Millisecond).Next(Int32.MaxValue)).ToString();
-        }
-
-        /// <summary>
-        /// Calc Ha1 hash for json request
-        /// </summary>
-        /// <param name="user">Current user's username</param>
-        /// <param name="password">Current user's password</param>
-        /// <param name="nonce">random value for each request</param>
-        /// <returns>Calculated Ha1 request value</returns>
-        public static string calcHa1(string user, string password, string nonce)
-        {
-           return Md5(user + ":" + nonce.ToString() + ":" + Md5(password));
-        }
-
-        /// <summary>
-        /// Calc Ha1 hash for cookie
-        /// </summary>
-        /// <param name="user">Current user's username</param>
-        /// <param name="password">Current user's password</param>
-        /// <param name="nonce">random value for each request</param>
-        /// <returns>Calculated Ha1 cookie value</returns>
-        public static string calcHa1Cookie(string user, string password, string nonce)
-        {
-            string ha1 = calcHa1(user, password, nonce);
-            return ha1.Substring(0,10) + Md5(password) + ha1.Substring(10);
-        }
-
-        /// <summary>
-        /// Calculate Authkey for json request
-        /// </summary>
-        /// <param name="user">Current user's usernam</param>
-        /// <param name="password">Current user's password</param>
-        /// <param name="requestId">Session's request ID</param>
-        /// <param name="nonce">Session's nonce</param>
-        /// <param name="cNonce">Session's cnonce</param>
-        /// <returns>Calculated auth key</returns>
-        public static string calcAuthKey(string user, string password, int requestId, string nonce, string cNonce)
-        {
-            string ha1 = calcHa1(user, password, nonce);
-            return Md5(ha1 + ":" + requestId.ToString() + ":" + cNonce + ":JSON:/cgi/json-req");
-        }
-
         /// <summary>
         /// Send http request to BBox
         /// </summary>
@@ -100,9 +27,8 @@ namespace BBox3Tool
 
                 //set data
                 if (data != null)
-                
                 {
-                    string dataStr = String.Join("&", data.Select(x => HttpUtility.UrlEncode(x.Key) + "=" + HttpUtility.UrlEncode(x.Value)));        
+                    string dataStr = String.Join("&", data.Select(x => HttpUtility.UrlEncode(x.Key) + "=" + HttpUtility.UrlEncode(x.Value)));
                     switch (mode)
                     {
                         case WebRequestMode.Get:
@@ -169,5 +95,66 @@ namespace BBox3Tool
                 return "";
             }
         }
+
+        /// <summary>
+        /// Auto detect type of modem
+        /// </summary>
+        /// <param name="ipAddress">IP address of the modem</param>
+        /// <returns>Type of device if recognised, or unknown</returns>
+        public static Device detectDevice(string ipAddress)
+        {
+            try
+            {
+                Uri host = new Uri("http://" + ipAddress);
+                Uri uriBbox3S = new Uri(host, Path.Combine("cgi", "json-req"));
+                Uri uriBbox3T = new Uri(host, "login.lua");
+                Uri uriBbox3T2 = new Uri(host, "login.lp");
+                Uri uriBbox2 = new Uri(host, "index.cgi");
+
+                if (detectDeviceGetStatusCode(uriBbox3S) == 200)
+                    return Device.BBOX3S;
+                else if (detectDeviceGetStatusCode(uriBbox3T) == 200 || detectDeviceGetStatusCode(uriBbox3T2) == 200)
+                    return Device.BBOX3T;
+                else if (detectDeviceGetStatusCode(uriBbox2) == 200)
+                    return Device.BBOX2;
+                else
+                    return Device.unknown;
+            }
+            catch(Exception ex)
+            {
+                Debugger.Log(0, "error", ex.ToString());
+                return Device.unknown;
+            }
+        }
+
+        /// <summary>
+        /// Get http status code for an url
+        /// </summary>
+        /// <param name="url">Url to get http status code form</param>
+        /// <returns>Http status code</returns>
+        private static int detectDeviceGetStatusCode(Uri url)
+        {
+            int status = 0;
+            try
+            {
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                request.AllowAutoRedirect = false;
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                status = (int)response.StatusCode;
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                status = (int)((HttpWebResponse)ex.Response).StatusCode;
+                if (status == 400 && url.ToString().EndsWith("json-req")) //bad request bbox3/s
+                    status = 200;
+            }
+            catch (Exception)
+            {
+                status = 0;
+            }
+            return status;
+        }
+
     }
 }

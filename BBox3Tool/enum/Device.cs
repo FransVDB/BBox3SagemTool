@@ -6,9 +6,9 @@ using System.Text;
 namespace BBox3Tool
 {
     /// <summary>
-    /// Modems this tool can detect
+    /// Devices this tool can detect
     /// </summary>
-    public enum Modem
+    public enum Device
     {
         unknown,
         BBOX3S,

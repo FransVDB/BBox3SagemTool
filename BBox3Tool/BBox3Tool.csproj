@@ -49,11 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="enum\Modem.cs" />
+    <Compile Include="enum\Device.cs" />
     <Compile Include="objects\Crypto.cs" />
+    <Compile Include="objects\ToolSettings.cs" />
+    <Compile Include="utils\NetworkUtils.cs" />
+    <Compile Include="utils\ProfileUtils.cs" />
+    <Compile Include="objects\DeviceSettings.cs" />
+    <Compile Include="utils\SettingsUtils.cs" />
+    <Compile Include="utils\ThreadUtils.cs" />
     <Compile Include="session\Bbox2Session.cs" />
     <Compile Include="session\Bbox3Session.cs" />
-    <Compile Include="objects\Bbox3Utils.cs" />
+    <Compile Include="utils\SagemUtils.cs" />
     <Compile Include="objects\DeviceInfo.cs" />
     <Compile Include="enum\DSLStandard.cs" />
     <Compile Include="Form1.cs">

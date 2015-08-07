@@ -32,30 +32,37 @@ namespace BBox3Tool
 
         public bool OpenSession(String host, String username, String password)
         {
-            // New connection
-            tc = new TelnetConnection(host, 23);
-
-            // Login
-            var usernamePrompt = tc.Read(2000);
-            if (usernamePrompt.Contains("login:"))
+            try
             {
-                tc.WriteLine(username);
+                // New connection
+                tc = new TelnetConnection(host, 23);
+
+                // Login
+                var usernamePrompt = tc.Read(2000);
+                if (usernamePrompt.Contains("login:"))
+                {
+                    tc.WriteLine(username);
+                }
+                else
+                {
+                    return false;
+                }
+                var passwordPrompt = tc.Read(200);
+                if (passwordPrompt.Contains("Password:"))
+                {
+                    tc.WriteLine(password);
+                }
+                else
+                {
+                    return false;
+                }
+
+                return true;
             }
-            else
+            catch (Exception e)
             {
                 return false;
             }
-            var passwordPrompt = tc.Read(200);
-            if (passwordPrompt.Contains("Password:"))
-            {
-                tc.WriteLine(password);
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
         }
 
         public bool CloseSession()
