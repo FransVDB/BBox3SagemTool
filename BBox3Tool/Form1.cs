@@ -25,6 +25,8 @@ namespace BBox3Tool
         private readonly Uri _liveUpdateCheck = new Uri("http://www.cloudscape.be/userbasepyro85/latest.xml");
         private readonly Uri _liveUpdateProfiles = new Uri("http://www.cloudscape.be/userbasepyro85/profiles.xml");
 
+        private bool _connecting = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -81,6 +83,20 @@ namespace BBox3Tool
 
         //buttons
         //-------
+        private void buttonInfo_Click(object sender, EventArgs e)
+        {
+            Form check = Application.OpenForms["FormAbout"];
+            if (check == null)
+            {
+                FormAbout form = new FormAbout();
+                Label labelVersion = form.Controls.Find("labelVersion", true)[0] as Label;
+                labelVersion.Text += " " + Application.ProductVersion;
+                form.Show();
+            }
+            else
+                check.Activate();
+        }
+
         private void buttonConnect_Click(object sender, EventArgs e)
         {
             //set session
@@ -106,9 +122,12 @@ namespace BBox3Tool
 
             if (_session == null)
             {
-                MessageBox.Show("Please select a modem.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            //set button text
+            buttonConnect.Text = "Connecting, please wait...";
 
             //check mode
             bool debug = (textBoxUsername.Text.ToLower() == "debug");
@@ -136,12 +155,14 @@ namespace BBox3Tool
             }
             else
             {
-                MessageBox.Show("Could not connect to modem.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Could not connect to device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void initNormalMode()
         {
+            _connecting = true;
+
             //init session
             backgroundWorker.RunWorkerAsync(new DeviceSettings
             {
@@ -240,9 +261,10 @@ namespace BBox3Tool
         private void backgroundWorkerBbox_DoWork(object sender, DoWorkEventArgs e)
         {
             bool connected = false;
+            
             BackgroundWorker worker = sender as BackgroundWorker;
             DeviceSettings sessionInfo = (DeviceSettings)e.Argument;
-
+             
             try
             {
                 //disable connect button
@@ -266,6 +288,7 @@ namespace BBox3Tool
                     //set button states
                     ThreadUtils.setButtonEnabledFromThread(buttonClipboard, false);
                     ThreadUtils.setButtonEnabledFromThread(buttonCancel, true);
+                    ThreadUtils.setButtonTextFromThread(buttonConnect, "Connect");
 
                     //set panels visibility
                     ThreadUtils.setPanelVisibilityFromThread(panelDebug, false);
@@ -385,8 +408,10 @@ namespace BBox3Tool
                 }
                 else
                 {
+                    _connecting = false;
                     ThreadUtils.setButtonEnabledFromThread(buttonConnect, true);
-                    MessageBox.Show("Could not connect to modem.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ThreadUtils.setButtonTextFromThread(buttonConnect, "Connect");
+                    MessageBox.Show("Could not connect to device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (ThreadCancelledException){}
@@ -396,6 +421,7 @@ namespace BBox3Tool
             }
             finally
             {
+                _connecting = false;
                 if (connected)
                     _session.CloseSession();
             }
@@ -520,6 +546,9 @@ namespace BBox3Tool
 
         private void panelThumb_MouseEnter(object sender, EventArgs e)
         {
+            if (_connecting)
+                return;
+
             Panel panel = getPanelFromThumb(sender);
             if (panel == null)
                 return;
@@ -532,6 +561,9 @@ namespace BBox3Tool
 
         private void panelThumb_MouseLeave(object sender, EventArgs e)
         {
+            if (_connecting)
+                return;
+
             Panel panel = getPanelFromThumb(sender);
             if (panel == null)
                 return;
@@ -545,6 +577,9 @@ namespace BBox3Tool
 
         private void panelThumb_Click(object sender, EventArgs e)
         {
+            if (_connecting)
+                return;
+
             //reset colors
             panelBBox3S.BackColor = Color.WhiteSmoke;
             panelBBox2.BackColor = Color.WhiteSmoke;
@@ -610,5 +645,6 @@ namespace BBox3Tool
 
             return false;
         }
+
     }
 }

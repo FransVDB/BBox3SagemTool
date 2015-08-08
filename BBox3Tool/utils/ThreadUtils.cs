@@ -42,5 +42,18 @@ namespace BBox3Tool.utils
                 button.Enabled = enabled;
             });
         }
+
+        /// <summary>
+        /// Set button text from within a thread
+        /// </summary>
+        /// <param name="button">Button</param>
+        /// <param name="text">Button text</param>
+        public static void setButtonTextFromThread(Button button, string text)
+        {
+            button.Invoke((MethodInvoker)delegate
+            {
+                button.Text = text;
+            });
+        }
     }
 }

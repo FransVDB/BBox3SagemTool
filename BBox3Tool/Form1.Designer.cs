@@ -68,6 +68,9 @@
             this.labelHardwareVersion = new System.Windows.Forms.Label();
             this.labelSoftwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
+            this.panelUnsupported = new System.Windows.Forms.Panel();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.labelUnsupported = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.labelRemember = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -103,11 +106,11 @@
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
-            this.labelUnsupported = new System.Windows.Forms.Label();
-            this.panelUnsupported = new System.Windows.Forms.Panel();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.buttonInfo = new System.Windows.Forms.Button();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
+            this.panelUnsupported.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.panelFritzBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.panelBBox2.SuspendLayout();
@@ -115,8 +118,6 @@
             this.panelBBox3S.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panelInfo.SuspendLayout();
-            this.panelUnsupported.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.SuspendLayout();
             // 
             // backgroundWorker
@@ -482,6 +483,7 @@
             // panelLogin
             // 
             this.panelLogin.BackColor = System.Drawing.Color.Transparent;
+            this.panelLogin.Controls.Add(this.buttonInfo);
             this.panelLogin.Controls.Add(this.panelUnsupported);
             this.panelLogin.Controls.Add(this.label1);
             this.panelLogin.Controls.Add(this.labelRemember);
@@ -502,6 +504,37 @@
             this.panelLogin.Name = "panelLogin";
             this.panelLogin.Size = new System.Drawing.Size(699, 316);
             this.panelLogin.TabIndex = 7;
+            // 
+            // panelUnsupported
+            // 
+            this.panelUnsupported.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(245)))), ((int)(((byte)(241)))));
+            this.panelUnsupported.Controls.Add(this.pictureBox4);
+            this.panelUnsupported.Controls.Add(this.labelUnsupported);
+            this.panelUnsupported.Location = new System.Drawing.Point(21, 205);
+            this.panelUnsupported.Name = "panelUnsupported";
+            this.panelUnsupported.Size = new System.Drawing.Size(350, 49);
+            this.panelUnsupported.TabIndex = 28;
+            this.panelUnsupported.Visible = false;
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
+            this.pictureBox4.Location = new System.Drawing.Point(8, 7);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(41, 39);
+            this.pictureBox4.TabIndex = 29;
+            this.pictureBox4.TabStop = false;
+            // 
+            // labelUnsupported
+            // 
+            this.labelUnsupported.AutoSize = true;
+            this.labelUnsupported.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelUnsupported.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(140)))), ((int)(((byte)(46)))), ((int)(((byte)(17)))));
+            this.labelUnsupported.Location = new System.Drawing.Point(55, 8);
+            this.labelUnsupported.Name = "labelUnsupported";
+            this.labelUnsupported.Size = new System.Drawing.Size(237, 32);
+            this.labelUnsupported.TabIndex = 27;
+            this.labelUnsupported.Text = "B-Box 3 Technicolor detected.\r\nThis tool does not support this modem.";
             // 
             // label1
             // 
@@ -927,36 +960,15 @@
             this.backgroundWorkerLiveUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerLiveUpdate_DoWork);
             this.backgroundWorkerLiveUpdate.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerLiveUpdate_RunWorkerCompleted);
             // 
-            // labelUnsupported
+            // buttonInfo
             // 
-            this.labelUnsupported.AutoSize = true;
-            this.labelUnsupported.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUnsupported.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(140)))), ((int)(((byte)(46)))), ((int)(((byte)(17)))));
-            this.labelUnsupported.Location = new System.Drawing.Point(55, 8);
-            this.labelUnsupported.Name = "labelUnsupported";
-            this.labelUnsupported.Size = new System.Drawing.Size(237, 32);
-            this.labelUnsupported.TabIndex = 27;
-            this.labelUnsupported.Text = "B-Box 3 Technicolor detected.\r\nThis tool does not support this modem.";
-            // 
-            // panelUnsupported
-            // 
-            this.panelUnsupported.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(245)))), ((int)(((byte)(241)))));
-            this.panelUnsupported.Controls.Add(this.pictureBox4);
-            this.panelUnsupported.Controls.Add(this.labelUnsupported);
-            this.panelUnsupported.Location = new System.Drawing.Point(21, 205);
-            this.panelUnsupported.Name = "panelUnsupported";
-            this.panelUnsupported.Size = new System.Drawing.Size(350, 49);
-            this.panelUnsupported.TabIndex = 28;
-            this.panelUnsupported.Visible = false;
-            // 
-            // pictureBox4
-            // 
-            this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.Location = new System.Drawing.Point(8, 7);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(41, 39);
-            this.pictureBox4.TabIndex = 29;
-            this.pictureBox4.TabStop = false;
+            this.buttonInfo.Location = new System.Drawing.Point(592, 281);
+            this.buttonInfo.Name = "buttonInfo";
+            this.buttonInfo.Size = new System.Drawing.Size(62, 23);
+            this.buttonInfo.TabIndex = 29;
+            this.buttonInfo.Text = "Info";
+            this.buttonInfo.UseVisualStyleBackColor = true;
+            this.buttonInfo.Click += new System.EventHandler(this.buttonInfo_Click);
             // 
             // Form1
             // 
@@ -976,6 +988,9 @@
             this.panelDebug.PerformLayout();
             this.panelLogin.ResumeLayout(false);
             this.panelLogin.PerformLayout();
+            this.panelUnsupported.ResumeLayout(false);
+            this.panelUnsupported.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.panelFritzBox.ResumeLayout(false);
             this.panelFritzBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
@@ -987,9 +1002,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panelInfo.ResumeLayout(false);
             this.panelInfo.PerformLayout();
-            this.panelUnsupported.ResumeLayout(false);
-            this.panelUnsupported.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1073,6 +1085,7 @@
         private System.Windows.Forms.Panel panelUnsupported;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.Label labelUnsupported;
+        private System.Windows.Forms.Button buttonInfo;
     }
 }
 
