@@ -223,10 +223,10 @@ namespace BBox3Tool
 
                     builder.AppendLine("VDSL2 profile:                 " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                     //builder.AppendLine("Vectoring:                     " + (_session.VectoringEnabled ? "Yes" : "No"));
-                    builder.AppendLine("Vectoring:                     " + (currentProfile.VectoringEnabled ? "Yes" : "No"));
+                    builder.AppendLine("Vectoring:                     " + boolToString(currentProfile.VectoringEnabled));
                     builder.AppendLine("Proximus profile:              " + currentProfile.Name);
-                    builder.AppendLine("DLM:                           " + (currentProfile.DlmProfile ? "Yes" : "No"));
-                    builder.AppendLine("Repair:                        " + (currentProfile.RepairProfile ? "Yes" : "No"));
+                    builder.AppendLine("DLM:                           " + boolToString(currentProfile.DlmProfile));
+                    builder.AppendLine("Repair:                        " + boolToString(currentProfile.RepairProfile));
                 }
             }
 
@@ -343,9 +343,9 @@ namespace BBox3Tool
                         else
                         {
                             //get vectoring status fallback: get from profile list
-                            ThreadUtils.setLabelTextFromThread(labelVectoring, currentProfile.VectoringEnabled ? "Yes" : "No");
-                            ThreadUtils.setLabelTextFromThread(labelDLM, currentProfile.DlmProfile ? "Yes" : "No");
-                            ThreadUtils.setLabelTextFromThread(labelRepair, currentProfile.RepairProfile ? "Yes" : "No");
+                            ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
+                            ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
+                            ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
                             ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
                             ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                         }
@@ -451,6 +451,13 @@ namespace BBox3Tool
                 ThreadUtils.setLabelTextFromThread(label, "unknown");
             else
                 ThreadUtils.setLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));              
+        }
+
+        private string boolToString(bool? value)
+        {
+            if (value == null)
+                return "unknown";
+            return ((bool)value) ? "yes" : "no";
         }
 
         //live update thread

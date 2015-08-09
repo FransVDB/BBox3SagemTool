@@ -80,7 +80,7 @@ namespace BBox3Tool.utils
         /// <returns>Proximus line profile of the current session</returns>
         public static ProximusLineProfile getProfile(List<ProximusLineProfile> profiles, int uploadSpeed, int downloadSpeed, bool? vectoringEnabled, decimal? distance)
         {
-            ProximusLineProfile profile = new ProximusLineProfile();
+            
 
             lock (profiles)
             {
@@ -139,7 +139,43 @@ namespace BBox3Tool.utils
 
                 //check matches found
                 if (rangeMatches.Count > 0)
-                    return rangeMatches.First();
+                {
+                    if (rangeMatches.Count == 1)
+                        return rangeMatches.First();
+                    else
+                    { 
+                        //multiple found, check which values are certain
+
+                        //provisioning
+                        bool? provisioning = null;
+                        if (rangeMatches.GroupBy(x => x.ProvisioningProfile).Count() == 1)
+                            provisioning = rangeMatches.First().ProvisioningProfile;
+
+                        //dlm
+                        bool? dlm = null;
+                        if (rangeMatches.GroupBy(x => x.DlmProfile).Count() == 1)
+                            dlm = rangeMatches.First().DlmProfile;
+
+                        //repair
+                        bool? repair = null;
+                        if (rangeMatches.GroupBy(x => x.RepairProfile).Count() == 1)
+                            repair = rangeMatches.First().RepairProfile;
+
+                        //vectoring
+                        bool? vectoring = null;
+                        if (rangeMatches.GroupBy(x => x.VectoringEnabled).Count() == 1)
+                            vectoring = rangeMatches.First().VectoringEnabled;
+
+                        //vdsl profile
+                        VDSL2Profile vdsl2profile = VDSL2Profile.unknown;
+                        if (rangeMatches.GroupBy(x => x.ProfileVDSL2).Count() == 1)
+                            vdsl2profile = rangeMatches.First().ProfileVDSL2;
+
+
+                        return new ProximusLineProfile("unknown", downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vdsl2profile, new List<int>(), new List<int>(), 0, 0);
+                    }
+                }
+                    
             }
 
             //no matches found

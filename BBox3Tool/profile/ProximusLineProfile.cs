@@ -14,10 +14,10 @@ namespace BBox3Tool
         private int _uploadSpeed;
         private List<int> _confirmedDownloadSpeeds;
         private List<int> _confirmedUploadSpeeds;
-        private bool _dlmProfile;
-        private bool _repairProfile;
-        private bool _provisioningProfile;
-        private bool _vectoringEnabled;
+        private bool? _dlmProfile;
+        private bool? _repairProfile;
+        private bool? _provisioningProfile;
+        private bool? _vectoringEnabled;
         private VDSL2Profile _profileVDSL2;
         private decimal _distanceMin;
         private decimal _distanceMax;
@@ -67,7 +67,7 @@ namespace BBox3Tool
         /// <summary>
         /// Indicated if this is a DLM profile or not 
         /// </summary>
-        public bool DlmProfile
+        public bool? DlmProfile
         {
             get { return _dlmProfile; }
         }
@@ -75,7 +75,7 @@ namespace BBox3Tool
         /// <summary>
         /// Indicated if this is a repair profile or not
         /// </summary>
-        public bool RepairProfile
+        public bool? RepairProfile
         {
             get { return _repairProfile; }
         }
@@ -83,7 +83,7 @@ namespace BBox3Tool
         /// <summary>
         /// Indicated if this is a provisioning profile or not
         /// </summary>
-        public bool ProvisioningProfile
+        public bool? ProvisioningProfile
         {
             get { return _provisioningProfile; }
         }
@@ -91,7 +91,7 @@ namespace BBox3Tool
         /// <summary>
         /// Indicated if this is a vectoring profile or not
         /// </summary>
-        public bool VectoringEnabled
+        public bool? VectoringEnabled
         {
             get { return _vectoringEnabled; }
         }
@@ -150,7 +150,7 @@ namespace BBox3Tool
         /// <param name="profile">VDSL2 profile (17a or 8d)</param>
         /// <param name="confirmedDownloadSpeeds">List of confirmed download speeds (feedback from users)</param>
         /// <param name="confirmedUploadSpeeds">List of confirmed upload speeds (feedback from users)</param>
-        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool provisioning, bool dlm, bool repair, bool vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds, decimal distanceMin, decimal distanceMax)
+        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool? provisioning, bool? dlm, bool? repair, bool? vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds, decimal distanceMin, decimal distanceMax)
         {
             _name = name;
             _downloadSpeed =downloadSpeed;

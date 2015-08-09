@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <document>
-  <version>1.1</version>
+  <version>1.2</version>
   <date>7/7/2015</date>
   <profiles>
     
@@ -428,7 +428,11 @@
     <profile name="ADSL" forum="4,5/0,5" min="0" max="8000" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
       <official down="4448" up="512" />
     </profile>
-    
+
+    <profile name="ADSL" forum="3,3/0,4" min="0" max="8000" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+      <official down="3360" up="384" />
+    </profile>
+
     <profile name="ADSL" forum="2/0,4" min="0" max="8000" vectoring="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
       <official down="2240" up="384" />
     </profile>
