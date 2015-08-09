@@ -89,8 +89,6 @@ namespace BBox3Tool
             if (check == null)
             {
                 FormAbout form = new FormAbout();
-                Label labelVersion = form.Controls.Find("labelVersion", true)[0] as Label;
-                labelVersion.Text += " " + Application.ProductVersion;
                 form.Show();
             }
             else

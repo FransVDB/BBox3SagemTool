@@ -117,4 +117,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Thanks to (in no particular order):
+•   the Userbase and ADSL-BC communities for posting results and feedback;
+•   philippe_d for providing feedback on ADSL-BC;
+•   Bssoft for help on the Proximus profile list;
+•   jantje81 for hosting the Proximus profile live update data;
+•   Petervanakelyen for adding support for B-Box 2 and Fritz!Box 7360;</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="pictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABsAAAAYCAYAAAALQIb7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAAEQElEQVRIS5WWTWhcVRiGJz9z
+        m7Yi1IKCWER0USqoGzdKF25E3JSuRHAhqBvRrYpuXAlKqa2lpjWpk04mc5PJZDKTyUz+ZpL0x1ooYjaK
+        1Y21okaw2iZ2Mnd+Xp/vTi4Mwx21hYdz7r3ne59z7jlz04hc5044AH+A4BY8KSnyfwkL7EYPLGk1Kl3u
+        k5bBdS5Bf2doN8JCu/GCijvUvBhR/VyPmivUF/G4zmthwWGEhYZxF/yguai8r99Qbb0k75u31Fz0Zddh
+        b1h4J2HBYbynnCNv4mE1Krepk5pNyVt+QprzX+dHQeC/ERbcyUPwl7L9qriPqrFVoQ5ZvaFqifNRJsd1
+        NuFAENqNsPBO4pobkDKOKiP7VLu5Tp2Q3lJ17hFppUda4tC4znQQ2o2w8HYOQkPlnVJ2QFuxvfJ+/546
+        qb75i7zC/dIq+3aBn0Le/zk8FwSHESYI6IcvtMCsF3Yg26nq8C5Vf7pCHbIb3yHjXJxDcp7nZV+2Blzc
+        uexl5RDZiZsnCJl3qk9bVxeok2q/XVZtZhevkWc+jOO0UvdmEN5JmMTYA9c0z0mz01YkZGpAtcGIbq+N
+        UcdJvDan2nRva0UlRGXGLXLtOutwXyBoJ0xkfKAZAgps/izkCZqIqn4S2aVj1CG7mlA9TcYC42z1Jlyy
+        ydG6zolA0E6YaD9sqMgs84hyMA3JXjWOR7S5+C51UnXtqBoTZBQRzG8Ll6Dsv8oq8CP8b9mUv6o8shnI
+        IpqC0YiaR5FlXqUO2ZfvqDFGho0rgL3uRUQlXqvtsevMB5KATtGz0NQsMhPmCLF9SZsMTJY4JD4eqi6/
+        oiYT8CdjkzKhv0qEdoL54pB1uJssCl8pR0HORDBNP0M7STtK2DFkQwdVN1nhsJpxMjLIbFImtL0tMN4O
+        lOE638LuMNnrmmJgxgQBdk3RJMRbso0Tj6nG0qrTz0gJk3HfVp8Fk+apmWV8AVo/9Lc7ZffCr5pklilI
+        IzJxmoIpSNFPwpleeYO7VZl5UfX4Hk4o4f5Yg76Js/QNe0MmdZ0b8GC77BOlCXMZnETmGvTHKTBRihly
+        9JuxiLbiD6hSOKStFH8BkkzYJuTDWB/qfDH9LPftw+A6sUD2OFT84DEG2UGwjfdbrhPI4hR8ytfjyD3y
+        fl6jjs/VzR9VTe5rTSrNF8pe9SRjJ8ix1hfT2la4Th2eMlnOZq1RbhpnKR5BFkMWsz73hnl+JKK/P97v
+        75f9s8ZLP92aWIoP9bjtjwUjGae1TJuAyW1LXIc/RvZVj3NhoTEefI7gDAFDMGx97n9G0fE+ee9HtVH6
+        UPU/r6t2ZVCN03wbE0iSrGyMMfYWjCT91n+KEFufe/RN1no4anAzjnDEVgS2Sru2yZwFDohOsuKhu5kA
+        fatxEQUZhoVPcJ3ivt9ybWzLnocElKDchRVYhfNwAS5ut3Zt9w0bs7xNe63lpuQ6L/0D4GCEzUDvJE8A
+        AAAASUVORK5CYII=
+</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Line values (current bit rate, maximum bit rate, attenuation and noise margin) are values directly requested from the device. Profile values (VDSL2 profile, Proximus profile, vectoring, DLM and repair) are calculated values based on the current bit rate. Distance on B-Box 3 is an estimated value calculated by the tool and may not be accurate, on B-Box 2 it is directly requested form the device and is therefore accurate.</value>
+  </data>
 </root>
