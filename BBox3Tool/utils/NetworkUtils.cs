@@ -105,20 +105,16 @@ namespace BBox3Tool.utils
         {
             try
             {
-                Uri host = new Uri("http://" + ipAddress);
-                Uri uriBbox3S = new Uri(host, Path.Combine("cgi", "json-req"));
-                Uri uriBbox3T = new Uri(host, "login.lua");
-                Uri uriBbox3T2 = new Uri(host, "login.lp");
-                Uri uriBbox2 = new Uri(host, "index.cgi");
-
-                if (detectDeviceGetStatusCode(uriBbox3S) == 200)
+                string hostname = Dns.GetHostEntry(ipAddress).HostName.ToLower();
+                if (hostname.Contains("mymodem.home") || hostname.Contains("sagemcom"))
                     return Device.BBOX3S;
-                else if (detectDeviceGetStatusCode(uriBbox3T) == 200 || detectDeviceGetStatusCode(uriBbox3T2) == 200)
+                if (hostname.Contains("dsldevice.lan"))
                     return Device.BBOX3T;
-                else if (detectDeviceGetStatusCode(uriBbox2) == 200)
+                if (hostname.Contains("gateway.home"))
                     return Device.BBOX2;
-                else
-                    return Device.unknown;
+                if (hostname.Contains("fritz.box"))
+                    return Device.FritzBox7390;
+                return Device.unknown;
             }
             catch(Exception ex)
             {
@@ -126,35 +122,5 @@ namespace BBox3Tool.utils
                 return Device.unknown;
             }
         }
-
-        /// <summary>
-        /// Get http status code for an url
-        /// </summary>
-        /// <param name="url">Url to get http status code form</param>
-        /// <returns>Http status code</returns>
-        private static int detectDeviceGetStatusCode(Uri url)
-        {
-            int status = 0;
-            try
-            {
-                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
-                request.AllowAutoRedirect = false;
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                status = (int)response.StatusCode;
-                response.Close();
-            }
-            catch (WebException ex)
-            {
-                status = (int)((HttpWebResponse)ex.Response).StatusCode;
-                if (status == 400 && url.ToString().EndsWith("json-req")) //bad request bbox3/s
-                    status = 200;
-            }
-            catch (Exception)
-            {
-                status = 0;
-            }
-            return status;
-        }
-
     }
 }

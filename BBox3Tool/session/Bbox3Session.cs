@@ -302,6 +302,19 @@ namespace BBox3Tool
                 {"xpath", xpath}
             });
 
+            //actions.Add(new Dictionary<string, object>
+            //{
+            //    {"id", 0},
+            //    {"method", "subscribeForNotification"},
+            //    {"xpath", xpath},
+            //    {"parameters", new Dictionary<string, object> {
+            //        {"id", _notificationID},
+            //        {"type", "value-change"},
+            //        {"current-value", true}
+            //    }}
+            //});
+            //_notificationID++;
+
             return sendActionsToBBox(actions);
         }
 
@@ -508,6 +521,7 @@ namespace BBox3Tool
                 //successfully logged in
                 LoggedIn = true;
 
+                //BBoxSubscribeForNotification(new List<string> { "Device/DSL/Lines/Line[Alias=\"DSL0\"]/Status" });
                 //getTest();
                 return true;
             }

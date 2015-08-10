@@ -44,9 +44,6 @@ namespace BBox3Tool
             //do live update, update profiles
             backgroundWorkerLiveUpdate.RunWorkerAsync();
 
-            //detect device
-            _selectedModem = NetworkUtils.detectDevice(textBoxIpAddress.Text);
-
             //load settings if saved
             ToolSettings settings = SettingsUtils.loadSettings();
             if (settings != null)
@@ -56,28 +53,13 @@ namespace BBox3Tool
                 textBoxUsername.Text = settings.Username;
                 textBoxPassword.Text = settings.Password;
                 checkBoxSave.Checked = true;
+                setSelectedDevice();
             }
             else
-                checkBoxSave.Checked = false;
-
-            //preselect modem
-            switch (_selectedModem)
             {
-                case Device.BBOX3S:
-                    panelThumb_Click(panelBBox3S, null);
-                    break;
-                case Device.BBOX2:
-                    panelThumb_Click(panelBBox2, null);
-                    break;
-                case Device.FritzBox7390:
-                    panelThumb_Click(panelFritzBox, null);
-                    break;
-                case Device.BBOX3T:
-                    panelUnsupported.Visible = true;
-                    break;
-                case Device.unknown:
-                default:
-                    break;
+                //detect device
+                backgroundWorkerDetectDevice.RunWorkerAsync();
+                checkBoxSave.Checked = false;
             }
         }
 
@@ -545,6 +527,44 @@ namespace BBox3Tool
         {
             buttonConnect.Enabled = true;
         }
+        
+        //detect device thread
+        //--------------------
+        private void backgroundWorkerDetectDevice_DoWork(object sender, DoWorkEventArgs e)
+        {
+            _selectedModem = NetworkUtils.detectDevice("192.168.1.1"); //default
+            //try fritzbox default if not found
+            if (_selectedModem == Device.unknown)
+                _selectedModem = NetworkUtils.detectDevice("192.168.178.1");
+        }
+
+        private void backgroundWorkerDetectDevice_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            setSelectedDevice();
+        }
+
+        private void setSelectedDevice()
+        {
+            //preselect modem
+            switch (_selectedModem)
+            {
+                case Device.BBOX3S:
+                    panelThumb_Click(panelBBox3S, null);
+                    break;
+                case Device.BBOX2:
+                    panelThumb_Click(panelBBox2, null);
+                    break;
+                case Device.FritzBox7390:
+                    panelThumb_Click(panelFritzBox, null);
+                    break;
+                case Device.BBOX3T:
+                    panelUnsupported.Visible = true;
+                    break;
+                case Device.unknown:
+                default:
+                    break;
+            }
+        }
 
         //gui
         //---
@@ -650,6 +670,10 @@ namespace BBox3Tool
 
             return false;
         }
+
+
+
+
 
     }
 }

@@ -57,7 +57,12 @@ namespace BBox3Tool
                     return false;
                 }
 
-                return true;
+                //check login successfull
+                var result = tc.Read(200);
+                if (result.ToLower().Contains("admin @ home"))
+                    return true;
+
+                return false;
             }
             catch (Exception e)
             {

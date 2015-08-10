@@ -68,6 +68,7 @@
             this.labelHardwareVersion = new System.Windows.Forms.Label();
             this.labelSoftwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
+            this.buttonInfo = new System.Windows.Forms.Button();
             this.panelUnsupported = new System.Windows.Forms.Panel();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.labelUnsupported = new System.Windows.Forms.Label();
@@ -106,7 +107,7 @@
             this.panelInfo = new System.Windows.Forms.Panel();
             this.labelDistance = new System.Windows.Forms.Label();
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
-            this.buttonInfo = new System.Windows.Forms.Button();
+            this.backgroundWorkerDetectDevice = new System.ComponentModel.BackgroundWorker();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelUnsupported.SuspendLayout();
@@ -504,6 +505,16 @@
             this.panelLogin.Name = "panelLogin";
             this.panelLogin.Size = new System.Drawing.Size(699, 316);
             this.panelLogin.TabIndex = 7;
+            // 
+            // buttonInfo
+            // 
+            this.buttonInfo.Location = new System.Drawing.Point(592, 281);
+            this.buttonInfo.Name = "buttonInfo";
+            this.buttonInfo.Size = new System.Drawing.Size(62, 23);
+            this.buttonInfo.TabIndex = 29;
+            this.buttonInfo.Text = "Info";
+            this.buttonInfo.UseVisualStyleBackColor = true;
+            this.buttonInfo.Click += new System.EventHandler(this.buttonInfo_Click);
             // 
             // panelUnsupported
             // 
@@ -960,15 +971,10 @@
             this.backgroundWorkerLiveUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerLiveUpdate_DoWork);
             this.backgroundWorkerLiveUpdate.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerLiveUpdate_RunWorkerCompleted);
             // 
-            // buttonInfo
+            // backgroundWorkerDetectDevice
             // 
-            this.buttonInfo.Location = new System.Drawing.Point(592, 281);
-            this.buttonInfo.Name = "buttonInfo";
-            this.buttonInfo.Size = new System.Drawing.Size(62, 23);
-            this.buttonInfo.TabIndex = 29;
-            this.buttonInfo.Text = "Info";
-            this.buttonInfo.UseVisualStyleBackColor = true;
-            this.buttonInfo.Click += new System.EventHandler(this.buttonInfo_Click);
+            this.backgroundWorkerDetectDevice.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerDetectDevice_DoWork);
+            this.backgroundWorkerDetectDevice.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerDetectDevice_RunWorkerCompleted);
             // 
             // Form1
             // 
@@ -1086,6 +1092,7 @@
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.Label labelUnsupported;
         private System.Windows.Forms.Button buttonInfo;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerDetectDevice;
     }
 }
 
