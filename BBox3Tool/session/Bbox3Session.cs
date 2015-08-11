@@ -924,14 +924,51 @@ namespace BBox3Tool
         /// <returns>Upstream max bit rate in kbps, or 'unknown' if not found</returns>
         public void GetUpstreamMaxBitRate()
         {
-            //TODO prediction
-            var startValue = (_upstreamCurrentBitRate > 0) ? _upstreamCurrentBitRate : 0;
-            startValue = Convert.ToInt32(Math.Floor(Convert.ToDecimal(startValue + 1) / 1000) * 1000);
-            _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", startValue, 50000, 1000);
+            //17a profiles
+            var valuesToCheck = new List<int>();
+            if (_upstreamCurrentBitRate >= 6000)
+            {
+                var startValue = Convert.ToInt32(_upstreamCurrentBitRate + (_upstreamNoiseMargin * 1000m * (1m + (0.1m * (3m / _upstreamAttenuation)))));
+                //adjustment <= 20.000
+                if (startValue <= 20000)
+                    startValue = Convert.ToInt32(startValue * 0.95);
 
-            if (_upstreamMaxBitRate < 0)
-                _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", 0, startValue, 1000);
+                //check range + - 7.500 of predicted value
+                for (int i = 0; i < 15; i++)
+                {
+                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 500), 500));
+                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 500), 500));
+                }
+                _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+                
+                //out of predicted range
+                if (_upstreamMaxBitRate < 0)
+                {
+                    valuesToCheck.Clear();
 
+                    //add values form predicted value +7.500 to 50.000
+                    if (startValue + 7500 < 50000)
+                        valuesToCheck.AddRange(Enumerable.Range(startValue + 7500, 50000 - (startValue + 7500)));
+
+                    //add values from predicted value -7.500 to 0
+                    if (startValue - 7500 > 0)
+                        valuesToCheck.AddRange(Enumerable.Range(0, startValue - 7500).OrderByDescending(x => x));
+
+                    _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+                }
+            }
+            else
+            {
+                valuesToCheck.AddRange(Enumerable.Range(_upstreamCurrentBitRate, 50000 - _upstreamCurrentBitRate));
+                _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+
+                if (_upstreamMaxBitRate < 0)
+                {
+                    valuesToCheck.Clear();
+                    valuesToCheck.AddRange(Enumerable.Range(0, _upstreamCurrentBitRate));
+                    _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+                }
+            }
             usMaxBitRateDone = true;
         }
 
@@ -957,20 +994,22 @@ namespace BBox3Tool
                     valuesToCheck = valuesToCheck.Select(x => x * 10).ToList();
                     decimal upbokle = getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UPBOKLE", valuesToCheck, 10, 5) / 100;
 
-                    decimal DistanceV9 = 0;
-                    decimal DistanceV7 = 0;
+                    //v0.10
+                    if (upbokle > 0)
+                        Distance = (upbokle / (20m + (upbokle/5m))) * 1000;
 
                     //v0.9
-                    if (upbokle > 0)
-                        DistanceV9 = (upbokle / (17m + (upbokle / 2.2m))) * 1000;
+                    /*if (upbokle > 0)
+                        Distance = (upbokle / (17m + (upbokle / 2.2m))) * 1000;*/
+
                     //v0.8
                     /*if (upbokle > 0)
                         Distance = (upbokle / (20m + (upbokle/3m))) * 1000;*/
-                    //v0.7
-                    if (upbokle > 0)
-                        DistanceV7 = (upbokle / 20m) * 1000;
 
-                    Distance = Math.Min(DistanceV9, DistanceV7);
+                    //v0.7
+                    /*if (upbokle > 0)
+                        Distance = (upbokle / 20m) * 1000;*/
+
                     break;
                 case DSLStandard.unknown:
                 default:
