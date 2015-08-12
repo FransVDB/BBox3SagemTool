@@ -278,9 +278,6 @@ namespace BBox3Tool
                     if (_session is Bbox3Session)
                         ThreadUtils.setLabelTextFromThread(distanceLabel, distanceLabel.Text + "\r\n(estimated)");
 
-                    // Get line data
-                    _session.GetLineData();
-
                     // Get device info
                     //----------------
                     DeviceInfo deviceInfo = _session.GetDeviceInfo();
@@ -288,7 +285,9 @@ namespace BBox3Tool
                     ThreadUtils.setLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
                     ThreadUtils.setLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
                     ThreadUtils.setLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
-
+                    
+                    // Get line data
+                    _session.GetLineData();
                     // Get dsl standard
                     ThreadUtils.setLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
 

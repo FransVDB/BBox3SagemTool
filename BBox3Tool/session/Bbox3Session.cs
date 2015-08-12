@@ -944,10 +944,10 @@ namespace BBox3Tool
                     startValue = Convert.ToInt32(startValue * 0.95);
 
                 //check range + - 7.500 of predicted value
-                for (int i = 0; i < 15; i++)
+                for (int i = 0; i < 30; i++)
                 {
-                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 500), 500));
-                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 500), 500));
+                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 250), 250));
+                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 250), 250));
                 }
                 _upstreamMaxBitRate = (int)getDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
                 

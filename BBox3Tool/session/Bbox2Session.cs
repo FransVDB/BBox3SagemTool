@@ -2,6 +2,9 @@
 using System.Globalization;
 using System.IO;
 using MinimalisticTelnet;
+using BBox3Tool.utils;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace BBox3Tool
 {
@@ -23,11 +26,19 @@ namespace BBox3Tool
         public bool? Vectoring { get; private set; }
         public DSLStandard DSLStandard { get; private set; }
 
+        private string _host;
+        private string _username;
+        private string _password;
+
         public Bbox2Session ()
 	    {
             DeviceName = "B-Box 2";
             Distance = null;
             Vectoring = false;
+
+            _host = string.Empty;
+            _username = string.Empty;
+            _password = string.Empty;
 	    }
 
         public bool OpenSession(String host, String username, String password)
@@ -60,7 +71,12 @@ namespace BBox3Tool
                 //check login successfull
                 var result = tc.Read(200);
                 if (result.ToLower().Contains("admin @ home"))
+                {
+                    _host = host;
+                    _username = username;
+                    _password = password;
                     return true;
+                }
 
                 return false;
             }
@@ -131,6 +147,49 @@ namespace BBox3Tool
         public DeviceInfo GetDeviceInfo()
         {
             var deviceInfo = new DeviceInfo();
+            deviceInfo.DeviceUptime = "unknown";
+            deviceInfo.LinkUptime = "unknown";
+            deviceInfo.HardwareVersion = "unknown";
+            deviceInfo.FirmwareVersion = "unknown";
+
+            try
+            {
+                Uri bbox2Uri = new Uri("http://" + _host);
+                Dictionary<string, string> getData = new Dictionary<string, string>();
+                getData.Add("user_name", _username);
+                getData.Add("password", _password);
+                string homePage = NetworkUtils.sendRequest(bbox2Uri, null, getData, WebRequestMode.Get);
+
+                //get hardware version
+                int hwIndex = homePage.IndexOf("<td class=\"libelle\">Hardware Version</td>");
+                if (hwIndex > 0)
+                {
+                    hwIndex = homePage.IndexOf("<td class=\"status\">", hwIndex);
+                    if (hwIndex > 0)
+                    {
+                        hwIndex += "<td class=\"status\">".Length;
+                        int hwIndexEnd = homePage.IndexOf("<", hwIndex);
+
+                        string hwVersion = homePage.Substring(hwIndex, hwIndexEnd - hwIndex).Replace("&nbsp;", " ");
+                        deviceInfo.HardwareVersion = hwVersion;
+                    }
+                }
+
+                //get firmware version
+                int fwIndex = homePage.IndexOf("<td class=\"libelle\">Runtime Code Version</td>");
+                if (fwIndex > 0)
+                {
+                    fwIndex = homePage.IndexOf("<td class=\"status\">", fwIndex);
+                    if (fwIndex > 0)
+                    {
+                        fwIndex += "<td class=\"status\">".Length;
+                        int fwIndexEnd = homePage.IndexOf("<", fwIndex);
+                        string fwVersion = homePage.Substring(fwIndex, fwIndexEnd - fwIndex).Replace("&nbsp;", " ");
+                        deviceInfo.FirmwareVersion = fwVersion;
+                    }
+                }
+            }
+            catch { }
             return deviceInfo;
         }
 
