@@ -9,7 +9,6 @@ namespace BBox3Tool
     {
         private String _hardwareVersion;
         private String _firmwareVersion;
-        private String _guiVersion;
         private String _deviceUptime;
         private String _linkUptime;
 
@@ -23,12 +22,6 @@ namespace BBox3Tool
         {
             get { return _firmwareVersion; }
             set { _firmwareVersion = value; }
-        }
-
-        public string GuiVersion
-        {
-            get { return _guiVersion; }
-            set { _guiVersion = value; }
         }
 
         public string DeviceUptime

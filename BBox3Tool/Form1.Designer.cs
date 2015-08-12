@@ -64,9 +64,8 @@
             this.labelDSLStandard = new System.Windows.Forms.Label();
             this.labelLinkUptime = new System.Windows.Forms.Label();
             this.labelDeviceUptime = new System.Windows.Forms.Label();
-            this.labelGUIVersion = new System.Windows.Forms.Label();
             this.labelHardwareVersion = new System.Windows.Forms.Label();
-            this.labelSoftwareVersion = new System.Windows.Forms.Label();
+            this.labelFirmwareVersion = new System.Windows.Forms.Label();
             this.panelLogin = new System.Windows.Forms.Panel();
             this.buttonInfo = new System.Windows.Forms.Button();
             this.panelUnsupported = new System.Windows.Forms.Panel();
@@ -94,8 +93,7 @@
             this.buttonConnect = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.hwVersionLabel = new System.Windows.Forms.Label();
-            this.guiVersionLabel = new System.Windows.Forms.Label();
-            this.softwareVersionLabel = new System.Windows.Forms.Label();
+            this.firmwareVersionLabel = new System.Windows.Forms.Label();
             this.deviceUptimeLabel = new System.Windows.Forms.Label();
             this.lineUptimeLabel = new System.Windows.Forms.Label();
             this.dslStandardLabel = new System.Windows.Forms.Label();
@@ -454,15 +452,6 @@
             this.labelDeviceUptime.TabIndex = 58;
             this.labelDeviceUptime.Text = "unknown";
             // 
-            // labelGUIVersion
-            // 
-            this.labelGUIVersion.AutoSize = true;
-            this.labelGUIVersion.Location = new System.Drawing.Point(589, 164);
-            this.labelGUIVersion.Name = "labelGUIVersion";
-            this.labelGUIVersion.Size = new System.Drawing.Size(51, 13);
-            this.labelGUIVersion.TabIndex = 56;
-            this.labelGUIVersion.Text = "unknown";
-            // 
             // labelHardwareVersion
             // 
             this.labelHardwareVersion.AutoSize = true;
@@ -472,14 +461,14 @@
             this.labelHardwareVersion.TabIndex = 55;
             this.labelHardwareVersion.Text = "unknown";
             // 
-            // labelSoftwareVersion
+            // labelFirmwareVersion
             // 
-            this.labelSoftwareVersion.AutoSize = true;
-            this.labelSoftwareVersion.Location = new System.Drawing.Point(589, 132);
-            this.labelSoftwareVersion.Name = "labelSoftwareVersion";
-            this.labelSoftwareVersion.Size = new System.Drawing.Size(51, 13);
-            this.labelSoftwareVersion.TabIndex = 54;
-            this.labelSoftwareVersion.Text = "unknown";
+            this.labelFirmwareVersion.AutoSize = true;
+            this.labelFirmwareVersion.Location = new System.Drawing.Point(589, 132);
+            this.labelFirmwareVersion.Name = "labelFirmwareVersion";
+            this.labelFirmwareVersion.Size = new System.Drawing.Size(51, 13);
+            this.labelFirmwareVersion.TabIndex = 54;
+            this.labelFirmwareVersion.Text = "unknown";
             // 
             // panelLogin
             // 
@@ -800,25 +789,15 @@
             this.hwVersionLabel.TabIndex = 51;
             this.hwVersionLabel.Text = "Hardware version";
             // 
-            // guiVersionLabel
+            // firmwareVersionLabel
             // 
-            this.guiVersionLabel.AutoSize = true;
-            this.guiVersionLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(83)))), ((int)(((byte)(138)))));
-            this.guiVersionLabel.Location = new System.Drawing.Point(475, 164);
-            this.guiVersionLabel.Name = "guiVersionLabel";
-            this.guiVersionLabel.Size = new System.Drawing.Size(63, 13);
-            this.guiVersionLabel.TabIndex = 52;
-            this.guiVersionLabel.Text = "GUI version";
-            // 
-            // softwareVersionLabel
-            // 
-            this.softwareVersionLabel.AutoSize = true;
-            this.softwareVersionLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(83)))), ((int)(((byte)(138)))));
-            this.softwareVersionLabel.Location = new System.Drawing.Point(475, 132);
-            this.softwareVersionLabel.Name = "softwareVersionLabel";
-            this.softwareVersionLabel.Size = new System.Drawing.Size(86, 13);
-            this.softwareVersionLabel.TabIndex = 53;
-            this.softwareVersionLabel.Text = "Software version";
+            this.firmwareVersionLabel.AutoSize = true;
+            this.firmwareVersionLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(83)))), ((int)(((byte)(138)))));
+            this.firmwareVersionLabel.Location = new System.Drawing.Point(475, 132);
+            this.firmwareVersionLabel.Name = "firmwareVersionLabel";
+            this.firmwareVersionLabel.Size = new System.Drawing.Size(86, 13);
+            this.firmwareVersionLabel.TabIndex = 53;
+            this.firmwareVersionLabel.Text = "Firmware version";
             // 
             // deviceUptimeLabel
             // 
@@ -908,13 +887,11 @@
             this.panelInfo.Controls.Add(this.label6);
             this.panelInfo.Controls.Add(this.buttonCancel);
             this.panelInfo.Controls.Add(this.hwVersionLabel);
-            this.panelInfo.Controls.Add(this.guiVersionLabel);
-            this.panelInfo.Controls.Add(this.labelSoftwareVersion);
+            this.panelInfo.Controls.Add(this.labelFirmwareVersion);
             this.panelInfo.Controls.Add(this.labelVDSLProfile);
-            this.panelInfo.Controls.Add(this.softwareVersionLabel);
+            this.panelInfo.Controls.Add(this.firmwareVersionLabel);
             this.panelInfo.Controls.Add(this.labelHardwareVersion);
             this.panelInfo.Controls.Add(this.vdslProfileLabel);
-            this.panelInfo.Controls.Add(this.labelGUIVersion);
             this.panelInfo.Controls.Add(this.labelProximusProfile);
             this.panelInfo.Controls.Add(this.proximusProfileLabel);
             this.panelInfo.Controls.Add(this.labelDeviceUptime);
@@ -982,9 +959,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(699, 316);
-            this.Controls.Add(this.panelLogin);
             this.Controls.Add(this.panelInfo);
             this.Controls.Add(this.panelDebug);
+            this.Controls.Add(this.panelLogin);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(715, 355);
             this.MinimumSize = new System.Drawing.Size(715, 355);
@@ -1049,15 +1026,13 @@
         private System.Windows.Forms.Button buttonConnect;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label labelDSLStandard;
-        private System.Windows.Forms.Label labelGUIVersion;
         private System.Windows.Forms.Label labelHardwareVersion;
-        private System.Windows.Forms.Label labelSoftwareVersion;
+        private System.Windows.Forms.Label labelFirmwareVersion;
         private System.Windows.Forms.Label labelDeviceUptime;
         private System.Windows.Forms.Label labelLinkUptime;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label hwVersionLabel;
-        private System.Windows.Forms.Label guiVersionLabel;
-        private System.Windows.Forms.Label softwareVersionLabel;
+        private System.Windows.Forms.Label firmwareVersionLabel;
         private System.Windows.Forms.Label deviceUptimeLabel;
         private System.Windows.Forms.Label lineUptimeLabel;
         private System.Windows.Forms.Label dslStandardLabel;

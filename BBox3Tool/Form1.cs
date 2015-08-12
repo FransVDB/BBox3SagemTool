@@ -285,8 +285,7 @@ namespace BBox3Tool
                     //----------------
                     DeviceInfo deviceInfo = _session.GetDeviceInfo();
                     ThreadUtils.setLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
-                    ThreadUtils.setLabelTextFromThread(labelSoftwareVersion, deviceInfo.FirmwareVersion);
-                    ThreadUtils.setLabelTextFromThread(labelGUIVersion, deviceInfo.GuiVersion);
+                    ThreadUtils.setLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
                     ThreadUtils.setLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
                     ThreadUtils.setLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
 
@@ -376,6 +375,30 @@ namespace BBox3Tool
                     //downstream
                     setLabelValueLoading(labelDownstreamMaxBitRate);
                     setLabelValueAsDecimal(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate, "###,###,##0 'kbps'");
+
+                    //retry proximus profile
+                    //---------------------
+                    if (_session.DSLStandard == DSLStandard.VDSL2)
+                    {
+                        ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
+                        if (currentProfile == null)
+                        {
+                            ThreadUtils.setLabelTextFromThread(labelVectoring, "unknown");
+                            ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
+                            ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
+                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
+                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
+                        }
+                        else
+                        {
+                            ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
+                            ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
+                            ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
+                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
+                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                        }
+                    }
+
 
                     //upstream: not for BBOX2
                     if (_session is Bbox3Session || _session is FritzBoxSession)

@@ -265,8 +265,7 @@ namespace BBox3Tool
 
             var deviceInfo = new DeviceInfo();
             deviceInfo.HardwareVersion = jsonObject["reply"]["actions"][0]["callbacks"][0]["parameters"]["value"].ToString();
-            deviceInfo.GuiVersion = jsonObject["reply"]["actions"][1]["callbacks"][0]["parameters"]["value"].ToString();
-            deviceInfo.FirmwareVersion = jsonObject["reply"]["actions"][2]["callbacks"][0]["parameters"]["value"].ToString();
+            deviceInfo.FirmwareVersion = jsonObject["reply"]["actions"][2]["callbacks"][0]["parameters"]["value"].ToString()  + " / " + jsonObject["reply"]["actions"][1]["callbacks"][0]["parameters"]["value"].ToString();
 
             try
             {
@@ -299,7 +298,11 @@ namespace BBox3Tool
             {
                 {"id", 0},
                 {"method", "getValue"},
-                {"xpath", xpath}
+                {"xpath", xpath},
+                /*{"parameters", new Dictionary<string, object> {
+                    {"current-value", true},
+                    {"no-default", true}
+                }}*/
             });
 
             //actions.Add(new Dictionary<string, object>
@@ -916,6 +919,13 @@ namespace BBox3Tool
 
             }
             dsMaxBitRateDone = true;
+
+            //fix vectoring state
+            if (_vectoring == null && vectoringDone)
+            {
+                if (_downstreamCurrentBitRate >= 69000 && _downstreamMaxBitRate >= 100000)
+                    _vectoring = true;
+            }
         }
 
         /// <summary>
