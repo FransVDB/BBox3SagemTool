@@ -104,10 +104,7 @@ namespace BBox3Tool
         public void GetLineData()
         {
             // Exec 'shell' command
-            if (tc.Read(500).EndsWith("$ "))
-            {
-                tc.WriteLine("shell");
-            }
+            tc.WriteLine("shell");
 
             // Wait for shell prompt
             if (tc.Read(1000).EndsWith("# "))
