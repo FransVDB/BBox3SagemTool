@@ -1006,7 +1006,7 @@ namespace BBox3Tool
 
                     //v0.10
                     if (upbokle > 0)
-                        Distance = (upbokle / (20m + (upbokle/5m))) * 1000;
+                        Distance = (upbokle / (20m + (upbokle/4.5m))) * 1000;
 
                     //v0.9
                     /*if (upbokle > 0)

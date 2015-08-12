@@ -280,14 +280,31 @@ namespace BBox3Tool
 
                     // Get device info
                     //----------------
+                    setLabelValueLoading(labelHardwareVersion);
+                    setLabelValueLoading(labelFirmwareVersion);
+                    setLabelValueLoading(labelDeviceUptime);
+                    setLabelValueLoading(labelLinkUptime);
                     DeviceInfo deviceInfo = _session.GetDeviceInfo();
                     ThreadUtils.setLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
                     ThreadUtils.setLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
                     ThreadUtils.setLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
                     ThreadUtils.setLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
                     
-                    // Get line data
+                    // Get line data (BBox2 & FritzBox)
+                    if (_session is Bbox2Session || _session is FritzBoxSession)
+                    {
+                        setLabelValueLoading(labelDownstreamCurrentBitRate);
+                        setLabelValueLoading(labelUpstreamCurrentBitRate);
+                        setLabelValueLoading(labelDistance);
+                        setLabelValueLoading(labelDownstreamAttenuation);
+                        setLabelValueLoading(labelUpstreamAttenuation);
+                        setLabelValueLoading(labelDownstreamNoiseMargin);
+                        setLabelValueLoading(labelUpstreamNoiseMargin);
+                        setLabelValueLoading(labelDownstreamMaxBitRate);
+                        setLabelValueLoading(labelUpstreamMaxBitRate);
+                    }
                     _session.GetLineData();
+
                     // Get dsl standard
                     ThreadUtils.setLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
 
