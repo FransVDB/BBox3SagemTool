@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorkerGetLineData = new System.ComponentModel.BackgroundWorker();
             this.panelDebug = new System.Windows.Forms.Panel();
             this.label14 = new System.Windows.Forms.Label();
             this.textBoxDebug = new System.Windows.Forms.TextBox();
@@ -106,6 +106,7 @@
             this.labelDistance = new System.Windows.Forms.Label();
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorkerDetectDevice = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorkerConnect = new System.ComponentModel.BackgroundWorker();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelUnsupported.SuspendLayout();
@@ -119,10 +120,10 @@
             this.panelInfo.SuspendLayout();
             this.SuspendLayout();
             // 
-            // backgroundWorker
+            // backgroundWorkerGetLineData
             // 
-            this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerBbox_DoWork);
-            this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerBbox_RunWorkerCompleted);
+            this.backgroundWorkerGetLineData.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerGetLineData_DoWork);
+            this.backgroundWorkerGetLineData.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerGetLineData_RunWorkerCompleted);
             // 
             // panelDebug
             // 
@@ -953,6 +954,11 @@
             this.backgroundWorkerDetectDevice.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerDetectDevice_DoWork);
             this.backgroundWorkerDetectDevice.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerDetectDevice_RunWorkerCompleted);
             // 
+            // backgroundWorkerConnect
+            // 
+            this.backgroundWorkerConnect.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerConnect_DoWork);
+            this.backgroundWorkerConnect.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerConnect_RunWorkerCompleted);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -991,7 +997,7 @@
 
         #endregion
 
-        private System.ComponentModel.BackgroundWorker backgroundWorker;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerGetLineData;
         private System.Windows.Forms.Panel panelDebug;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox textBoxDebugResult;
@@ -1068,6 +1074,7 @@
         private System.Windows.Forms.Label labelUnsupported;
         private System.Windows.Forms.Button buttonInfo;
         private System.ComponentModel.BackgroundWorker backgroundWorkerDetectDevice;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerConnect;
     }
 }
 

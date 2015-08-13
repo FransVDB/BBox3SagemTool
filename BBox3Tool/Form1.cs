@@ -26,6 +26,7 @@ namespace BBox3Tool
         private readonly Uri _liveUpdateProfiles = new Uri("http://www.cloudscape.be/userbasepyro85/profiles.xml");
 
         private bool _connecting = false;
+        private bool _connected = false;
 
         public Form1()
         {
@@ -35,8 +36,8 @@ namespace BBox3Tool
             this.Text += " " + Application.ProductVersion;
 
             //set worker thread properties
-            backgroundWorker.WorkerSupportsCancellation = true;
-            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorkerGetLineData.WorkerSupportsCancellation = true;
+            backgroundWorkerGetLineData.WorkerReportsProgress = true;
 
             //load embedded xml profiles
             _profiles = ProfileUtils.loadEmbeddedProfiles();
@@ -83,7 +84,7 @@ namespace BBox3Tool
             switch (_selectedModem)
             {
                 case Device.BBOX3S:
-                    _session = new Bbox3Session(backgroundWorker, _profiles);
+                    _session = new Bbox3Session(backgroundWorkerGetLineData, _profiles);
                     break;
                 case Device.BBOX2:
                     _session = new Bbox2Session();
@@ -108,6 +109,7 @@ namespace BBox3Tool
 
             //set button text
             buttonConnect.Text = "Connecting, please wait...";
+            buttonConnect.Enabled = false;
 
             //check mode
             bool debug = (textBoxUsername.Text.ToLower() == "debug");
@@ -125,7 +127,7 @@ namespace BBox3Tool
             string password = textBoxPassword.Text;
 
             //init session
-            _session = new Bbox3Session(backgroundWorker, _profiles, true);
+            _session = new Bbox3Session(backgroundWorkerGetLineData, _profiles, true);
             if (_session.OpenSession(host, username, password))
             {
                 buttonConnect.Enabled = false;
@@ -135,16 +137,17 @@ namespace BBox3Tool
             }
             else
             {
+                //set button text
+                buttonConnect.Text = "Connect";
+                buttonConnect.Enabled = true;
                 MessageBox.Show("Could not connect to device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void initNormalMode()
         {
-            _connecting = true;
-
             //init session
-            backgroundWorker.RunWorkerAsync(new DeviceSettings
+            backgroundWorkerConnect.RunWorkerAsync(new DeviceSettings
             {
                 Host = textBoxIpAddress.Text,
                 Username = textBoxUsername.Text,
@@ -154,9 +157,9 @@ namespace BBox3Tool
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker.IsBusy)
+            if (backgroundWorkerGetLineData.IsBusy)
             {
-                backgroundWorker.CancelAsync();
+                backgroundWorkerGetLineData.CancelAsync();
                 buttonCancel.Enabled = false;
             }
         }
@@ -238,25 +241,23 @@ namespace BBox3Tool
         //worker thread
         //-------------
 
-        private void backgroundWorkerBbox_DoWork(object sender, DoWorkEventArgs e)
+        private void backgroundWorkerConnect_DoWork(object sender, DoWorkEventArgs e)
         {
-            bool connected = false;
-            
-            BackgroundWorker worker = sender as BackgroundWorker;
+
             DeviceSettings sessionInfo = (DeviceSettings)e.Argument;
-             
+            BackgroundWorker worker = (BackgroundWorker)sender;
+
             try
             {
-                //disable connect button
-                ThreadUtils.setButtonEnabledFromThread(buttonConnect, false);
+                _connecting = true;
+                _connected = _session.OpenSession(sessionInfo.Host, sessionInfo.Username, sessionInfo.Password);
 
-                //open session, log in
-                connected = _session.OpenSession(sessionInfo.Host, sessionInfo.Username, sessionInfo.Password);
-                if (connected)
+                //check remember settings
+                if (_connected)
                 {
-                    //check remember settings
                     if (checkBoxSave.Checked)
-                        SettingsUtils.saveSettings( new ToolSettings{
+                        SettingsUtils.saveSettings(new ToolSettings
+                        {
                             Device = _selectedModem,
                             Username = sessionInfo.Username,
                             Password = sessionInfo.Password,
@@ -264,189 +265,214 @@ namespace BBox3Tool
                         });
                     else
                         SettingsUtils.deleteSettings();
+                }
 
-                    //set button states
-                    ThreadUtils.setButtonEnabledFromThread(buttonClipboard, false);
-                    ThreadUtils.setButtonEnabledFromThread(buttonCancel, true);
-                    ThreadUtils.setButtonTextFromThread(buttonConnect, "Connect");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unexpected error occurred. Debug info: " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
-                    //set panels visibility
-                    ThreadUtils.setPanelVisibilityFromThread(panelDebug, false);
-                    ThreadUtils.setPanelVisibilityFromThread(panelInfo, true);
-                    ThreadUtils.setPanelVisibilityFromThread(panelLogin, false);
+        private void backgroundWorkerConnect_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (_connected)
+            {
+                //set button states
+                buttonClipboard.Enabled = false;
+                buttonCancel.Enabled = true;
+                buttonConnect.Text = "Connect";
 
-                    if (_session is Bbox3Session)
-                        ThreadUtils.setLabelTextFromThread(distanceLabel, distanceLabel.Text + "\r\n(estimated)");
+                //set panels visibility
+                panelDebug.Visible = false;
+                panelInfo.Visible = true;
+                panelLogin.Visible = false;
 
-                    // Get device info
-                    //----------------
-                    setLabelValueLoading(labelHardwareVersion);
-                    setLabelValueLoading(labelFirmwareVersion);
-                    setLabelValueLoading(labelDeviceUptime);
-                    setLabelValueLoading(labelLinkUptime);
-                    DeviceInfo deviceInfo = _session.GetDeviceInfo();
-                    ThreadUtils.setLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
-                    ThreadUtils.setLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
-                    ThreadUtils.setLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
-                    ThreadUtils.setLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
-                    
-                    // Get line data (BBox2 & FritzBox)
-                    if (_session is Bbox2Session || _session is FritzBoxSession)
-                    {
-                        setLabelValueLoading(labelDownstreamCurrentBitRate);
-                        setLabelValueLoading(labelUpstreamCurrentBitRate);
-                        setLabelValueLoading(labelDistance);
-                        setLabelValueLoading(labelDownstreamAttenuation);
-                        setLabelValueLoading(labelUpstreamAttenuation);
-                        setLabelValueLoading(labelDownstreamNoiseMargin);
-                        setLabelValueLoading(labelUpstreamNoiseMargin);
-                        setLabelValueLoading(labelDownstreamMaxBitRate);
-                        setLabelValueLoading(labelUpstreamMaxBitRate);
-                    }
-                    _session.GetLineData();
+                //start thread getLineData
+                backgroundWorkerGetLineData.RunWorkerAsync();
+            }
+            else
+            {
+                buttonConnect.Enabled = true;
+                buttonConnect.Text = "Connect";
+                MessageBox.Show("Could not connect to device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            _connecting = false;
+        }
 
-                    // Get dsl standard
-                    ThreadUtils.setLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
+        private void backgroundWorkerGetLineData_DoWork(object sender, DoWorkEventArgs e)
+        {
 
-                    // Get sync values
-                    //----------------
+            BackgroundWorker worker = sender as BackgroundWorker;
+            try
+            {
+                //disable connect button
+                ThreadUtils.setButtonEnabledFromThread(buttonConnect, false);
+
+                if (_session is Bbox3Session)
+                    ThreadUtils.setLabelTextFromThread(distanceLabel, distanceLabel.Text + "\r\n(estimated)");
+
+                // Get device info
+                //----------------
+                setLabelValueLoading(labelHardwareVersion);
+                setLabelValueLoading(labelFirmwareVersion);
+                setLabelValueLoading(labelDeviceUptime);
+                setLabelValueLoading(labelLinkUptime);
+                DeviceInfo deviceInfo = _session.GetDeviceInfo();
+                ThreadUtils.setLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
+                ThreadUtils.setLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
+                ThreadUtils.setLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
+                ThreadUtils.setLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
+
+                // Get line data (BBox2 & FritzBox)
+                //---------------------------------
+                if (_session is Bbox2Session || _session is FritzBoxSession)
+                {
                     setLabelValueLoading(labelDownstreamCurrentBitRate);
-                    setLabelValueAsDecimal(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate, "###,###,##0 'kbps'");
                     setLabelValueLoading(labelUpstreamCurrentBitRate);
-                    setLabelValueAsDecimal(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate, "###,###,##0 'kbps'");
-                    
-                    //distance
-                    //--------
                     setLabelValueLoading(labelDistance);
-                    setLabelValueAsDecimal(labelDistance, _session.Distance, "0 'm'");
-                    
-                    //Proximus profile
-                    //----------------
-                    if (_session.DSLStandard == DSLStandard.VDSL2)
-                    {
-                        //TODO check why this is incorrect
-                        //_session.getVectoringEnabled();
-                        //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
-
-                        ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
-                        if (currentProfile == null)
-                        {
-                            ThreadUtils.setLabelTextFromThread(labelVectoring, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
-                        }
-                        else
-                        {
-                            //get vectoring status fallback: get from profile list
-                            ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
-                            ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
-                            ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
-                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
-                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                        }
-                    }
-                    else
-                    {
-                        setLabelNotApplicable(vdslProfileLabel, labelVDSLProfile);
-                        setLabelNotApplicable(vectoringLabel, labelVectoring);
-                        setLabelNotApplicable(repairLabel, labelRepair);
-                        setLabelNotApplicable(dlmLabel, labelDLM);
-                        setLabelNotApplicable(proximusProfileLabel, labelProximusProfile);
-                    }
-
-                    //attenuation
-                    //-----------
-                    //downstream
                     setLabelValueLoading(labelDownstreamAttenuation);
-                    setLabelValueAsDecimal(labelDownstreamAttenuation, _session.DownstreamAttenuation, "0.0 'dB'");
-
-                    //upstream: BBOX3 adsl only
-                    if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
-                    {
-                        setLabelValueLoading(labelUpstreamAttenuation);
-                        setLabelValueAsDecimal(labelUpstreamAttenuation, _session.UpstreamAttenuation, "0.0 'dB'");
-                    }
-                    else
-                        setLabelNotApplicable(upstreamAttenuationLabel, labelUpstreamAttenuation);
-                    
-                    //noise margin
-                    //------------
-                    //downstream
+                    setLabelValueLoading(labelUpstreamAttenuation);
                     setLabelValueLoading(labelDownstreamNoiseMargin);
-                    setLabelValueAsDecimal(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin, "0.0 'dB'");
-
-                    //upstream: not for BBOX2
-                    if (_session is Bbox3Session || _session is FritzBoxSession)
-                    {
-                        setLabelValueLoading(labelUpstreamNoiseMargin);
-                        setLabelValueAsDecimal(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin, "0.0 'dB'");
-                    }
-                    else
-                        setLabelNotApplicable(upstreamNoiseMarginLabel, labelUpstreamNoiseMargin);
-                    
-                    //max bitrate
-                    //-----------
-                    //downstream
+                    setLabelValueLoading(labelUpstreamNoiseMargin);
                     setLabelValueLoading(labelDownstreamMaxBitRate);
-                    setLabelValueAsDecimal(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate, "###,###,##0 'kbps'");
+                    setLabelValueLoading(labelUpstreamMaxBitRate);
+                }
+                _session.GetLineData();
 
-                    //retry proximus profile
-                    //---------------------
-                    if (_session.DSLStandard == DSLStandard.VDSL2)
+                // Get dsl standard
+                //-----------------
+                ThreadUtils.setLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
+
+                // Get sync values
+                //----------------
+                setLabelValueLoading(labelDownstreamCurrentBitRate);
+                setLabelValueAsDecimal(labelDownstreamCurrentBitRate, _session.DownstreamCurrentBitRate, "###,###,##0 'kbps'");
+                setLabelValueLoading(labelUpstreamCurrentBitRate);
+                setLabelValueAsDecimal(labelUpstreamCurrentBitRate, _session.UpstreamCurrentBitRate, "###,###,##0 'kbps'");
+
+                //distance
+                //--------
+                setLabelValueLoading(labelDistance);
+                setLabelValueAsDecimal(labelDistance, _session.Distance, "0 'm'");
+
+                //Proximus profile
+                //----------------
+                if (_session.DSLStandard == DSLStandard.VDSL2)
+                {
+                    //TODO check why this is incorrect
+                    //_session.getVectoringEnabled();
+                    //setLabelText(labelVectoring, _session.VectoringEnabled ? "Yes" : "No");
+
+                    ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
+                    if (currentProfile == null)
                     {
-                        ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
-                        if (currentProfile == null)
-                        {
-                            ThreadUtils.setLabelTextFromThread(labelVectoring, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
-                        }
-                        else
-                        {
-                            ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
-                            ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
-                            ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
-                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
-                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                        }
-                    }
-
-
-                    //upstream: not for BBOX2
-                    if (_session is Bbox3Session || _session is FritzBoxSession)
-                    {
-                        setLabelValueLoading(labelUpstreamMaxBitRate);
-                        setLabelValueAsDecimal(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate, "###,###,##0 'kbps'");
+                        ThreadUtils.setLabelTextFromThread(labelVectoring, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
                     }
                     else
-                        setLabelNotApplicable(upstreamMaxBitRateLabel, labelUpstreamMaxBitRate);
+                    {
+                        //get vectoring status fallback: get from profile list
+                        ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
+                        ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
+                        ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
+                        ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
+                        ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    }
                 }
                 else
                 {
-                    _connecting = false;
-                    ThreadUtils.setButtonEnabledFromThread(buttonConnect, true);
-                    ThreadUtils.setButtonTextFromThread(buttonConnect, "Connect");
-                    MessageBox.Show("Could not connect to device.", "Connection failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    setLabelNotApplicable(vdslProfileLabel, labelVDSLProfile);
+                    setLabelNotApplicable(vectoringLabel, labelVectoring);
+                    setLabelNotApplicable(repairLabel, labelRepair);
+                    setLabelNotApplicable(dlmLabel, labelDLM);
+                    setLabelNotApplicable(proximusProfileLabel, labelProximusProfile);
                 }
+
+                //attenuation
+                //-----------
+                //downstream
+                setLabelValueLoading(labelDownstreamAttenuation);
+                setLabelValueAsDecimal(labelDownstreamAttenuation, _session.DownstreamAttenuation, "0.0 'dB'");
+
+                //upstream: BBOX3 adsl only
+                if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
+                {
+                    setLabelValueLoading(labelUpstreamAttenuation);
+                    setLabelValueAsDecimal(labelUpstreamAttenuation, _session.UpstreamAttenuation, "0.0 'dB'");
+                }
+                else
+                    setLabelNotApplicable(upstreamAttenuationLabel, labelUpstreamAttenuation);
+
+                //noise margin
+                //------------
+                //downstream
+                setLabelValueLoading(labelDownstreamNoiseMargin);
+                setLabelValueAsDecimal(labelDownstreamNoiseMargin, _session.DownstreamNoiseMargin, "0.0 'dB'");
+
+                //upstream: not for BBOX2
+                if (_session is Bbox3Session || _session is FritzBoxSession)
+                {
+                    setLabelValueLoading(labelUpstreamNoiseMargin);
+                    setLabelValueAsDecimal(labelUpstreamNoiseMargin, _session.UpstreamNoiseMargin, "0.0 'dB'");
+                }
+                else
+                    setLabelNotApplicable(upstreamNoiseMarginLabel, labelUpstreamNoiseMargin);
+
+                //max bitrate
+                //-----------
+                //downstream
+                setLabelValueLoading(labelDownstreamMaxBitRate);
+                setLabelValueAsDecimal(labelDownstreamMaxBitRate, _session.DownstreamMaxBitRate, "###,###,##0 'kbps'");
+
+                //retry proximus profile
+                //---------------------
+                if (_session.DSLStandard == DSLStandard.VDSL2)
+                {
+                    ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
+                    if (currentProfile == null)
+                    {
+                        ThreadUtils.setLabelTextFromThread(labelVectoring, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
+                        ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
+                    }
+                    else
+                    {
+                        ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
+                        ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
+                        ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
+                        ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
+                        ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    }
+                }
+
+                //upstream: not for BBOX2
+                if (_session is Bbox3Session || _session is FritzBoxSession)
+                {
+                    setLabelValueLoading(labelUpstreamMaxBitRate);
+                    setLabelValueAsDecimal(labelUpstreamMaxBitRate, _session.UpstreamMaxBitRate, "###,###,##0 'kbps'");
+                }
+                else
+                    setLabelNotApplicable(upstreamMaxBitRateLabel, labelUpstreamMaxBitRate);
             }
-            catch (ThreadCancelledException){}
+            catch (ThreadCancelledException) { }
             catch (Exception ex)
             {
                 MessageBox.Show("Unexpected error occurred. Debug info: " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                _connecting = false;
-                if (connected)
+                if (_connected)
                     _session.CloseSession();
             }
         }
 
-        private void backgroundWorkerBbox_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void backgroundWorkerGetLineData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             buttonClipboard.Enabled = true;
             buttonConnect.Enabled = true;
@@ -467,11 +493,11 @@ namespace BBox3Tool
         }
 
         private void setLabelValueAsDecimal(Label label, decimal? value, string formatter)
-        {   
+        {
             if (value == null)
                 ThreadUtils.setLabelTextFromThread(label, "unknown");
             else
-                ThreadUtils.setLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));              
+                ThreadUtils.setLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));
         }
 
         private string boolToString(bool? value)
@@ -566,7 +592,7 @@ namespace BBox3Tool
         {
             buttonConnect.Enabled = true;
         }
-        
+
         //detect device thread
         //--------------------
         private void backgroundWorkerDetectDevice_DoWork(object sender, DoWorkEventArgs e)
@@ -711,6 +737,5 @@ namespace BBox3Tool
 
             return false;
         }
-
     }
 }
