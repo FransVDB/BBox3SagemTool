@@ -571,10 +571,16 @@ namespace BBox3Tool
         //--------------------
         private void backgroundWorkerDetectDevice_DoWork(object sender, DoWorkEventArgs e)
         {
-            _selectedModem = NetworkUtils.detectDevice("192.168.1.1"); //default
+            Device detected = NetworkUtils.detectDevice("192.168.1.1"); //default
             //try fritzbox default if not found
-            if (_selectedModem == Device.unknown)
-                _selectedModem = NetworkUtils.detectDevice("192.168.178.1");
+            if (detected == Device.unknown)
+                detected = NetworkUtils.detectDevice("192.168.178.1");
+            //do not overwrite user choice
+            if (_selectedModem == Device.unknown && detected != Device.unknown)
+                _selectedModem = detected;
+            //detect bbox3 Technicolor
+            if (detected == Device.BBOX3T)
+                ThreadUtils.setPanelVisibilityFromThread(panelUnsupported, true);
         }
 
         private void backgroundWorkerDetectDevice_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -596,10 +602,6 @@ namespace BBox3Tool
                 case Device.FritzBox7390:
                     panelThumb_Click(panelFritzBox, null);
                     break;
-                case Device.BBOX3T:
-                    panelUnsupported.Visible = true;
-                    break;
-                case Device.unknown:
                 default:
                     break;
             }
@@ -709,10 +711,6 @@ namespace BBox3Tool
 
             return false;
         }
-
-
-
-
 
     }
 }
