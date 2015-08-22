@@ -29,6 +29,10 @@ namespace BBox3Tool.utils
                 if (data != null)
                 {
                     string dataStr = String.Join("&", data.Select(x => HttpUtility.UrlEncode(x.Key) + "=" + HttpUtility.UrlEncode(x.Value)));
+                    //dataStr = dataStr.Replace("%5cu0026", "%26"); // &
+                    dataStr = dataStr.Replace("%5cu0027", "%27"); // '
+                    //dataStr = dataStr.Replace("%5cu003e", "%3e"); // >
+                    //dataStr = dataStr.Replace("%5cu003c", "%3c"); // <
                     switch (mode)
                     {
                         case WebRequestMode.Get:
