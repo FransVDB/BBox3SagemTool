@@ -25,12 +25,22 @@ namespace BBox3Tool
         public string DeviceName { get; private set; }
         public bool? Vectoring { get; private set; }
         public DSLStandard DSLStandard { get; private set; }
+        public bool LineConnected
+        {
+            get
+            {
+                return (GetAdminHTML().IndexOf("NOT CONNECTED") == -1);
+            }
+        }
 
         private string _host;
         private string _username;
         private string _password;
 
-        public Bbox2Session ()
+        private bool _gotAdminHTML;
+        private string _adminHTML;
+
+        public Bbox2Session()
 	    {
             DeviceName = "B-Box 2";
             Distance = null;
@@ -100,44 +110,68 @@ namespace BBox3Tool
 
             return true;
         }
+        
+        public void RefreshData()
+        {
+            //not implemented
+        }
 
         public void GetLineData()
         {
-            // Exec 'shell' command
-            tc.WriteLine("shell");
+            try
+            {
+                // Exec 'shell' command
+                tc.WriteLine("shell");
 
-            // Wait for shell prompt
-            if (tc.Read(1000).EndsWith("# "))
-            {
-                // Send 'vdsl pstatex' command
-                tc.WriteLine("vdsl pstatex");
-            }
+                // Wait for shell prompt
+                if (tc.Read(1000).EndsWith("# "))
+                {
+                    // Send 'vdsl pstatex' command
+                    tc.WriteLine("vdsl pstatex");
+                }
 
-            // Read reply
-            var pstatexReply = tc.Read(1000);
-            if (pstatexReply.Contains("Far-end ITU Vendor Id"))
-            {
-                // Parse results
-                ParsePstatex(pstatexReply);
-            }
-            else
-            {
-                throw new Exception("Unable to read extended port status.");
-            }
+                // Read reply
+                var pstatexReply = tc.Read(1000);
+                if (pstatexReply.Contains("Far-end ITU Vendor Id"))
+                {
+                    // Parse results
+                    ParsePstatex(pstatexReply);
+                }
+                else
+                {
+                    throw new Exception("Unable to read extended port status.");
+                }
 
-            // Wait for shell prompt
-            if (pstatexReply.EndsWith("# "))
-            {
-                // Send 'vdsl getsnr' command
-                tc.WriteLine("vdsl getsnr");
-            }
+                // Wait for shell prompt
+                if (pstatexReply.EndsWith("# "))
+                {
+                    // Send 'vdsl getsnr' command
+                    tc.WriteLine("vdsl getsnr");
+                }
 
-            // Read reply
-            var getsnrReply = tc.Read(1000);
-            if (getsnrReply.Contains("Attenuation"))
+                // Read reply
+                var getsnrReply = tc.Read(1000);
+                if (getsnrReply.Contains("Attenuation"))
+                {
+                    // Parse results
+                    ParseVdslSnr(getsnrReply);
+                }
+            }
+            //vdsl pstatex connection failed --> adsl  line
+            catch
             {
-                // Parse results
-                ParseVdslSnr(getsnrReply);
+                DownstreamCurrentBitRate = 0;
+                UpstreamCurrentBitRate = 0;
+                DownstreamMaxBitRate = 0;
+                UpstreamMaxBitRate = 0;
+                DownstreamNoiseMargin = 0;
+                UpstreamNoiseMargin = 0;
+                DownstreamAttenuation = 0;
+                UpstreamAttenuation = 0;
+                Distance = 0;
+                DSLStandard = DSLStandard.unknown;
+                _vdslProfile = VDSL2Profile.unknown;
+                //TODO read adsl stats from telnet
             }
         }
 
@@ -151,11 +185,7 @@ namespace BBox3Tool
 
             try
             {
-                Uri bbox2Uri = new Uri("http://" + _host);
-                Dictionary<string, string> getData = new Dictionary<string, string>();
-                getData.Add("user_name", _username);
-                getData.Add("password", _password);
-                string homePage = NetworkUtils.sendRequest(bbox2Uri, null, getData, WebRequestMode.Get);
+                string homePage = GetAdminHTML();
 
                 //get hardware version
                 int hwIndex = homePage.IndexOf("<td class=\"libelle\">Hardware Version</td>");
@@ -272,6 +302,38 @@ namespace BBox3Tool
                     break;
                 }
             }
+        }
+
+        private string GetAdminHTML()
+        {
+            if (!_gotAdminHTML)
+            {
+                Uri bbox2Uri = new Uri("http://" + _host);
+                Dictionary<string, string> getData = new Dictionary<string, string>();
+                getData.Add("user_name", _username);
+                getData.Add("password", _password);
+
+                _adminHTML = NetworkUtils.sendRequest(bbox2Uri, null, getData, WebRequestMode.Get);
+                _gotAdminHTML = true;
+            }
+            return _adminHTML;
+        }
+
+        private string GetValueFromHTML(string html, string value)
+        {
+            //get firmware version
+            int valueIndex = html.IndexOf("<td class=\"libelle\">" + value + "</td>");
+            if (valueIndex > 0)
+            {
+                valueIndex = html.IndexOf("<td class=\"status\">", valueIndex);
+                if (valueIndex > 0)
+                {
+                    valueIndex += "<td class=\"status\">".Length;
+                    int valueIndexEnd = html.IndexOf("<", valueIndex);
+                    return html.Substring(valueIndex, valueIndexEnd - valueIndex).Replace("&nbsp;", " ").Trim();
+                }
+            }
+            return string.Empty;
         }
     }
 }

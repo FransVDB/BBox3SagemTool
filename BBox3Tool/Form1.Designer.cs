@@ -646,7 +646,7 @@
             // 
             // pictureBox3
             // 
-            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.pictureBox3.Image = global::BBox3Tool.Properties.Resources.fritzboxThumb;
             this.pictureBox3.Location = new System.Drawing.Point(8, 7);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(93, 66);
@@ -685,7 +685,7 @@
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Image = global::BBox3Tool.Properties.Resources.bbox2Thumb;
             this.pictureBox2.Location = new System.Drawing.Point(8, 7);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(93, 66);
@@ -724,7 +724,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Image = global::BBox3Tool.Properties.Resources.bbox3Thumb;
             this.pictureBox1.Location = new System.Drawing.Point(8, 7);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(93, 66);
@@ -965,9 +965,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(699, 316);
+            this.Controls.Add(this.panelLogin);
             this.Controls.Add(this.panelInfo);
             this.Controls.Add(this.panelDebug);
-            this.Controls.Add(this.panelLogin);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(715, 355);
             this.MinimumSize = new System.Drawing.Size(715, 355);
