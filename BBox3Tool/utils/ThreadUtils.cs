@@ -55,5 +55,21 @@ namespace BBox3Tool.utils
                 button.Text = text;
             });
         }
+
+        public static void AddLoaderToPanel(Panel panel, PictureBox loader)
+        {
+            panel.Invoke((MethodInvoker)delegate
+            {
+                panel.Controls.Add(loader);
+            });
+        }
+
+        public static void RemoveLoaderFromPanel(Panel panel, PictureBox loader)
+        {
+            panel.Invoke((MethodInvoker)delegate
+            {
+                panel.Controls.Remove(loader);
+            });
+        }
     }
 }

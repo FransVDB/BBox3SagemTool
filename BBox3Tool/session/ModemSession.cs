@@ -6,8 +6,11 @@ namespace BBox3Tool
     {
         bool OpenSession(String host, String username, String password);
         bool CloseSession();
-        
+        void RefreshData();
+
         void GetLineData();
+
+        bool LineConnected { get; }
 
         DeviceInfo GetDeviceInfo();
         String GetDebugValue(String debugValue);
