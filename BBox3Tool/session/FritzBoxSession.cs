@@ -60,6 +60,10 @@ namespace BBox3Tool
             return true;
         }
 
+        public void RefreshData() { 
+            //not implemented
+        }
+
         public void GetLineData()
         {
             // Exec 'vdsl' command
@@ -181,6 +185,15 @@ namespace BBox3Tool
         public string GetDebugValue(string debugValue)
         {
             return "Not implemented yet!";
+        }
+
+        public bool LineConnected
+        {
+            get
+            {
+                //TODO implementation
+                return true;
+            }
         }
 
         public int DownstreamCurrentBitRate { get; private set; }
