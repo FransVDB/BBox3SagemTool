@@ -965,9 +965,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(699, 316);
-            this.Controls.Add(this.panelLogin);
             this.Controls.Add(this.panelInfo);
             this.Controls.Add(this.panelDebug);
+            this.Controls.Add(this.panelLogin);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(715, 355);
             this.MinimumSize = new System.Drawing.Size(715, 355);

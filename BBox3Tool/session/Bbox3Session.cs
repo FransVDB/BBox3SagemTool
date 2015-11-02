@@ -880,8 +880,8 @@ namespace BBox3Tool
                 var restMarginDown = _downstreamNoiseMargin - 6m;
                 var startValue = _downstreamCurrentBitRate + Convert.ToInt32(restMarginDown * 3000);
 
-                _downstreamMaxBitRate = startValue;
-                return;
+                //_downstreamMaxBitRate = startValue;
+                //return;
 
                 //check range + - 15.000 of predicted value
                 for (int i = 0; i < 30; i++)
@@ -941,8 +941,8 @@ namespace BBox3Tool
                 if (startValue <= 20000)
                     startValue = Convert.ToInt32(startValue * 0.95);
 
-                _upstreamMaxBitRate = startValue;
-                return;
+                //_upstreamMaxBitRate = startValue;
+                //return;
 
                 //check range + - 7.500 of predicted value
                 for (int i = 0; i < 30; i++)

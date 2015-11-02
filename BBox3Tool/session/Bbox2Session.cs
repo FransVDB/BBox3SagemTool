@@ -172,6 +172,7 @@ namespace BBox3Tool
                 DSLStandard = DSLStandard.unknown;
                 _vdslProfile = VDSL2Profile.unknown;
                 //TODO read adsl stats from telnet
+                //tc.WriteLine("adslstat");
             }
         }
 
