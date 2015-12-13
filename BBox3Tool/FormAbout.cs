@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace BBox3Tool
@@ -29,12 +22,12 @@ namespace BBox3Tool
 
         private void linkLabelUserbase_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start(e.Link.LinkData as string);
+            Process.Start((string) e.Link.LinkData);
         }
 
         private void linkLabelADSLBC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start(e.Link.LinkData as string);
+            Process.Start((string) e.Link.LinkData);
         }
     }
 }
