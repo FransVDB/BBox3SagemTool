@@ -21,6 +21,9 @@ namespace BBox3Tool.utils
             XmlDocument profilesDoc = new XmlDocument();
             using (Stream stream = typeof(Form1).Assembly.GetManifestResourceStream("BBox3Tool.profile.profiles.xml"))
             {
+                if (stream == null)
+                    throw new Exception("BBox3Tool.profile.profiles.xml not found in resources.");
+
                 using (StreamReader sr = new StreamReader(stream))
                 {
                     profilesDoc.LoadXml(sr.ReadToEnd());
@@ -40,34 +43,59 @@ namespace BBox3Tool.utils
         {
             //run trough all xml profiles
             List<ProximusLineProfile> listProfiles = new List<ProximusLineProfile>();
-            foreach (XmlNode profileNode in xmlDoc.SelectNodes("//document/profiles/profile"))
+
+            XmlNodeList nodeProfiles = xmlDoc.SelectNodes("//document/profiles/profile");
+            if (nodeProfiles != null)
             {
-                List<int> confirmedDownloadList = new List<int>();
-                List<int> confirmedUploadList = new List<int>();
-                foreach (XmlNode confirmedNode in profileNode.SelectNodes("confirmed"))
+                foreach (XmlNode profileNode in nodeProfiles)
                 {
-                    confirmedDownloadList.Add(Convert.ToInt32(confirmedNode.Attributes["down"].Value));
-                    confirmedUploadList.Add(Convert.ToInt32(confirmedNode.Attributes["up"].Value));
+                    List<int> confirmedDownloadList = new List<int>();
+                    List<int> confirmedUploadList = new List<int>();
+
+                    XmlNodeList nodeConfirmed = profileNode.SelectNodes("confirmed");
+                    if (nodeConfirmed != null)
+                    {
+                        foreach (XmlNode confirmedNode in nodeConfirmed)
+                        {
+                            if (confirmedNode.Attributes != null)
+                            {
+                                confirmedDownloadList.Add(Convert.ToInt32(confirmedNode.Attributes["down"].Value));
+                                confirmedUploadList.Add(Convert.ToInt32(confirmedNode.Attributes["up"].Value));
+                            }
+                        }
+                    }
+
+                    XmlNodeList nodeOfficial = profileNode.SelectNodes("official");
+                    if (nodeOfficial != null)
+                    {
+                        XmlAttributeCollection attributesOfficial = nodeOfficial[0].Attributes;
+                        if (attributesOfficial != null)
+                        {
+                            confirmedDownloadList.Add(Convert.ToInt32(attributesOfficial["down"].Value));
+                            confirmedUploadList.Add(Convert.ToInt32(attributesOfficial["up"].Value));
+                        }
+                    }
+
+                    if (profileNode.Attributes != null)
+                    {
+                        ProximusLineProfile profile = new ProximusLineProfile(
+                            profileNode.Attributes["name"].Value,
+                            confirmedDownloadList.Last(),
+                            confirmedUploadList.Last(),
+                            Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["repair"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["vectoring-up"].Value),
+                            (VDSL2Profile) Enum.Parse(typeof (VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
+                            confirmedDownloadList.Distinct().ToList(),
+                            confirmedUploadList.Distinct().ToList(),
+                            Convert.ToDecimal(profileNode.Attributes["min"].Value, CultureInfo.InvariantCulture),
+                            Convert.ToDecimal(profileNode.Attributes["max"].Value, CultureInfo.InvariantCulture));
+
+                        listProfiles.Add(profile);
+                    }
                 }
-                confirmedDownloadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["down"].Value));
-                confirmedUploadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["up"].Value));
-
-                ProximusLineProfile profile = new ProximusLineProfile(
-                    profileNode.Attributes["name"].Value,
-                    confirmedDownloadList.Last(),
-                    confirmedUploadList.Last(),
-                    Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["repair"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["vectoring-up"].Value),
-                    (VDSL2Profile)Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
-                    confirmedDownloadList.Distinct().ToList(),
-                    confirmedUploadList.Distinct().ToList(),
-                    Convert.ToDecimal(profileNode.Attributes["min"].Value, CultureInfo.InvariantCulture),
-                    Convert.ToDecimal(profileNode.Attributes["max"].Value, CultureInfo.InvariantCulture));
-
-                listProfiles.Add(profile);
             }
             return listProfiles;
         }

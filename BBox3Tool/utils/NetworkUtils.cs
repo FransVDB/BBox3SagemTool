@@ -38,12 +38,12 @@ namespace BBox3Tool.utils
                     {
                         case WebRequestMode.Get:
                             url = new Uri(url + "?" + dataStr);
-                            request = WebRequest.Create(url) as HttpWebRequest;
+                            request = (HttpWebRequest) WebRequest.Create(url);
                             request.Method = "GET";
                             request.Host = url.Host;
                             break;
                         case WebRequestMode.Post:
-                            request = WebRequest.Create(url) as HttpWebRequest;
+                            request = (HttpWebRequest) WebRequest.Create(url);
                             request.Method = "POST";
                             request.Host = url.Host;
 
@@ -67,7 +67,7 @@ namespace BBox3Tool.utils
                     }
                 }
                 else
-                    request = WebRequest.Create(url) as HttpWebRequest;
+                    request = (HttpWebRequest) WebRequest.Create(url);
 
                 //set headers, fake real browser the best we can
                 request.KeepAlive = true;
@@ -89,7 +89,11 @@ namespace BBox3Tool.utils
 
                 //make request and get response
                 WebResponse response = request.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
+                Stream responseStream = response.GetResponseStream();
+                if (responseStream == null)
+                    throw new Exception("No response from " + request.RequestUri);
+
+                StreamReader reader = new StreamReader(responseStream);
                 string responseString = reader.ReadToEnd();
                 response.Close();
                 return responseString;
