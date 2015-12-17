@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BBox3Tool
+namespace BBox3Tool.exception
 {
     public class ThreadCancelledException: Exception
     {

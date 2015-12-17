@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using BBox3Tool.enums;
+using BBox3Tool.profile;
 
 namespace BBox3Tool.utils
 {
@@ -13,7 +15,7 @@ namespace BBox3Tool.utils
         /// Load Proximus line profiles from embedded resource
         /// </summary>
         /// <returns>Proximus line profiles</returns>
-        public static List<ProximusLineProfile> loadEmbeddedProfiles()
+        public static List<ProximusLineProfile> LoadEmbeddedProfiles()
         {
             //load xml doc
             XmlDocument profilesDoc = new XmlDocument();
@@ -26,7 +28,7 @@ namespace BBox3Tool.utils
             }
 
             //run trough all xml profiles
-            return loadProfilesFromXML(profilesDoc);
+            return LoadProfilesFromXml(profilesDoc);
         }
 
         /// <summary>
@@ -34,7 +36,7 @@ namespace BBox3Tool.utils
         /// </summary>
         /// <param name="xmlDoc">Xml document that contains the profiles</param>
         /// <returns>Proximus line profiles</returns>
-        public static List<ProximusLineProfile> loadProfilesFromXML(XmlDocument xmlDoc)
+        public static List<ProximusLineProfile> LoadProfilesFromXml(XmlDocument xmlDoc)
         {
             //run trough all xml profiles
             List<ProximusLineProfile> listProfiles = new List<ProximusLineProfile>();
@@ -58,6 +60,7 @@ namespace BBox3Tool.utils
                     Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
                     Convert.ToBoolean(profileNode.Attributes["repair"].Value),
                     Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
+                    Convert.ToBoolean(profileNode.Attributes["vectoring-up"].Value),
                     (VDSL2Profile)Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
                     confirmedDownloadList.Distinct().ToList(),
                     confirmedUploadList.Distinct().ToList(),
@@ -75,13 +78,12 @@ namespace BBox3Tool.utils
         /// <param name="profiles">Proximus line profiles to choose from</param>
         /// <param name="uploadSpeed">Upload speed of current session</param>
         /// <param name="downloadSpeed">Download speed of current session</param>
-        /// <param name="vectoringEnabled">Vectoring enabled/disabled or null for unknown</param>
-        /// <param name="distance">Distance or null for unknown</param>
+        /// <param name="vectoringDownEnabled">Vectoring down enabled/disabled or null for Unknown</param>µ
+        /// <param name="vectoringUpEnabled">Vectoring up enabled/disabled or null for Unknown</param>
+        /// <param name="distance">Distance or null for Unknown</param>
         /// <returns>Proximus line profile of the current session</returns>
-        public static ProximusLineProfile getProfile(List<ProximusLineProfile> profiles, int uploadSpeed, int downloadSpeed, bool? vectoringEnabled, decimal? distance)
+        public static ProximusLineProfile GetProfile(List<ProximusLineProfile> profiles, int uploadSpeed, int downloadSpeed, bool vectoringDownEnabled, bool vectoringUpEnabled, decimal? distance)
         {
-            
-
             lock (profiles)
             {
                 //check if speed matches with confirmed speeds
@@ -115,7 +117,7 @@ namespace BBox3Tool.utils
                           .First().x;
                 }*/
 
-                //no matches found, get profile with closest speeds in range of +256kb
+                //get profiles with closest speeds in range of +256kb
                 List<ProximusLineProfile> rangeMatches = profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
                     .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
                     .OrderBy(p => p.diffDownload)
@@ -124,9 +126,8 @@ namespace BBox3Tool.utils
                     .ToList();
 
                 //check on vectoring
-                if (vectoringEnabled != null)
-                    rangeMatches = rangeMatches
-                        .Where(x => x.VectoringEnabled == vectoringEnabled).ToList();
+                rangeMatches = rangeMatches
+                    .Where(x => x.VectoringDownDownEnabled == vectoringDownEnabled && x.VectoringUpEnabled == vectoringUpEnabled).ToList();
 
                 //check on distance
                 if (distance != null)
@@ -163,16 +164,19 @@ namespace BBox3Tool.utils
 
                         //vectoring
                         bool? vectoring = null;
-                        if (rangeMatches.GroupBy(x => x.VectoringEnabled).Count() == 1)
-                            vectoring = rangeMatches.First().VectoringEnabled;
+                        if (rangeMatches.GroupBy(x => x.VectoringDownDownEnabled).Count() == 1)
+                            vectoring = rangeMatches.First().VectoringDownDownEnabled;
+                        bool? vectoringUp = null;
+                        if (rangeMatches.GroupBy(x => x.VectoringUpEnabled).Count() == 1)
+                            vectoringUp = rangeMatches.First().VectoringUpEnabled;
 
                         //vdsl profile
-                        VDSL2Profile vdsl2profile = VDSL2Profile.unknown;
+                        VDSL2Profile vdsl2Profile = VDSL2Profile.unknown;
                         if (rangeMatches.GroupBy(x => x.ProfileVDSL2).Count() == 1)
-                            vdsl2profile = rangeMatches.First().ProfileVDSL2;
+                            vdsl2Profile = rangeMatches.First().ProfileVDSL2;
 
 
-                        return new ProximusLineProfile("unknown", downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vdsl2profile, new List<int>(), new List<int>(), 0, 0);
+                        return new ProximusLineProfile("Unknown", downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vectoringUp, vdsl2Profile, new List<int>(), new List<int>(), 0, 0);
                     }
                 }
                     

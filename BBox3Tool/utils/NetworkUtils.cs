@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
+using BBox3Tool.enums;
 
 namespace BBox3Tool.utils
 {
@@ -19,11 +20,11 @@ namespace BBox3Tool.utils
         /// <param name="data">Data to send to Bbox (post or get data)</param>
         /// <param name="mode">Request mode: post or get</param>
         /// <returns>Reply as string</returns>
-        public static string sendRequest(Uri url, CookieCollection cookies = null, Dictionary<string, string> data = null, WebRequestMode mode = WebRequestMode.Get)
+        public static string SendRequest(Uri url, CookieCollection cookies = null, Dictionary<string, string> data = null, WebRequestMode mode = WebRequestMode.Get)
         {
             try
             {
-                HttpWebRequest request = null;
+                HttpWebRequest request;
 
                 //set data
                 if (data != null)
@@ -36,7 +37,7 @@ namespace BBox3Tool.utils
                     switch (mode)
                     {
                         case WebRequestMode.Get:
-                            url = new Uri(url.ToString() + "?" + dataStr);
+                            url = new Uri(url + "?" + dataStr);
                             request = WebRequest.Create(url) as HttpWebRequest;
                             request.Method = "GET";
                             request.Host = url.Host;
@@ -104,8 +105,8 @@ namespace BBox3Tool.utils
         /// Auto detect type of modem
         /// </summary>
         /// <param name="ipAddress">IP address of the modem</param>
-        /// <returns>Type of device if recognised, or unknown</returns>
-        public static Device detectDevice(string ipAddress)
+        /// <returns>Type of device if recognised, or Unknown</returns>
+        public static Device DetectDevice(string ipAddress)
         {
             try
             {
@@ -118,12 +119,12 @@ namespace BBox3Tool.utils
                     return Device.BBOX2;
                 if (hostname.Contains("fritz.box"))
                     return Device.FritzBox7390;
-                return Device.unknown;
+                return Device.Unknown;
             }
             catch(Exception ex)
             {
                 Debugger.Log(0, "error", ex.ToString());
-                return Device.unknown;
+                return Device.Unknown;
             }
         }
     }

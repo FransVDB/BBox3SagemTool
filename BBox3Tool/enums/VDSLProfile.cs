@@ -1,4 +1,4 @@
-﻿namespace BBox3Tool
+﻿namespace BBox3Tool.enums
 {
     public enum VDSL2Profile
     {

@@ -9,6 +9,10 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using BBox3Tool.enums;
+using BBox3Tool.exception;
+using BBox3Tool.profile;
+using BBox3Tool.session;
 
 namespace BBox3Tool
 {
@@ -17,30 +21,30 @@ namespace BBox3Tool
         private IModemSession _session;
         private List<ProximusLineProfile> _profiles;
 
-        private Device _selectedModem = Device.unknown;
+        private Device _selectedModem = Device.Unknown;
 
-        private Color _colorSelected = Color.FromArgb(174, 204, 237);
-        private Color _colorMouseOver = Color.FromArgb(235, 228, 241);
+        private readonly Color _colorSelected = Color.FromArgb(174, 204, 237);
+        private readonly Color _colorMouseOver = Color.FromArgb(235, 228, 241);
 
         private readonly Uri _liveUpdateCheck = new Uri("http://www.cloudscape.be/userbasepyro85/latest.xml");
         private readonly Uri _liveUpdateProfiles = new Uri("http://www.cloudscape.be/userbasepyro85/profiles.xml");
 
-        private bool _connecting = false;
-        private bool _connected = false;
+        private bool _connecting;
+        private bool _connected;
 
         public Form1()
         {
             InitializeComponent();
 
             //set form title
-            this.Text += " " + Application.ProductVersion;
+            Text += " " + Application.ProductVersion;
 
             //set worker thread properties
             backgroundWorkerGetLineData.WorkerSupportsCancellation = true;
             backgroundWorkerGetLineData.WorkerReportsProgress = true;
 
             //load embedded xml profiles
-            _profiles = ProfileUtils.loadEmbeddedProfiles();
+            _profiles = ProfileUtils.LoadEmbeddedProfiles();
 
             //do live update, update profiles
             backgroundWorkerLiveUpdate.RunWorkerAsync();
@@ -95,7 +99,7 @@ namespace BBox3Tool
                 case Device.BBOX3T:
                     _session = null;
                     break;
-                case Device.unknown:
+                case Device.Unknown:
                 default:
                     _session = null;
                     break;
@@ -114,12 +118,12 @@ namespace BBox3Tool
             //check mode
             bool debug = (textBoxUsername.Text.ToLower() == "debug");
             if (debug)
-                initDebugMode();
+                InitDebugMode();
             else
-                initNormalMode();
+                InitNormalMode();
         }
 
-        private void initDebugMode()
+        private void InitDebugMode()
         {
             //get textbox values
             string host = textBoxIpAddress.Text;
@@ -144,7 +148,7 @@ namespace BBox3Tool
             }
         }
 
-        private void initNormalMode()
+        private void InitNormalMode()
         {
             //init session
             backgroundWorkerConnect.RunWorkerAsync(new DeviceSettings
@@ -172,42 +176,43 @@ namespace BBox3Tool
             builder.AppendLine("--------------------" + new String('-', Application.ProductVersion.Length));
             builder.AppendLine("Device:                        " + _session.DeviceName);
             builder.AppendLine("");
-            builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
-            builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "Unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "Unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream max bit rate:       " + (_session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Downstream max bit rate:       " + (_session.DownstreamMaxBitRate < 0 ? "Unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
             if (_session is Bbox3Session || _session is FritzBoxSession)
-                builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
+                builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "Unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
+            builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "Unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
             if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
-                builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
+                builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "Unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
+            builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "Unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
             if (_session is Bbox3Session || _session is FritzBoxSession)
-                builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
+                builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "Unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
 
             builder.AppendLine("DSL standard:                  " + _session.DSLStandard.ToString().Replace("plus", "+"));
             if (_session.DSLStandard == DSLStandard.VDSL2)
             {
-                ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
+                ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                 if (currentProfile == null)
                 {
-                    builder.AppendLine("VDSL2 profile:                 unknown");
-                    builder.AppendLine("Vectoring:                     " + boolToString(_session.Vectoring));
-                    builder.AppendLine("Proximus profile:              unknown");
-                    builder.AppendLine("DLM:                           unknown");
-                    builder.AppendLine("Repair:                        unknown");
+                    builder.AppendLine("DSL profile:                   Unknown");
+                    builder.AppendLine("Vectoring down:                " + boolToString(_session.VectoringDown));
+                    builder.AppendLine("Vectoring up:                  " + boolToString(_session.VectoringUp));
+                    builder.AppendLine("Proximus profile:              Unknown");
+                    builder.AppendLine("DLM:                           Unknown");
+                    builder.AppendLine("Repair:                        Unknown");
                 }
                 else
                 {
-
-                    builder.AppendLine("VDSL2 profile:                 " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                    builder.AppendLine("Vectoring:                     " + boolToString(_session.Vectoring));
+                    builder.AppendLine("DSL profile:                   " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                    builder.AppendLine("Vectoring down:                " + boolToString(_session.VectoringDown));
+                    builder.AppendLine("Vectoring up:                  " + boolToString(_session.VectoringUp));
                     builder.AppendLine("Proximus profile:              " + currentProfile.Name);
                     builder.AppendLine("DLM:                           " + boolToString(currentProfile.DlmProfile));
                     builder.AppendLine("Repair:                        " + boolToString(currentProfile.RepairProfile));
@@ -215,9 +220,9 @@ namespace BBox3Tool
             }
 
             if (_session is Bbox3Session)
-                builder.AppendLine("Distance (estimated):          " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
             else
-                builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
 
             builder.AppendLine("[/code]");
 
@@ -298,7 +303,10 @@ namespace BBox3Tool
                 labelDSLStandard.Text = "...";
                 labelVDSLProfile.Text = "...";
                 labelProximusProfile.Text = "...";
-                labelVectoring.Text = "...";
+                labelVectoringDown.Text = "...";
+                labelVectoringUp.Text = "...";
+                labelVectoringModemCapable.Text = "...";
+                labelVectoringROPCapable.Text = "...";
                 labelDLM.Text = "...";
                 labelRepair.Text = "...";
                 labelDistance.Text = "...";
@@ -336,10 +344,11 @@ namespace BBox3Tool
                 ThreadUtils.setButtonEnabledFromThread(buttonConnect, false);
 
                 if (_session is Bbox3Session)
-                    ThreadUtils.setLabelTextFromThread(distanceLabel, distanceLabel.Text + "\r\n(estimated)");
+                    ThreadUtils.setLabelTextFromThread(distanceLabel, "Estimated distance");
 
                 // Get device info
                 //----------------
+                ThreadUtils.setLabelTextFromThread(labelVectoringModemCapable, boolToString(_session.VectoringDeviceCapable));
                 setLabelValueLoading(labelHardwareVersion);
                 setLabelValueLoading(labelFirmwareVersion);
                 setLabelValueLoading(labelDeviceUptime);
@@ -396,36 +405,39 @@ namespace BBox3Tool
                     if (_session.DSLStandard == DSLStandard.VDSL2)
                     {
                         //get vectoring status
-                        setLabelValueLoading(labelVectoring);
-                        ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(_session.Vectoring));
+                        setLabelValueLoading(labelVectoringDown);
+                        ThreadUtils.setLabelTextFromThread(labelVectoringDown, boolToString(_session.VectoringDown));
+                        setLabelValueLoading(labelVectoringUp);
+                        ThreadUtils.setLabelTextFromThread(labelVectoringUp, boolToString(_session.VectoringUp));
 
-                        ProximusLineProfile currentProfile = ProfileUtils.getProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.Vectoring, _session.Distance);
+                        ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                         if (currentProfile == null)
                         {
-                            ThreadUtils.setLabelTextFromThread(labelDLM, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelRepair, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, "unknown");
-                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "unknown");
+                            ThreadUtils.setLabelTextFromThread(labelDLM, "Unknown");
+                            ThreadUtils.setLabelTextFromThread(labelRepair, "Unknown");
+                            ThreadUtils.setLabelTextFromThread(labelProximusProfile, "Unknown");
+                            ThreadUtils.setLabelTextFromThread(labelVDSLProfile, "Unknown");
                         }
                         else
                         {
-                            //get vectoring status fallback: get from profile list
-                            if (_session.Vectoring == null)
-                                ThreadUtils.setLabelTextFromThread(labelVectoring, boolToString(currentProfile.VectoringEnabled));
                             ThreadUtils.setLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
                             ThreadUtils.setLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
                             ThreadUtils.setLabelTextFromThread(labelProximusProfile, currentProfile.Name.ToString());
                             ThreadUtils.setLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
+                            
                         }
                     }
                     else
                     {
                         setLabelNotApplicable(vdslProfileLabel, labelVDSLProfile);
-                        setLabelNotApplicable(vectoringLabel, labelVectoring);
+                        setLabelNotApplicable(vectoringLabel, labelVectoringDown);
                         setLabelNotApplicable(repairLabel, labelRepair);
                         setLabelNotApplicable(dlmLabel, labelDLM);
                         setLabelNotApplicable(proximusProfileLabel, labelProximusProfile);
                     }
+                    
+                    //vectoring ROP capable
+                    ThreadUtils.setLabelTextFromThread(labelVectoringROPCapable, boolToString(_session.VectoringROPCapable));
 
                     //attenuation
                     //-----------
@@ -505,11 +517,12 @@ namespace BBox3Tool
             PictureBox loader = new PictureBox();
             loader.Image = Properties.Resources.loader;
             loader.Refresh();
+            loader.BringToFront();
             loader.Visible = true;
             loader.Size = new System.Drawing.Size(16, 16);
             loader.Location = label.Location; //new Point( label.Location.X - 20, label.Location.Y);
 
-            ThreadUtils.AddLoaderToPanel(panelInfo, loader);
+            ThreadUtils.AddLoaderToPanel((Panel)label.Parent, loader);
             ThreadUtils.setLabelTextFromThread(label, "" /*"busy..."*/);
             
             //set eventhandler, when text changes, remove loading icon
@@ -521,15 +534,15 @@ namespace BBox3Tool
         private void setLabelValueAsDecimal(Label label, decimal? value, string formatter)
         {
             if (value == null)
-                ThreadUtils.setLabelTextFromThread(label, "unknown");
+                ThreadUtils.setLabelTextFromThread(label, "Unknown");
             else
-                ThreadUtils.setLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));
+                ThreadUtils.setLabelTextFromThread(label, value < 0 ? "Unknown" : ((decimal)value).ToString(formatter));
         }
 
         private string boolToString(bool? value)
         {
             if (value == null)
-                return "unknown";
+                return "Unknown";
             return ((bool)value) ? "yes" : "no";
         }
 
@@ -543,7 +556,7 @@ namespace BBox3Tool
             try
             {
                 //check latest profiles & distance
-                string latest = NetworkUtils.sendRequest(_liveUpdateCheck);
+                string latest = NetworkUtils.SendRequest(_liveUpdateCheck);
                 if (!string.IsNullOrEmpty(latest))
                 {
                     XmlDocument latestDoc = new XmlDocument();
@@ -584,7 +597,7 @@ namespace BBox3Tool
                             //check if profiles are already stored locally
                             if (getOnlineProfiles)
                             {
-                                string latestProfiles = NetworkUtils.sendRequest(_liveUpdateProfiles);
+                                string latestProfiles = NetworkUtils.SendRequest(_liveUpdateProfiles);
                                 if (!string.IsNullOrEmpty(latestProfiles))
                                 {
                                     XmlDocument latestprofilesDoc = new XmlDocument();
@@ -600,7 +613,7 @@ namespace BBox3Tool
                                 localDoc.Load("BBox3Tool.profiles.xml");
                                 lock (_profiles)
                                 {
-                                    _profiles = ProfileUtils.loadProfilesFromXML(localDoc);
+                                    _profiles = ProfileUtils.LoadProfilesFromXml(localDoc);
                                 }
                             }
                         }
@@ -623,12 +636,12 @@ namespace BBox3Tool
         //--------------------
         private void backgroundWorkerDetectDevice_DoWork(object sender, DoWorkEventArgs e)
         {
-            Device detected = NetworkUtils.detectDevice("192.168.1.1"); //default
+            Device detected = NetworkUtils.DetectDevice("192.168.1.1"); //default
             //try fritzbox default if not found
-            if (detected == Device.unknown)
-                detected = NetworkUtils.detectDevice("192.168.178.1");
+            if (detected == Device.Unknown)
+                detected = NetworkUtils.DetectDevice("192.168.178.1");
             //do not overwrite user choice
-            if (_selectedModem == Device.unknown && detected != Device.unknown)
+            if (_selectedModem == Device.Unknown && detected != Device.Unknown)
                 _selectedModem = detected;
             //detect bbox3 Technicolor
             if (detected == Device.BBOX3T)
@@ -732,7 +745,7 @@ namespace BBox3Tool
             {
                 textBoxUsername.Text = "";
                 textBoxUsername.Enabled = true;
-                _selectedModem = Device.unknown;
+                _selectedModem = Device.Unknown;
             }
         }
 

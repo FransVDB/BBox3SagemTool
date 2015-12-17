@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using MinimalisticTelnet;
+using BBox3Tool.enums;
+using BBox3Tool.objects;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     internal class FritzBoxSession : IModemSession
     {
@@ -16,8 +17,16 @@ namespace BBox3Tool
             DeviceName = "Fritz!Box 7390";
             DSLStandard = DSLStandard.unknown;
             Distance = null;
-            Vectoring = null;
+            VectoringDown = false;
+            VectoringUp = false;
+            VectoringDeviceCapable = true;
+            VectoringROPCapable = null;
 	    }
+
+        //TODO FritzBox:
+        //- check vectoring down : G.INP down > 10
+        //- check vectoring down : G.INP up > 10
+        //- check vectoring ROP capable : Far-end ITU Vendor Id = Broadcom
 
         public bool OpenSession(String host, String username, String password)
         {
@@ -216,7 +225,13 @@ namespace BBox3Tool
 
         public string DeviceName { get; private set; }
 
-        public bool? Vectoring { get; private set; }
+        public bool VectoringDown { get; private set; }
+
+        public bool VectoringUp { get; private set; }
+        
+        public bool VectoringDeviceCapable { get; private set; }
+
+        public bool? VectoringROPCapable { get; private set; }
 
         public DSLStandard DSLStandard { get; private set; }
     }

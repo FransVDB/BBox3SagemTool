@@ -1,5 +1,4 @@
-﻿using BBox3Tool.utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -9,8 +8,13 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Script.Serialization;
+using BBox3Tool.enums;
+using BBox3Tool.exception;
+using BBox3Tool.objects;
+using BBox3Tool.profile;
+using BBox3Tool.utils;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     public class Bbox3Session : IModemSession
     {
@@ -48,7 +52,9 @@ namespace BBox3Tool
         private decimal _downstreamNoiseMargin;
         private decimal _upstreamNoiseMargin;
         private decimal? _distance;
-        private bool? _vectoring;
+        private bool _vectoringDown;
+        private bool _vectoringUp;
+        private bool? _vectoringROPCapable;
         private DSLStandard _DSLStandard;
 
         //booleans for stats
@@ -57,7 +63,7 @@ namespace BBox3Tool
         private bool dsAttenuationDone, usAttenuationDone;
         private bool dsNoiseMarginDone, usNoiseMarginDone;
         private bool distanceDone;
-        private bool vectoringDone;
+        private bool vectoringDownDone, vectoringUpDone;
         private bool DSLStandardDone;
 
         #endregion
@@ -173,16 +179,43 @@ namespace BBox3Tool
             set { this._distance = value; }
         }
 
-        public bool? Vectoring
+        public bool VectoringDown
         {
             get
             {
-                if (!vectoringDone)
-                    GetVectoringEnabled();
-                return _vectoring;
+                if (!vectoringDownDone)
+                    GetVectoringDownEnabled();
+                return _vectoringDown;
             }
-            private set { this._vectoring = value; }
+            private set { _vectoringDown = value; }
         }
+
+        public bool VectoringUp
+        {
+            get
+            {
+                if (!vectoringUpDone)
+                    GetVectoringUpEnabled();
+                return _vectoringUp;
+            }
+            private set { _vectoringUp = value; }
+        }
+
+        public bool? VectoringROPCapable
+        {
+            get
+            {
+                if (VectoringDown || VectoringUp)
+                    return true;
+                else
+                    return null;
+            }
+            private set { this._vectoringROPCapable = value; }
+        }
+
+        public bool VectoringDeviceCapable { get; private set; }
+
+        
 
         public string DeviceName { get; private set; }
 
@@ -247,7 +280,10 @@ namespace BBox3Tool
 
             CurrentProfile = new ProximusLineProfile();
             Distance = null;
-            Vectoring = null;
+            VectoringDown = false;
+            VectoringUp = false;
+            VectoringDeviceCapable = true;
+            VectoringROPCapable = null;
             DSLStandard = DSLStandard.unknown;
 
             //load profiles
@@ -419,7 +455,7 @@ namespace BBox3Tool
                 _requestID = 0;
                 _basicAuth = false;
                 _serverNonce = "";
-                _localNonce = SagemUtils.getLocalNonce();
+                _localNonce = SagemUtils.GetLocalNonce();
 
                 //create json object
                 var jsonLogin = new
@@ -491,7 +527,7 @@ namespace BBox3Tool
                             }
                         },
                         {"cnonce", Convert.ToInt32(_localNonce)},
-                        {"auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
+                        {"auth-key", SagemUtils.CalcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
                     }
                 };
 
@@ -501,7 +537,7 @@ namespace BBox3Tool
                 data.Add("req", jsonString);
 
                 //send request & get response
-                var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+                var response = NetworkUtils.SendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
                 //deserialize object
                 var serializer = new JavaScriptSerializer();
@@ -535,7 +571,7 @@ namespace BBox3Tool
             try
             {
                 //calc local nonce
-                _localNonce = SagemUtils.getLocalNonce();
+                _localNonce = SagemUtils.GetLocalNonce();
 
                 //create json object
                 var jsonLogout = new
@@ -557,7 +593,7 @@ namespace BBox3Tool
                         },
                         {"cnonce", Convert.ToUInt32(_localNonce)},
                         {
-                            "auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)
+                            "auth-key", SagemUtils.CalcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)
                         }
                     }
                 };
@@ -568,7 +604,7 @@ namespace BBox3Tool
                 data.Add("req", jsonString);
 
                 //send request & get response
-                var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+                var response = NetworkUtils.SendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
                 //deserialize object
                 var serializer = new JavaScriptSerializer();
@@ -611,7 +647,7 @@ namespace BBox3Tool
         /// </summary>
         public void GetDownstreamCurrentBitRate()
         {
-            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            if (DSLStandard == DSLStandard.VDSL2)
             {
 
                 //check confirmed bitrates first (feedback from users)
@@ -665,7 +701,7 @@ namespace BBox3Tool
         /// </summary>
         public void GetUpstreamCurrentBitRate()
         {
-            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            if (DSLStandard == DSLStandard.VDSL2)
             {
                 //check confirmed bitrates first (feedback from users)
                 var knownUploadBitrates = _profiles.SelectMany(x => x.ConfirmedUploadSpeeds).ToList();
@@ -776,33 +812,42 @@ namespace BBox3Tool
         }
 
         /// <summary>
-        ///     Check if vectoring is enabled on this line
+        ///     Check if vectoring down is enabled on this line
         /// </summary>
-        public void GetVectoringEnabled()
+        public void GetVectoringDownEnabled()
         {
-            if (DSLStandard == BBox3Tool.DSLStandard.VDSL2)
+            if (DSLStandard == DSLStandard.VDSL2)
             {
                 //only correct after line reset
-                dynamic jsonObject = BBoxGetValue(new List<string> { "Device/DSL/Lines/Line[VectoringState=\"RUNNING\"]/Status" });
-                if (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied")
-                    Vectoring = true;
-                else
-                {
-                    var valuesToCheck = new List<int> { };
-                    valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
-                    var inpDownstream = getDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINP", valuesToCheck, 10, 5);
-                    if (inpDownstream >= 10)
-                        Vectoring = true;
-                    else if (inpDownstream >= 1)
-                        Vectoring = false;
-                    else
-                        Vectoring = null; // !! not false, because the above checks don't always return correct values
-                }
+                var valuesToCheck = new List<int> { };
+                valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
+                var inpDownstream = getDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINP", valuesToCheck, 10, 5);
+                VectoringDown = (inpDownstream >= 10);
+                
             }
             else
-                Vectoring = false;
+                VectoringDown = false;
 
-            vectoringDone = true;
+            vectoringDownDone = true;
+        }
+
+        /// <summary>
+        ///     Check if vectoring up is enabled on this line
+        /// </summary>
+        public void GetVectoringUpEnabled()
+        {
+            if (DSLStandard == DSLStandard.VDSL2)
+            {
+                //only correct after line reset
+                var valuesToCheck = new List<int> { };
+                valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
+                var inpUpstream = getDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINPus", valuesToCheck, 10, 5);
+                VectoringUp = (inpUpstream >= 10);
+            }
+            else
+                VectoringUp = false;
+
+            vectoringUpDone = true;
         }
 
         #endregion profile
@@ -869,7 +914,7 @@ namespace BBox3Tool
         /// <summary>
         ///     Get downstream max bit rate, check from 0 to 150.000 kbps
         /// </summary>
-        /// <returns>Downstream max bit rate in kbps, or 'unknown' if not found</returns>
+        /// <returns>Downstream max bit rate in kbps, or 'Unknown' if not found</returns>
         public void GetDownstreamMaxBitRate()
         {
             var valuesToCheck = new List<int>();
@@ -880,8 +925,8 @@ namespace BBox3Tool
                 var restMarginDown = _downstreamNoiseMargin - 6m;
                 var startValue = _downstreamCurrentBitRate + Convert.ToInt32(restMarginDown * 3000);
 
-                //_downstreamMaxBitRate = startValue;
-                //return;
+                _downstreamMaxBitRate = startValue;
+                return;
 
                 //check range + - 15.000 of predicted value
                 for (int i = 0; i < 30; i++)
@@ -929,7 +974,7 @@ namespace BBox3Tool
         /// <summary>
         ///     Get upstream max bit rate, check from 0 to 50.000 kbps
         /// </summary>
-        /// <returns>Upstream max bit rate in kbps, or 'unknown' if not found</returns>
+        /// <returns>Upstream max bit rate in kbps, or 'Unknown' if not found</returns>
         public void GetUpstreamMaxBitRate()
         {
             //17a profiles
@@ -941,8 +986,8 @@ namespace BBox3Tool
                 if (startValue <= 20000)
                     startValue = Convert.ToInt32(startValue * 0.95);
 
-                //_upstreamMaxBitRate = startValue;
-                //return;
+                _upstreamMaxBitRate = startValue;
+                return;
 
                 //check range + - 7.500 of predicted value
                 for (int i = 0; i < 30; i++)
@@ -994,7 +1039,7 @@ namespace BBox3Tool
             {
                 case DSLStandard.ADSL:
                     //based on stats
-                    Distance = (1000m / 8.75m) * DownstreamAttenuation;
+                    Distance = (1000m / 9.6m) * DownstreamAttenuation;
                     break;
                 case DSLStandard.ADSL2:
                     Distance = null;
@@ -1370,7 +1415,7 @@ namespace BBox3Tool
                 throw new ThreadCancelledException("Request cancelled.");
 
             //calc local nonce
-            _localNonce = SagemUtils.getLocalNonce();
+            _localNonce = SagemUtils.GetLocalNonce();
 
             //create json object
             var jsonGetValue = new
@@ -1382,7 +1427,7 @@ namespace BBox3Tool
                     {"priority", false},
                     {"actions", actions.ToArray()},
                     {"cnonce", Convert.ToUInt32(_localNonce)},
-                    {"auth-key", SagemUtils.calcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
+                    {"auth-key", SagemUtils.CalcAuthKey(_username, _password, _requestID, _serverNonce, _localNonce)}
                 }
             };
 
@@ -1392,7 +1437,7 @@ namespace BBox3Tool
             data.Add("req", jsonString);
 
             //send request & get response
-            var response = NetworkUtils.sendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
+            var response = NetworkUtils.SendRequest(_cgiReq, getCookies(), data, WebRequestMode.Post);
 
             //increase request id
             _requestID++;
@@ -1422,7 +1467,7 @@ namespace BBox3Tool
                     {"basic", _basicAuth},
                     {"user", _username},
                     {"nonce", _serverNonce},
-                    {"ha1", SagemUtils.calcHa1Cookie(_username, _password, _serverNonce)},
+                    {"ha1", SagemUtils.CalcHa1Cookie(_username, _password, _serverNonce)},
                     {
                         "dataModel",
                         new

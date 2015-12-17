@@ -1,11 +1,10 @@
 ﻿using BBox3Tool.objects;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Xml;
+using BBox3Tool.enums;
 
 namespace BBox3Tool.utils
 {
@@ -46,7 +45,7 @@ namespace BBox3Tool.utils
                 case Device.FritzBox7390:
                     settingsDoc.SelectSingleNode("//document/login/device").InnerText = "FRITZBOX";
                     break;
-                case Device.unknown:
+                case Device.Unknown:
                 case Device.BBOX3T:
                 default:
                     break;
@@ -92,7 +91,7 @@ namespace BBox3Tool.utils
                             settings.Device = Device.FritzBox7390;
                             break;
                         default:
-                            settings.Device = Device.unknown;
+                            settings.Device = Device.Unknown;
                             break;
                     }
                     return settings;

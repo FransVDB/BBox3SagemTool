@@ -9,7 +9,7 @@ namespace BBox3Tool
         {
             InitializeComponent();
 
-            labelVersion.Text += " " + Application.ProductVersion;
+            labelVersion.Text += Application.ProductVersion;
 
             LinkLabel.Link linkUserbase = new LinkLabel.Link();
             linkUserbase.LinkData = "http://userbase.be/forum/viewtopic.php?f=43&t=43902";

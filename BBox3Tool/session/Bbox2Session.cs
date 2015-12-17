@@ -1,37 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using MinimalisticTelnet;
+using System.Text;
+using BBox3Tool.enums;
+using BBox3Tool.objects;
 using BBox3Tool.utils;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     internal class Bbox2Session : IModemSession
     {
         private VDSL2Profile _vdslProfile;
-        private TelnetConnection tc;
-
-        public int DownstreamCurrentBitRate { get; private set; }
-        public int UpstreamCurrentBitRate { get; private set; }
-        public int DownstreamMaxBitRate { get; private set; }
-        public int UpstreamMaxBitRate { get; private set; }
-        public decimal DownstreamAttenuation { get; private set; }
-        public decimal UpstreamAttenuation { get; private set; }
-        public decimal DownstreamNoiseMargin { get; private set; }
-        public decimal UpstreamNoiseMargin { get; private set; }
-        public decimal? Distance { get; private set; }
-        public string DeviceName { get; private set; }
-        public bool? Vectoring { get; private set; }
-        public DSLStandard DSLStandard { get; private set; }
-        public bool LineConnected
-        {
-            get
-            {
-                return (GetAdminHTML().IndexOf("NOT CONNECTED") == -1);
-            }
-        }
+        private TelnetConnection _tc;
 
         private string _host;
         private string _username;
@@ -40,11 +21,55 @@ namespace BBox3Tool
         private bool _gotAdminHTML;
         private string _adminHTML;
 
+        #region getters & setters
+
+        public int DownstreamCurrentBitRate { get; private set; }
+
+        public int UpstreamCurrentBitRate { get; private set; }
+
+        public int DownstreamMaxBitRate { get; private set; }
+
+        public int UpstreamMaxBitRate { get; private set; }
+
+        public decimal DownstreamAttenuation { get; private set; }
+
+        public decimal UpstreamAttenuation { get; private set; }
+
+        public decimal DownstreamNoiseMargin { get; private set; }
+
+        public decimal UpstreamNoiseMargin { get; private set; }
+
+        public decimal? Distance { get; private set; }
+
+        public string DeviceName { get; private set; }
+
+        public bool VectoringDown { get; private set; }
+
+        public bool VectoringUp { get; private set; }
+
+        public bool VectoringDeviceCapable { get; private set; }
+
+        public bool? VectoringROPCapable { get; private set; }
+
+        public DSLStandard DSLStandard { get; private set; }
+
+        public bool LineConnected
+        {
+            get
+            {
+                return (GetAdminHTML().IndexOf("NOT CONNECTED") == -1);
+            }
+        }
+
+        #endregion
+
         public Bbox2Session()
 	    {
             DeviceName = "B-Box 2";
             Distance = null;
-            Vectoring = false;
+            VectoringDown = false;
+            VectoringUp = false;
+            VectoringDeviceCapable = false;
 
             _host = string.Empty;
             _username = string.Empty;
@@ -56,22 +81,22 @@ namespace BBox3Tool
             try
             {
                 // New connection
-                tc = new TelnetConnection(host, 23);
+                _tc = new TelnetConnection(host, 23);
 
                 // Login
-                var usernamePrompt = tc.Read(2000);
+                var usernamePrompt = _tc.Read(2000);
                 if (usernamePrompt.Contains("login:"))
                 {
-                    tc.WriteLine(username);
+                    _tc.WriteLine(username);
                 }
                 else
                 {
                     return false;
                 }
-                var passwordPrompt = tc.Read(200);
+                var passwordPrompt = _tc.Read(200);
                 if (passwordPrompt.Contains("Password:"))
                 {
-                    tc.WriteLine(password);
+                    _tc.WriteLine(password);
                 }
                 else
                 {
@@ -79,7 +104,7 @@ namespace BBox3Tool
                 }
 
                 //check login successfull
-                var result = tc.Read(200);
+                var result = _tc.Read(200);
                 if (result.ToLower().Contains("admin @ home"))
                 {
                     _host = host;
@@ -99,14 +124,14 @@ namespace BBox3Tool
         public bool CloseSession()
         {
             // Close session if still connected
-            if (tc.IsConnected)
+            if (_tc.IsConnected)
             {
-                tc.WriteLine("^C");
-                tc.WriteLine("exit");
+                _tc.WriteLine("^C");
+                _tc.WriteLine("exit");
             }
 
             // Kill socket
-            tc.CloseConnection();
+            _tc.CloseConnection();
 
             return true;
         }
@@ -121,17 +146,17 @@ namespace BBox3Tool
             try
             {
                 // Exec 'shell' command
-                tc.WriteLine("shell");
+                _tc.WriteLine("shell");
 
                 // Wait for shell prompt
-                if (tc.Read(1000).EndsWith("# "))
+                if (_tc.Read(1000).EndsWith("# "))
                 {
                     // Send 'vdsl pstatex' command
-                    tc.WriteLine("vdsl pstatex");
+                    _tc.WriteLine("vdsl pstatex");
                 }
 
                 // Read reply
-                var pstatexReply = tc.Read(1000);
+                var pstatexReply = _tc.Read(1000);
                 if (pstatexReply.Contains("Far-end ITU Vendor Id"))
                 {
                     // Parse results
@@ -146,11 +171,11 @@ namespace BBox3Tool
                 if (pstatexReply.EndsWith("# "))
                 {
                     // Send 'vdsl getsnr' command
-                    tc.WriteLine("vdsl getsnr");
+                    _tc.WriteLine("vdsl getsnr");
                 }
 
                 // Read reply
-                var getsnrReply = tc.Read(1000);
+                var getsnrReply = _tc.Read(1000);
                 if (getsnrReply.Contains("Attenuation"))
                 {
                     // Parse results
@@ -172,17 +197,17 @@ namespace BBox3Tool
                 DSLStandard = DSLStandard.unknown;
                 _vdslProfile = VDSL2Profile.unknown;
                 //TODO read adsl stats from telnet
-                //tc.WriteLine("adslstat");
+                //_tc.WriteLine("adslstat");
             }
         }
 
         public DeviceInfo GetDeviceInfo()
         {
             var deviceInfo = new DeviceInfo();
-            deviceInfo.DeviceUptime = "unknown";
-            deviceInfo.LinkUptime = "unknown";
-            deviceInfo.HardwareVersion = "unknown";
-            deviceInfo.FirmwareVersion = "unknown";
+            deviceInfo.DeviceUptime = "Unknown";
+            deviceInfo.LinkUptime = "Unknown";
+            deviceInfo.HardwareVersion = "Unknown";
+            deviceInfo.FirmwareVersion = "Unknown";
 
             try
             {
@@ -265,12 +290,13 @@ namespace BBox3Tool
                             Distance = Convert.ToDecimal(loopLength, CultureInfo.InvariantCulture) * 0.3048m;
                             break;
                         case "Line Type":
-                            if (array[1].Trim() == "0x00800000#" || array[1].Trim() == "0x04000000#")
+                            if (array[1].Trim() == "0x00800000#" || array[1].Trim() == "0x04000000#" || array[1].Trim() == "0x00200000#")
                                 DSLStandard = DSLStandard.VDSL2;
                             else
                                 DSLStandard = DSLStandard.unknown;
                             break;
                         case "Far-end ITU Vendor Id":
+                            VectoringROPCapable = FromHexString(array[1]).Contains("BDCM"); //0xb5004244434da45f
                             break;
                     }
                 }
@@ -314,7 +340,7 @@ namespace BBox3Tool
                 getData.Add("user_name", _username);
                 getData.Add("password", _password);
 
-                _adminHTML = NetworkUtils.sendRequest(bbox2Uri, null, getData, WebRequestMode.Get);
+                _adminHTML = NetworkUtils.SendRequest(bbox2Uri, null, getData);
                 _gotAdminHTML = true;
             }
             return _adminHTML;
@@ -335,6 +361,15 @@ namespace BBox3Tool
                 }
             }
             return string.Empty;
+        }
+
+        public string FromHexString(string hexString)
+        {
+            var bytes = new byte[hexString.Length / 2];
+            for (var i = 0; i < bytes.Length; i++)
+                bytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2), 16);
+
+            return Encoding.Unicode.GetString(bytes);
         }
     }
 }

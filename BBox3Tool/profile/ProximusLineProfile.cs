@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BBox3Tool.enums;
 
-namespace BBox3Tool
+namespace BBox3Tool.profile
 {
-
-    //TODO abstraction: vdsl profile, adsl profile, repar, dlm, provisioning, vectoring
-
     public class ProximusLineProfile
     {
         //private members
-        private string _name;
-        private int _downloadSpeed;
-        private int _uploadSpeed;
-        private List<int> _confirmedDownloadSpeeds;
-        private List<int> _confirmedUploadSpeeds;
-        private bool? _dlmProfile;
-        private bool? _repairProfile;
-        private bool? _provisioningProfile;
-        private bool? _vectoringEnabled;
-        private VDSL2Profile _profileVDSL2;
-        private decimal _distanceMin;
-        private decimal _distanceMax;
+        private readonly string _name;
+        private readonly int _downloadSpeed;
+        private readonly int _uploadSpeed;
+        private readonly List<int> _confirmedDownloadSpeeds;
+        private readonly List<int> _confirmedUploadSpeeds;
+        private readonly bool? _dlmProfile;
+        private readonly bool? _repairProfile;
+        private readonly bool? _provisioningProfile;
+        private readonly bool? _vectoringDownDownEnabled;
+        private readonly bool? _vectoringUpEnabled;
+        private readonly VDSL2Profile _profileVDSL2;
+        private readonly decimal _distanceMin;
+        private readonly decimal _distanceMax;
 
         #region getters&setters
 
@@ -89,11 +87,19 @@ namespace BBox3Tool
         }
 
         /// <summary>
-        /// Indicated if this is a vectoring profile or not
+        /// Indicate if vectoring down is enabled or not
         /// </summary>
-        public bool? VectoringEnabled
+        public bool? VectoringDownDownEnabled
         {
-            get { return _vectoringEnabled; }
+            get { return _vectoringDownDownEnabled; }
+        }
+
+        /// <summary>
+        /// Indicate if vectoring up is enabled or not
+        /// </summary>
+        public bool? VectoringUpEnabled
+        {
+            get { return _vectoringUpEnabled; }
         }
 
         /// <summary>
@@ -102,14 +108,19 @@ namespace BBox3Tool
         public VDSL2Profile ProfileVDSL2
         {
             get { return _profileVDSL2; }
-            set { _profileVDSL2 = value; }
         }
 
+        /// <summary>
+        /// Minimum distance for this profile
+        /// </summary>
         public decimal DistanceMin
         {
             get { return _distanceMin; }
         }
 
+        /// <summary>
+        /// Maximum distance for this profile
+        /// </summary>
         public decimal DictanceMax
         {
             get { return _distanceMax; }
@@ -129,7 +140,8 @@ namespace BBox3Tool
             _dlmProfile = false;
             _repairProfile = false;
             _provisioningProfile = false;
-            _vectoringEnabled = false;
+            _vectoringDownDownEnabled = false;
+            _vectoringUpEnabled = false;
             _confirmedDownloadSpeeds = new List<int>();
             _confirmedUploadSpeeds = new List<int>();
             _profileVDSL2 = VDSL2Profile.unknown;
@@ -146,11 +158,14 @@ namespace BBox3Tool
         /// <param name="provisioning">Indicated if this is a provisioning profile or not</param>
         /// <param name="dlm">Indicated if this is a DLM profile or not</param>
         /// <param name="repair">Indicated if this is a repair profile or not</param>
-        /// <param name="vectoring">Indicated if this is a vectoring profile or not</param>
+        /// <param name="vectoringDown">Indicate if vectoring down is enabled or not</param>
+        /// <param name="vectoringUp">Indicate if vectoring up is enabled or not</param>
         /// <param name="profile">VDSL2 profile (17a or 8d)</param>
         /// <param name="confirmedDownloadSpeeds">List of confirmed download speeds (feedback from users)</param>
         /// <param name="confirmedUploadSpeeds">List of confirmed upload speeds (feedback from users)</param>
-        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool? provisioning, bool? dlm, bool? repair, bool? vectoring, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds, decimal distanceMin, decimal distanceMax)
+        /// <param name="distanceMin">Minimim distance for this profile</param>
+        /// <param name="distanceMax">Maximum distance for this profile</param>
+        public ProximusLineProfile(string name, int downloadSpeed, int uploadSpeed, bool? provisioning, bool? dlm, bool? repair, bool? vectoringDown, bool? vectoringUp, VDSL2Profile profile, List<int> confirmedDownloadSpeeds, List<int> confirmedUploadSpeeds, decimal distanceMin, decimal distanceMax)
         {
             _name = name;
             _downloadSpeed =downloadSpeed;
@@ -158,7 +173,8 @@ namespace BBox3Tool
             _dlmProfile = dlm;
             _repairProfile = repair;
             _provisioningProfile = provisioning;
-            _vectoringEnabled = vectoring;
+            _vectoringDownDownEnabled = vectoringDown;
+            _vectoringUpEnabled = vectoringUp;
             _profileVDSL2 = profile;
             _confirmedDownloadSpeeds = confirmedDownloadSpeeds;
             _confirmedUploadSpeeds = confirmedUploadSpeeds;

@@ -1,6 +1,8 @@
 ﻿using System;
+using BBox3Tool.enums;
+using BBox3Tool.objects;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     interface IModemSession
     {
@@ -25,7 +27,10 @@ namespace BBox3Tool
         decimal UpstreamNoiseMargin { get; }
         decimal? Distance { get; }
         string DeviceName { get; }
-        bool? Vectoring { get; }
+        bool VectoringDown { get; }
+        bool VectoringUp { get; }
+        bool VectoringDeviceCapable { get; }
+        bool? VectoringROPCapable { get; }
         DSLStandard DSLStandard { get; }
     }
 }
