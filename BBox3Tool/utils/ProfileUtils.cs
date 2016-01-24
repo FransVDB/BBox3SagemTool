@@ -79,7 +79,8 @@ namespace BBox3Tool.utils
                     if (profileNode.Attributes != null)
                     {
                         ProximusLineProfile profile = new ProximusLineProfile(
-                            profileNode.Attributes["name"].Value,
+                            profileNode.Attributes["name"].Value, 
+                            profileNode.Attributes["speedname"].Value, 
                             confirmedDownloadList.Last(),
                             confirmedUploadList.Last(),
                             Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
@@ -202,9 +203,18 @@ namespace BBox3Tool.utils
                         VDSL2Profile vdsl2Profile = VDSL2Profile.unknown;
                         if (rangeMatches.GroupBy(x => x.ProfileVDSL2).Count() == 1)
                             vdsl2Profile = rangeMatches.First().ProfileVDSL2;
+                        
+                        //LPXXX
+                        string lp = "unknown";
+                        if (rangeMatches.GroupBy(x => x.LpName).Count() == 1)
+                            lp = rangeMatches.First().LpName;
 
+                        //Name (100/20)
+                        string name = "unknown";
+                        if (rangeMatches.GroupBy(x => x.SpeedName).Count() == 1)
+                            name = rangeMatches.First().SpeedName;
 
-                        return new ProximusLineProfile("Unknown", downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vectoringUp, vdsl2Profile, new List<int>(), new List<int>(), 0, 0);
+                        return new ProximusLineProfile(lp, name, downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vectoringUp, vdsl2Profile, new List<int>(), new List<int>(), 0, 0);
                     }
                 }
                     

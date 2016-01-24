@@ -194,6 +194,13 @@ namespace BBox3Tool
                 builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "Unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
 
+
+            builder.AppendLine("Vectoring down:                " + boolToString(_session.VectoringDown));
+            builder.AppendLine("Vectoring up:                  " + boolToString(_session.VectoringUp));
+            builder.AppendLine("Modem vectoring compatible:    " + boolToString(_session.VectoringDeviceCapable));
+            builder.AppendLine("ROP vectoring compatible:      " + boolToString(_session.VectoringROPCapable));
+            builder.AppendLine("");
+
             builder.AppendLine("DSL standard:                  " + _session.DSLStandard.ToString().Replace("plus", "+"));
             if (_session.DSLStandard == DSLStandard.VDSL2)
             {
@@ -201,28 +208,28 @@ namespace BBox3Tool
                 if (currentProfile == null)
                 {
                     builder.AppendLine("DSL profile:                   Unknown");
-                    builder.AppendLine("Vectoring down:                " + boolToString(_session.VectoringDown));
-                    builder.AppendLine("Vectoring up:                  " + boolToString(_session.VectoringUp));
-                    builder.AppendLine("Proximus profile:              Unknown");
-                    builder.AppendLine("DLM:                           Unknown");
-                    builder.AppendLine("Repair:                        Unknown");
+                    if (_session is Bbox3Session)
+                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                    else
+                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                    builder.AppendLine("");
+                    builder.AppendLine("Proximus profile name:         Unknown");
+                    builder.AppendLine("Proximus DLM profile:          Unknown");
+                    builder.AppendLine("Proximus repair profile:       Unknown");
                 }
                 else
                 {
                     builder.AppendLine("DSL profile:                   " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                    builder.AppendLine("Vectoring down:                " + boolToString(_session.VectoringDown));
-                    builder.AppendLine("Vectoring up:                  " + boolToString(_session.VectoringUp));
-                    builder.AppendLine("Proximus profile:              " + currentProfile.Name);
-                    builder.AppendLine("DLM:                           " + boolToString(currentProfile.DlmProfile));
-                    builder.AppendLine("Repair:                        " + boolToString(currentProfile.RepairProfile));
+                    if (_session is Bbox3Session)
+                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                    else
+                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                    builder.AppendLine("");
+                    builder.AppendLine("Proximus profile name:         " + currentProfile.SpeedName);
+                    builder.AppendLine("Proximus DLM profile:          " + boolToString(currentProfile.DlmProfile));
+                    builder.AppendLine("Proximus repair profile:       " + boolToString(currentProfile.RepairProfile));
                 }
             }
-
-            if (_session is Bbox3Session)
-                builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
-            else
-                builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
-
             builder.AppendLine("[/code]");
 
             Clipboard.SetText(builder.ToString());
@@ -248,7 +255,7 @@ namespace BBox3Tool
         {
 
             DeviceSettings sessionInfo = (DeviceSettings)e.Argument;
-            
+
             try
             {
                 _connecting = true;
@@ -344,16 +351,25 @@ namespace BBox3Tool
 
                 // Get device info
                 //----------------
-                ThreadUtils.SetLabelTextFromThread(labelVectoringModemCapable, boolToString(_session.VectoringDeviceCapable));
                 SetLabelValueLoading(labelHardwareVersion);
                 SetLabelValueLoading(labelFirmwareVersion);
                 SetLabelValueLoading(labelDeviceUptime);
                 SetLabelValueLoading(labelLinkUptime);
                 DeviceInfo deviceInfo = _session.GetDeviceInfo();
-                ThreadUtils.SetLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
-                ThreadUtils.SetLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
-                ThreadUtils.SetLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
-                ThreadUtils.SetLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
+                if (_session is Bbox3Session || _session is Bbox2Session)
+                {
+                    ThreadUtils.SetLabelTextFromThread(labelHardwareVersion, deviceInfo.HardwareVersion);
+                    ThreadUtils.SetLabelTextFromThread(labelFirmwareVersion, deviceInfo.FirmwareVersion);
+                    ThreadUtils.SetLabelTextFromThread(labelDeviceUptime, deviceInfo.DeviceUptime);
+                    ThreadUtils.SetLabelTextFromThread(labelLinkUptime, deviceInfo.LinkUptime);
+                }
+                if (_session is FritzBoxSession)
+                {
+                    setLabelNotApplicable(hwVersionLabel, labelHardwareVersion);
+                    setLabelNotApplicable(firmwareVersionLabel, labelFirmwareVersion);
+                    setLabelNotApplicable(deviceUptimeLabel, labelDeviceUptime);
+                    setLabelNotApplicable(lineUptimeLabel, labelLinkUptime);
+                }
 
                 // Check line connected
                 //---------------------
@@ -370,13 +386,26 @@ namespace BBox3Tool
                     {
                         SetLabelValueLoading(labelDownstreamCurrentBitRate);
                         SetLabelValueLoading(labelUpstreamCurrentBitRate);
-                        SetLabelValueLoading(labelDistance);
                         SetLabelValueLoading(labelDownstreamAttenuation);
                         SetLabelValueLoading(labelUpstreamAttenuation);
                         SetLabelValueLoading(labelDownstreamNoiseMargin);
                         SetLabelValueLoading(labelUpstreamNoiseMargin);
                         SetLabelValueLoading(labelDownstreamMaxBitRate);
                         SetLabelValueLoading(labelUpstreamMaxBitRate);
+
+                        SetLabelValueLoading(labelDistance);
+                        SetLabelValueLoading(labelDSLStandard);
+                        SetLabelValueLoading(labelVDSLProfile);
+
+                        SetLabelValueLoading(labelVectoringDown);
+                        SetLabelValueLoading(labelVectoringUp);
+                        SetLabelValueLoading(labelVectoringROPCapable);
+                        SetLabelValueLoading(labelVectoringModemCapable);
+
+                        SetLabelValueLoading(labelProximusProfile);
+                        SetLabelValueLoading(labelDLM);
+                        SetLabelValueLoading(labelRepair);
+
                     }
                     _session.GetLineData();
 
@@ -418,22 +447,26 @@ namespace BBox3Tool
                         {
                             ThreadUtils.SetLabelTextFromThread(labelDLM, boolToString(currentProfile.DlmProfile));
                             ThreadUtils.SetLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
-                            ThreadUtils.SetLabelTextFromThread(labelProximusProfile, currentProfile.Name);
+                            ThreadUtils.SetLabelTextFromThread(labelProximusProfile, currentProfile.SpeedName);
                             ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-                            
+
                         }
                     }
                     else
                     {
                         setLabelNotApplicable(vdslProfileLabel, labelVDSLProfile);
                         setLabelNotApplicable(vectoringLabel, labelVectoringDown);
+                        setLabelNotApplicable(vectoringLabel, labelVectoringUp);
                         setLabelNotApplicable(repairLabel, labelRepair);
                         setLabelNotApplicable(dlmLabel, labelDLM);
                         setLabelNotApplicable(proximusProfileLabel, labelProximusProfile);
                     }
-                    
+
                     //vectoring ROP capable
+                    SetLabelValueLoading(labelVectoringROPCapable);
                     ThreadUtils.SetLabelTextFromThread(labelVectoringROPCapable, boolToString(_session.VectoringROPCapable));
+                    SetLabelValueLoading(labelVectoringModemCapable);
+                    ThreadUtils.SetLabelTextFromThread(labelVectoringModemCapable, boolToString(_session.VectoringDeviceCapable));
 
                     //attenuation
                     //-----------
@@ -512,7 +545,7 @@ namespace BBox3Tool
             //set loader
             PictureBox loader = new PictureBox
             {
-                Image = Properties.Resources.loader, 
+                Image = Properties.Resources.loader,
                 Visible = true,
                 Size = new Size(16, 16),
                 Location = label.Location
@@ -522,9 +555,10 @@ namespace BBox3Tool
 
             ThreadUtils.AddLoaderToPanel((Panel)label.Parent, loader);
             ThreadUtils.SetLabelTextFromThread(label, "");
-            
+
             //set eventhandler, when text changes, remove loading icon
-            label.TextChanged += (sender, e) => {
+            label.TextChanged += (sender, e) =>
+            {
                 ThreadUtils.RemoveLoaderFromPanel(panelInfo, loader);
             };
         }

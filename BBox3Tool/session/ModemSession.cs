@@ -7,15 +7,18 @@ namespace BBox3Tool.session
     interface IModemSession
     {
         bool OpenSession(String host, String username, String password);
+
         bool CloseSession();
+
         void RefreshData();
 
         void GetLineData();
 
-        bool LineConnected { get; }
-
         DeviceInfo GetDeviceInfo();
+
         String GetDebugValue(String debugValue);
+
+        //getters
 
         int DownstreamCurrentBitRate { get; }
         int UpstreamCurrentBitRate { get; }
@@ -31,6 +34,7 @@ namespace BBox3Tool.session
         bool VectoringUp { get; }
         bool VectoringDeviceCapable { get; }
         bool? VectoringROPCapable { get; }
+        bool LineConnected { get; }
         DSLStandard DSLStandard { get; }
     }
 }
