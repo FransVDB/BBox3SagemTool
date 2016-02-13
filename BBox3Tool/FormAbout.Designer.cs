@@ -58,10 +58,10 @@
             // labelVersion
             // 
             this.labelVersion.AutoSize = true;
-            this.labelVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelVersion.Location = new System.Drawing.Point(12, 45);
+            this.labelVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelVersion.Location = new System.Drawing.Point(12, 38);
             this.labelVersion.Name = "labelVersion";
-            this.labelVersion.Size = new System.Drawing.Size(51, 15);
+            this.labelVersion.Size = new System.Drawing.Size(57, 16);
             this.labelVersion.TabIndex = 10;
             this.labelVersion.Text = "Version ";
             // 
@@ -69,7 +69,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 72);
+            this.label1.Location = new System.Drawing.Point(12, 66);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(425, 90);
             this.label1.TabIndex = 11;
@@ -79,7 +79,7 @@
             // 
             this.linkLabelUserbase.AutoSize = true;
             this.linkLabelUserbase.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.linkLabelUserbase.Location = new System.Drawing.Point(166, 246);
+            this.linkLabelUserbase.Location = new System.Drawing.Point(166, 255);
             this.linkLabelUserbase.Name = "linkLabelUserbase";
             this.linkLabelUserbase.Size = new System.Drawing.Size(60, 15);
             this.linkLabelUserbase.TabIndex = 12;
@@ -91,7 +91,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(12, 246);
+            this.label2.Location = new System.Drawing.Point(12, 256);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(295, 15);
             this.label2.TabIndex = 13;
@@ -101,7 +101,7 @@
             // 
             this.linkLabelADSLBC.AutoSize = true;
             this.linkLabelADSLBC.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.linkLabelADSLBC.Location = new System.Drawing.Point(247, 246);
+            this.linkLabelADSLBC.Location = new System.Drawing.Point(247, 255);
             this.linkLabelADSLBC.Name = "linkLabelADSLBC";
             this.linkLabelADSLBC.Size = new System.Drawing.Size(58, 15);
             this.linkLabelADSLBC.TabIndex = 14;
@@ -114,9 +114,9 @@
             this.panelDisclaimer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(252)))), ((int)(((byte)(229)))));
             this.panelDisclaimer.Controls.Add(this.pictureBox1);
             this.panelDisclaimer.Controls.Add(this.label3);
-            this.panelDisclaimer.Location = new System.Drawing.Point(15, 273);
+            this.panelDisclaimer.Location = new System.Drawing.Point(15, 283);
             this.panelDisclaimer.Name = "panelDisclaimer";
-            this.panelDisclaimer.Size = new System.Drawing.Size(607, 37);
+            this.panelDisclaimer.Size = new System.Drawing.Size(732, 37);
             this.panelDisclaimer.TabIndex = 15;
             // 
             // pictureBox1
@@ -142,9 +142,9 @@
             // label4
             // 
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(12, 176);
+            this.label4.Location = new System.Drawing.Point(12, 169);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(610, 62);
+            this.label4.Size = new System.Drawing.Size(735, 77);
             this.label4.TabIndex = 16;
             this.label4.Text = resources.GetString("label4.Text");
             // 
@@ -153,7 +153,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(634, 321);
+            this.ClientSize = new System.Drawing.Size(759, 331);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.panelDisclaimer);
             this.Controls.Add(this.linkLabelADSLBC);
@@ -163,8 +163,8 @@
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.labelAboutTitle);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(650, 360);
-            this.MinimumSize = new System.Drawing.Size(650, 360);
+            this.MaximumSize = new System.Drawing.Size(775, 370);
+            this.MinimumSize = new System.Drawing.Size(775, 370);
             this.Name = "FormAbout";
             this.ShowIcon = false;
             this.Text = "Info";

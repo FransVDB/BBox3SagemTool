@@ -151,6 +151,9 @@
 </value>
   </data>
   <data name="label4.Text" xml:space="preserve">
-    <value>Line values (current bit rate, maximum bit rate, attenuation, noise margin, vectoring) are values directly requested from the device. Profile values (VDSL2 profile, Proximus profile, DLM and repair) are calculated values based on the current bit rate. Distance on B-Box 3 is an estimated value calculated by the tool and may not be accurate, on B-Box 2 it is directly requested form the device and is therefore accurate.</value>
+    <value>Line values (current bit rate, attenuation, noise margin, vectoring) are values directly requested from the device. 
+The max bit rate is calculated by the tool if the VDSL2 profile could be determined, otherwise, it is requested from the device.
+Profile values (VDSL2 profile, Proximus profile, DLM and repair) are calculated values based on the current bit rate. 
+Distance on B-Box 3 is an estimated value calculated by the tool and may not be accurate, on B-Box 2 it is directly requested form the device and is therefore accurate.</value>
   </data>
 </root>

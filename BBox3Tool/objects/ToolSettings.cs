@@ -1,4 +1,6 @@
-﻿namespace BBox3Tool.objects
+﻿using BBox3Tool.enums;
+
+namespace BBox3Tool.objects
 {
     public class ToolSettings
     {

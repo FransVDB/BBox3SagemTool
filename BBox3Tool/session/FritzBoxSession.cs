@@ -1,36 +1,45 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using MinimalisticTelnet;
+using BBox3Tool.enums;
+using BBox3Tool.objects;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     internal class FritzBoxSession : IModemSession
     {
         private VDSL2Profile _vdslProfile;
 
-        private TelnetConnection tc;
+        private TelnetConnection _tc;
 
         public FritzBoxSession()
 	    {
             DeviceName = "Fritz!Box 7390";
             DSLStandard = DSLStandard.unknown;
             Distance = null;
-            Vectoring = null;
+            VectoringDown = false;
+            VectoringUp = false;
+            VectoringDeviceCapable = true;
+            VectoringROPCapable = null;
 	    }
 
-        public bool OpenSession(String host, String username, String password)
+        //TODO FritzBox:
+        //- check vectoring down : G.INP down > 10
+        //- check vectoring down : G.INP up > 10
+        //- check vectoring ROP capable : Far-end ITU Vendor Id = Broadcom
+
+        public bool OpenSession(string host, string username, string password)
         {
             try
             {
                 // New connection
-                tc = new TelnetConnection(host, 23);
+                _tc = new TelnetConnection(host, 23);
 
                 // Login
-                var passwordPrompt = tc.Read(200);
+                var passwordPrompt = _tc.Read(200);
                 if (passwordPrompt.Contains("password:"))
                 {
-                    tc.WriteLine(password);
+                    _tc.WriteLine(password);
                 }
                 else
                 {
@@ -39,7 +48,7 @@ namespace BBox3Tool
 
                 return true;
             }
-            catch(Exception e)
+            catch
             {
                 return false;
             }
@@ -48,14 +57,14 @@ namespace BBox3Tool
         public bool CloseSession()
         {
             // Close session if still connected
-            if (tc.IsConnected)
+            if (_tc.IsConnected)
             {
-                tc.WriteLine("^C");
-                tc.WriteLine("exit");
+                _tc.WriteLine("^C");
+                _tc.WriteLine("exit");
             }
 
             // Kill socket
-            tc.CloseConnection();
+            _tc.CloseConnection();
 
             return true;
         }
@@ -67,20 +76,20 @@ namespace BBox3Tool
         public void GetLineData()
         {
             // Exec 'vdsl' command
-            if (tc.Read(500).EndsWith("# "))
+            if (_tc.Read(500).EndsWith("# "))
             {
-                tc.WriteLine("vdsl");
+                _tc.WriteLine("vdsl");
             }
 
             // Wait for cpe prompt
-            if (tc.Read(1000).EndsWith("cpe>"))
+            if (_tc.Read(1000).EndsWith("cpe>"))
             {
                 // Request extended port status
-                tc.WriteLine("11");
+                _tc.WriteLine("11");
             }
 
             // Read reply
-            var extendedPortStatusReply = tc.Read(2000);
+            var extendedPortStatusReply = _tc.Read(2000);
             if (extendedPortStatusReply.Contains("Far-end ITU Vendor Id"))
             {
                 // Parse results
@@ -95,11 +104,11 @@ namespace BBox3Tool
             if (extendedPortStatusReply.EndsWith("cpe> "))
             {
                 // Request near-end SNR margin and attenuation
-                tc.WriteLine("13");
+                _tc.WriteLine("13");
             }
 
             // Read reply
-            var getsnrReply = tc.Read(2000);
+            var getsnrReply = _tc.Read(2000);
             if (getsnrReply.Contains("Attenuation"))
             {
                 // Parse results
@@ -107,7 +116,7 @@ namespace BBox3Tool
             }
         }
 
-        private void ParsePortStatus(String extendedPortStatus)
+        private void ParsePortStatus(string extendedPortStatus)
         {
             var reader = new StringReader(extendedPortStatus);
             while (true)
@@ -152,7 +161,7 @@ namespace BBox3Tool
             }
         }
 
-        private void ParseVdslSnr(String snr)
+        private void ParseVdslSnr(string snr)
         {
             var reader = new StringReader(snr);
             while (true)
@@ -216,7 +225,13 @@ namespace BBox3Tool
 
         public string DeviceName { get; private set; }
 
-        public bool? Vectoring { get; private set; }
+        public bool VectoringDown { get; private set; }
+
+        public bool VectoringUp { get; private set; }
+        
+        public bool VectoringDeviceCapable { get; private set; }
+
+        public bool? VectoringROPCapable { get; private set; }
 
         public DSLStandard DSLStandard { get; private set; }
     }

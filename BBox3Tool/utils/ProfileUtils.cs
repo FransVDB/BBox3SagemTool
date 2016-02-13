@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using BBox3Tool.enums;
+using BBox3Tool.profile;
 
 namespace BBox3Tool.utils
 {
@@ -13,12 +15,15 @@ namespace BBox3Tool.utils
         /// Load Proximus line profiles from embedded resource
         /// </summary>
         /// <returns>Proximus line profiles</returns>
-        public static List<ProximusLineProfile> loadEmbeddedProfiles()
+        public static List<ProximusLineProfile> LoadEmbeddedProfiles()
         {
             //load xml doc
             XmlDocument profilesDoc = new XmlDocument();
             using (Stream stream = typeof(Form1).Assembly.GetManifestResourceStream("BBox3Tool.profile.profiles.xml"))
             {
+                if (stream == null)
+                    throw new Exception("BBox3Tool.profile.profiles.xml not found in resources.");
+
                 using (StreamReader sr = new StreamReader(stream))
                 {
                     profilesDoc.LoadXml(sr.ReadToEnd());
@@ -26,7 +31,7 @@ namespace BBox3Tool.utils
             }
 
             //run trough all xml profiles
-            return loadProfilesFromXML(profilesDoc);
+            return LoadProfilesFromXml(profilesDoc);
         }
 
         /// <summary>
@@ -34,37 +39,64 @@ namespace BBox3Tool.utils
         /// </summary>
         /// <param name="xmlDoc">Xml document that contains the profiles</param>
         /// <returns>Proximus line profiles</returns>
-        public static List<ProximusLineProfile> loadProfilesFromXML(XmlDocument xmlDoc)
+        public static List<ProximusLineProfile> LoadProfilesFromXml(XmlDocument xmlDoc)
         {
             //run trough all xml profiles
             List<ProximusLineProfile> listProfiles = new List<ProximusLineProfile>();
-            foreach (XmlNode profileNode in xmlDoc.SelectNodes("//document/profiles/profile"))
+
+            XmlNodeList nodeProfiles = xmlDoc.SelectNodes("//document/profiles/profile");
+            if (nodeProfiles != null)
             {
-                List<int> confirmedDownloadList = new List<int>();
-                List<int> confirmedUploadList = new List<int>();
-                foreach (XmlNode confirmedNode in profileNode.SelectNodes("confirmed"))
+                foreach (XmlNode profileNode in nodeProfiles)
                 {
-                    confirmedDownloadList.Add(Convert.ToInt32(confirmedNode.Attributes["down"].Value));
-                    confirmedUploadList.Add(Convert.ToInt32(confirmedNode.Attributes["up"].Value));
+                    List<int> confirmedDownloadList = new List<int>();
+                    List<int> confirmedUploadList = new List<int>();
+
+                    XmlNodeList nodeConfirmed = profileNode.SelectNodes("confirmed");
+                    if (nodeConfirmed != null)
+                    {
+                        foreach (XmlNode confirmedNode in nodeConfirmed)
+                        {
+                            if (confirmedNode.Attributes != null)
+                            {
+                                confirmedDownloadList.Add(Convert.ToInt32(confirmedNode.Attributes["down"].Value));
+                                confirmedUploadList.Add(Convert.ToInt32(confirmedNode.Attributes["up"].Value));
+                            }
+                        }
+                    }
+
+                    XmlNodeList nodeOfficial = profileNode.SelectNodes("official");
+                    if (nodeOfficial != null)
+                    {
+                        XmlAttributeCollection attributesOfficial = nodeOfficial[0].Attributes;
+                        if (attributesOfficial != null)
+                        {
+                            confirmedDownloadList.Add(Convert.ToInt32(attributesOfficial["down"].Value));
+                            confirmedUploadList.Add(Convert.ToInt32(attributesOfficial["up"].Value));
+                        }
+                    }
+
+                    if (profileNode.Attributes != null)
+                    {
+                        ProximusLineProfile profile = new ProximusLineProfile(
+                            profileNode.Attributes["name"].Value, 
+                            profileNode.Attributes["speedname"].Value, 
+                            confirmedDownloadList.Last(),
+                            confirmedUploadList.Last(),
+                            Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["repair"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
+                            Convert.ToBoolean(profileNode.Attributes["vectoring-up"].Value),
+                            (VDSL2Profile) Enum.Parse(typeof (VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
+                            confirmedDownloadList.Distinct().ToList(),
+                            confirmedUploadList.Distinct().ToList(),
+                            Convert.ToDecimal(profileNode.Attributes["min"].Value, CultureInfo.InvariantCulture),
+                            Convert.ToDecimal(profileNode.Attributes["max"].Value, CultureInfo.InvariantCulture));
+
+                        listProfiles.Add(profile);
+                    }
                 }
-                confirmedDownloadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["down"].Value));
-                confirmedUploadList.Add(Convert.ToInt32(profileNode.SelectNodes("official")[0].Attributes["up"].Value));
-
-                ProximusLineProfile profile = new ProximusLineProfile(
-                    profileNode.Attributes["name"].Value,
-                    confirmedDownloadList.Last(),
-                    confirmedUploadList.Last(),
-                    Convert.ToBoolean(profileNode.Attributes["provisioning"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["dlm"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["repair"].Value),
-                    Convert.ToBoolean(profileNode.Attributes["vectoring"].Value),
-                    (VDSL2Profile)Enum.Parse(typeof(VDSL2Profile), "p" + profileNode.Attributes["vdsl2"].Value),
-                    confirmedDownloadList.Distinct().ToList(),
-                    confirmedUploadList.Distinct().ToList(),
-                    Convert.ToDecimal(profileNode.Attributes["min"].Value, CultureInfo.InvariantCulture),
-                    Convert.ToDecimal(profileNode.Attributes["max"].Value, CultureInfo.InvariantCulture));
-
-                listProfiles.Add(profile);
             }
             return listProfiles;
         }
@@ -75,13 +107,12 @@ namespace BBox3Tool.utils
         /// <param name="profiles">Proximus line profiles to choose from</param>
         /// <param name="uploadSpeed">Upload speed of current session</param>
         /// <param name="downloadSpeed">Download speed of current session</param>
-        /// <param name="vectoringEnabled">Vectoring enabled/disabled or null for unknown</param>
-        /// <param name="distance">Distance or null for unknown</param>
+        /// <param name="vectoringDownEnabled">Vectoring down enabled/disabled or null for Unknown</param>µ
+        /// <param name="vectoringUpEnabled">Vectoring up enabled/disabled or null for Unknown</param>
+        /// <param name="distance">Distance or null for Unknown</param>
         /// <returns>Proximus line profile of the current session</returns>
-        public static ProximusLineProfile getProfile(List<ProximusLineProfile> profiles, int uploadSpeed, int downloadSpeed, bool? vectoringEnabled, decimal? distance)
+        public static ProximusLineProfile GetProfile(List<ProximusLineProfile> profiles, int uploadSpeed, int downloadSpeed, bool vectoringDownEnabled, bool vectoringUpEnabled, decimal? distance)
         {
-            
-
             lock (profiles)
             {
                 //check if speed matches with confirmed speeds
@@ -115,7 +146,7 @@ namespace BBox3Tool.utils
                           .First().x;
                 }*/
 
-                //no matches found, get profile with closest speeds in range of +256kb
+                //get profiles with closest speeds in range of +256kb
                 List<ProximusLineProfile> rangeMatches = profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
                     .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
                     .OrderBy(p => p.diffDownload)
@@ -124,9 +155,9 @@ namespace BBox3Tool.utils
                     .ToList();
 
                 //check on vectoring
-                if (vectoringEnabled != null)
-                    rangeMatches = rangeMatches
-                        .Where(x => x.VectoringEnabled == vectoringEnabled).ToList();
+                rangeMatches = rangeMatches
+                    .Where(x => x.VectoringDownDownEnabled == vectoringDownEnabled)
+                    .OrderBy(x => x.VectoringUpEnabled == vectoringUpEnabled).ToList();
 
                 //check on distance
                 if (distance != null)
@@ -163,16 +194,28 @@ namespace BBox3Tool.utils
 
                         //vectoring
                         bool? vectoring = null;
-                        if (rangeMatches.GroupBy(x => x.VectoringEnabled).Count() == 1)
-                            vectoring = rangeMatches.First().VectoringEnabled;
+                        if (rangeMatches.GroupBy(x => x.VectoringDownDownEnabled).Count() == 1)
+                            vectoring = rangeMatches.First().VectoringDownDownEnabled;
+                        bool? vectoringUp = null;
+                        if (rangeMatches.GroupBy(x => x.VectoringUpEnabled).Count() == 1)
+                            vectoringUp = rangeMatches.First().VectoringUpEnabled;
 
                         //vdsl profile
-                        VDSL2Profile vdsl2profile = VDSL2Profile.unknown;
+                        VDSL2Profile vdsl2Profile = VDSL2Profile.unknown;
                         if (rangeMatches.GroupBy(x => x.ProfileVDSL2).Count() == 1)
-                            vdsl2profile = rangeMatches.First().ProfileVDSL2;
+                            vdsl2Profile = rangeMatches.First().ProfileVDSL2;
+                        
+                        //LPXXX
+                        string lp = "unknown";
+                        if (rangeMatches.GroupBy(x => x.LpName).Count() == 1)
+                            lp = rangeMatches.First().LpName;
 
+                        //Name (100/20)
+                        string name = "unknown";
+                        if (rangeMatches.GroupBy(x => x.SpeedName).Count() == 1)
+                            name = rangeMatches.First().SpeedName;
 
-                        return new ProximusLineProfile("unknown", downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vdsl2profile, new List<int>(), new List<int>(), 0, 0);
+                        return new ProximusLineProfile(lp, name, downloadSpeed, uploadSpeed, provisioning, dlm, repair, vectoring, vectoringUp, vdsl2Profile, new List<int>(), new List<int>(), 0, 0);
                     }
                 }
                     

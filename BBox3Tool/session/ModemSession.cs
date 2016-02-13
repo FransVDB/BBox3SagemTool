@@ -1,19 +1,24 @@
 ﻿using System;
+using BBox3Tool.enums;
+using BBox3Tool.objects;
 
-namespace BBox3Tool
+namespace BBox3Tool.session
 {
     interface IModemSession
     {
         bool OpenSession(String host, String username, String password);
+
         bool CloseSession();
+
         void RefreshData();
 
         void GetLineData();
 
-        bool LineConnected { get; }
-
         DeviceInfo GetDeviceInfo();
+
         String GetDebugValue(String debugValue);
+
+        //getters
 
         int DownstreamCurrentBitRate { get; }
         int UpstreamCurrentBitRate { get; }
@@ -25,7 +30,11 @@ namespace BBox3Tool
         decimal UpstreamNoiseMargin { get; }
         decimal? Distance { get; }
         string DeviceName { get; }
-        bool? Vectoring { get; }
+        bool VectoringDown { get; }
+        bool VectoringUp { get; }
+        bool VectoringDeviceCapable { get; }
+        bool? VectoringROPCapable { get; }
+        bool LineConnected { get; }
         DSLStandard DSLStandard { get; }
     }
 }
