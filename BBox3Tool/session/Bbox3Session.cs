@@ -932,7 +932,16 @@ namespace BBox3Tool.session
                 {
                     case VDSL2Profile.p17a:
                         {
-                            _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6.5m) * 3200) + Convert.ToInt32(5000 / _downstreamAttenuation);
+                            _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 2900) + Convert.ToInt32(5000 / _downstreamAttenuation);
+                            
+                            //corrections
+                            if (_downstreamMaxBitRate >= 140000)
+                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.98);
+                            else if (_downstreamMaxBitRate >= 138000)
+                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.985);
+                            else if (_downstreamMaxBitRate >= 136000)
+                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.995);
+
                             return;
                         }
                     case VDSL2Profile.p8b:
@@ -1008,7 +1017,7 @@ namespace BBox3Tool.session
                     case VDSL2Profile.p17a:
                         {
                             //zone 1 & 2
-                            _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6) * 1300 + 4000 * (1 + (8 - _downstreamAttenuation) / 15));
+                            _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 5m) * 1250 + 1000 * (1 + (8 - _downstreamAttenuation) / 15));
                             return;
                         }
                     case VDSL2Profile.p8b:
@@ -1016,10 +1025,10 @@ namespace BBox3Tool.session
                         {
                             //zone 3
                             if (profile.DistanceMax <= 1000)
-                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 440);
+                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 440);
                             //zone 4 & 5
                             else
-                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 140);
+                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 140);
                             return;
                         }
                 }

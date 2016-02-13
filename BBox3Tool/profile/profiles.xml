@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <document>
-  <version>3.1</version>
-  <date>13/12/2015</date>
+  <version>3.2</version>
+  <date>06/02/2016</date>
   <profiles>
     
     <!-- ZONE 1: 0 - 400m -->
@@ -88,7 +88,7 @@
       <confirmed down="30063" up="10049" />
     </profile> 
     
-    <profile name="LP705" speedname="30/6" min="0" max="400" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="17a">
+    <profile name="LP705" speedname="30/6" min="0" max="400" vectoring="false" vectoring-up="false" provisioning="true" dlm="true" repair="false" vdsl2="17a">
       <official down="30064" up="6064" />
     </profile>
     

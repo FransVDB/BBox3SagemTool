@@ -156,7 +156,8 @@ namespace BBox3Tool.utils
 
                 //check on vectoring
                 rangeMatches = rangeMatches
-                    .Where(x => x.VectoringDownDownEnabled == vectoringDownEnabled && x.VectoringUpEnabled == vectoringUpEnabled).ToList();
+                    .Where(x => x.VectoringDownDownEnabled == vectoringDownEnabled)
+                    .OrderBy(x => x.VectoringUpEnabled == vectoringUpEnabled).ToList();
 
                 //check on distance
                 if (distance != null)

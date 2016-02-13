@@ -175,23 +175,23 @@ namespace BBox3Tool
             builder.AppendLine("--------------------" + new String('-', Application.ProductVersion.Length));
             builder.AppendLine("Device:                        " + _session.DeviceName);
             builder.AppendLine("");
-            builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "Unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
-            builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "Unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Downstream current bit rate:   " + (_session.DownstreamCurrentBitRate < 0 ? "unknown" : _session.DownstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Upstream current bit rate:     " + (_session.UpstreamCurrentBitRate < 0 ? "unknown" : _session.UpstreamCurrentBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream max bit rate:       " + (_session.DownstreamMaxBitRate < 0 ? "Unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
+            builder.AppendLine("Downstream max bit rate:       " + (_session.DownstreamMaxBitRate < 0 ? "unknown" : _session.DownstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
             if (_session is Bbox3Session || _session is FritzBoxSession)
-                builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "Unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
+                builder.AppendLine("Upstream max bit rate:         " + (_session.UpstreamMaxBitRate < 0 ? "unknown" : _session.UpstreamMaxBitRate.ToString("###,###,##0 'kbps'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "Unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
+            builder.AppendLine("Downstream attenuation:        " + (_session.DownstreamAttenuation < 0 ? "unknown" : _session.DownstreamAttenuation.ToString("0.0 'dB'")));
             if (_session is Bbox3Session && new List<DSLStandard> { DSLStandard.ADSL, DSLStandard.ADSL2, DSLStandard.ADSL2plus }.Contains(_session.DSLStandard))
-                builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "Unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
+                builder.AppendLine("Upstream attenuation:          " + (_session.UpstreamAttenuation < 0 ? "unknown" : _session.UpstreamAttenuation.ToString("0.0 'dB'")));
             builder.AppendLine("");
 
-            builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "Unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
+            builder.AppendLine("Downstream noise margin:       " + (_session.DownstreamNoiseMargin < 0 ? "unknown" : _session.DownstreamNoiseMargin.ToString("0.0 'dB'")));
             if (_session is Bbox3Session || _session is FritzBoxSession)
-                builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "Unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
+                builder.AppendLine("Upstream noise margin:         " + (_session.UpstreamNoiseMargin < 0 ? "unknown" : _session.UpstreamNoiseMargin.ToString("0.0 'dB'")));
             builder.AppendLine("");
 
 
@@ -209,9 +209,9 @@ namespace BBox3Tool
                 {
                     builder.AppendLine("DSL profile:                   Unknown");
                     if (_session is Bbox3Session)
-                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     else
-                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     builder.AppendLine("");
                     builder.AppendLine("Proximus profile name:         Unknown");
                     builder.AppendLine("Proximus DLM profile:          Unknown");
@@ -221,9 +221,9 @@ namespace BBox3Tool
                 {
                     builder.AppendLine("DSL profile:                   " + currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
                     if (_session is Bbox3Session)
-                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                        builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     else
-                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "Unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
+                        builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     builder.AppendLine("");
                     builder.AppendLine("Proximus profile name:         " + currentProfile.SpeedName);
                     builder.AppendLine("Proximus DLM profile:          " + boolToString(currentProfile.DlmProfile));
@@ -438,10 +438,10 @@ namespace BBox3Tool
                         ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                         if (currentProfile == null)
                         {
-                            ThreadUtils.SetLabelTextFromThread(labelDLM, "Unknown");
-                            ThreadUtils.SetLabelTextFromThread(labelRepair, "Unknown");
-                            ThreadUtils.SetLabelTextFromThread(labelProximusProfile, "Unknown");
-                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, "Unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelDLM, "unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelRepair, "unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelProximusProfile, "unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, "unknown");
                         }
                         else
                         {
@@ -566,15 +566,15 @@ namespace BBox3Tool
         private void setLabelValueAsDecimal(Label label, decimal? value, string formatter)
         {
             if (value == null)
-                ThreadUtils.SetLabelTextFromThread(label, "Unknown");
+                ThreadUtils.SetLabelTextFromThread(label, "unknown");
             else
-                ThreadUtils.SetLabelTextFromThread(label, value < 0 ? "Unknown" : ((decimal)value).ToString(formatter));
+                ThreadUtils.SetLabelTextFromThread(label, value < 0 ? "unknown" : ((decimal)value).ToString(formatter));
         }
 
         private string boolToString(bool? value)
         {
             if (value == null)
-                return "Unknown";
+                return "unknown";
             return ((bool)value) ? "yes" : "no";
         }
 

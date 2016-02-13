@@ -229,7 +229,7 @@
             this.labelVDSLProfile.Name = "labelVDSLProfile";
             this.labelVDSLProfile.Size = new System.Drawing.Size(59, 15);
             this.labelVDSLProfile.TabIndex = 40;
-            this.labelVDSLProfile.Text = "Unknown";
+            this.labelVDSLProfile.Text = "unknown";
             // 
             // vdslProfileLabel
             // 
@@ -250,7 +250,7 @@
             this.labelProximusProfile.Name = "labelProximusProfile";
             this.labelProximusProfile.Size = new System.Drawing.Size(59, 15);
             this.labelProximusProfile.TabIndex = 38;
-            this.labelProximusProfile.Text = "Unknown";
+            this.labelProximusProfile.Text = "unknown";
             // 
             // proximusProfileLabel
             // 
@@ -271,7 +271,7 @@
             this.labelVectoringDown.Name = "labelVectoringDown";
             this.labelVectoringDown.Size = new System.Drawing.Size(59, 15);
             this.labelVectoringDown.TabIndex = 36;
-            this.labelVectoringDown.Text = "Unknown";
+            this.labelVectoringDown.Text = "unknown";
             // 
             // labelRepair
             // 
@@ -281,7 +281,7 @@
             this.labelRepair.Name = "labelRepair";
             this.labelRepair.Size = new System.Drawing.Size(59, 15);
             this.labelRepair.TabIndex = 35;
-            this.labelRepair.Text = "Unknown";
+            this.labelRepair.Text = "unknown";
             // 
             // vectoringLabel
             // 
@@ -324,7 +324,7 @@
             this.labelDLM.Name = "labelDLM";
             this.labelDLM.Size = new System.Drawing.Size(59, 15);
             this.labelDLM.TabIndex = 31;
-            this.labelDLM.Text = "Unknown";
+            this.labelDLM.Text = "unknown";
             // 
             // labelDSLStandard
             // 
@@ -334,7 +334,7 @@
             this.labelDSLStandard.Name = "labelDSLStandard";
             this.labelDSLStandard.Size = new System.Drawing.Size(59, 15);
             this.labelDSLStandard.TabIndex = 49;
-            this.labelDSLStandard.Text = "Unknown";
+            this.labelDSLStandard.Text = "unknown";
             // 
             // labelLinkUptime
             // 
@@ -344,7 +344,7 @@
             this.labelLinkUptime.Name = "labelLinkUptime";
             this.labelLinkUptime.Size = new System.Drawing.Size(59, 15);
             this.labelLinkUptime.TabIndex = 60;
-            this.labelLinkUptime.Text = "Unknown";
+            this.labelLinkUptime.Text = "unknown";
             // 
             // labelDeviceUptime
             // 
@@ -354,7 +354,7 @@
             this.labelDeviceUptime.Name = "labelDeviceUptime";
             this.labelDeviceUptime.Size = new System.Drawing.Size(59, 15);
             this.labelDeviceUptime.TabIndex = 58;
-            this.labelDeviceUptime.Text = "Unknown";
+            this.labelDeviceUptime.Text = "unknown";
             // 
             // labelHardwareVersion
             // 
@@ -364,7 +364,7 @@
             this.labelHardwareVersion.Name = "labelHardwareVersion";
             this.labelHardwareVersion.Size = new System.Drawing.Size(59, 15);
             this.labelHardwareVersion.TabIndex = 55;
-            this.labelHardwareVersion.Text = "Unknown";
+            this.labelHardwareVersion.Text = "unknown";
             // 
             // labelFirmwareVersion
             // 
@@ -374,7 +374,7 @@
             this.labelFirmwareVersion.Name = "labelFirmwareVersion";
             this.labelFirmwareVersion.Size = new System.Drawing.Size(59, 15);
             this.labelFirmwareVersion.TabIndex = 54;
-            this.labelFirmwareVersion.Text = "Unknown";
+            this.labelFirmwareVersion.Text = "unknown";
             // 
             // panelLogin
             // 
@@ -876,7 +876,7 @@
             this.labelVectoringUp.Name = "labelVectoringUp";
             this.labelVectoringUp.Size = new System.Drawing.Size(59, 15);
             this.labelVectoringUp.TabIndex = 51;
-            this.labelVectoringUp.Text = "Unknown";
+            this.labelVectoringUp.Text = "unknown";
             // 
             // label15
             // 
@@ -908,7 +908,7 @@
             this.labelVectoringModemCapable.Name = "labelVectoringModemCapable";
             this.labelVectoringModemCapable.Size = new System.Drawing.Size(59, 15);
             this.labelVectoringModemCapable.TabIndex = 49;
-            this.labelVectoringModemCapable.Text = "Unknown";
+            this.labelVectoringModemCapable.Text = "unknown";
             // 
             // label21
             // 
@@ -929,7 +929,7 @@
             this.labelVectoringROPCapable.Name = "labelVectoringROPCapable";
             this.labelVectoringROPCapable.Size = new System.Drawing.Size(59, 15);
             this.labelVectoringROPCapable.TabIndex = 40;
-            this.labelVectoringROPCapable.Text = "Unknown";
+            this.labelVectoringROPCapable.Text = "unknown";
             // 
             // panelBoxDsl
             // 
@@ -954,7 +954,7 @@
             this.labelDistance.Name = "labelDistance";
             this.labelDistance.Size = new System.Drawing.Size(59, 15);
             this.labelDistance.TabIndex = 45;
-            this.labelDistance.Text = "Unknown";
+            this.labelDistance.Text = "unknown";
             // 
             // panelBoxLine
             // 
