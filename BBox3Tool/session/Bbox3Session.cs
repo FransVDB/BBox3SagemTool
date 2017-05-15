@@ -57,6 +57,7 @@ namespace BBox3Tool.session
         private bool _vectoringUp;
         private bool? _vectoringROPCapable;
         private DSLStandard _DSLStandard;
+        private Annex _annex;
 
         //booleans for stats
         private bool _dsCurrBitRateDone, _usCurrBitRateDone;
@@ -238,6 +239,17 @@ namespace BBox3Tool.session
                 return _DSLStandard;
             }
             private set { _DSLStandard = value; }
+        }
+
+        public Annex Annex
+        {
+            get
+            {
+                if (!_dslStandardDone)
+                    GetDslStandard();
+                return _annex;
+            }
+            private set { _annex = value; }
         }
 
         #endregion
@@ -656,12 +668,15 @@ namespace BBox3Tool.session
         {
             if (DSLStandard == DSLStandard.VDSL2)
             {
+                var checkedDownloadSpeeds = new List<int>();
 
                 //check confirmed bitrates first (feedback from users)
                 var knownDownloadBitrates = _profiles.SelectMany(x => x.ConfirmedDownloadSpeeds).ToList();
                 knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed));
                 knownDownloadBitrates = knownDownloadBitrates.Distinct().OrderByDescending(x => x).ToList();
                 _downstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 10, 5));
+
+                checkedDownloadSpeeds.AddRange(knownDownloadBitrates);
 
                 //speed found, return
                 if (_downstreamCurrentBitRate >= 0)
@@ -670,16 +685,48 @@ namespace BBox3Tool.session
                     return;
                 }
 
-                //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -64 to +64
+                //fallback 1
+                //----------
+                //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -128 to +128
                 knownDownloadBitrates.Clear();
-                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed).SelectMany(x => Enumerable.Range(x - 64, 128)));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed).SelectMany(x => Enumerable.Range(x - 128, 256)));
                 knownDownloadBitrates = knownDownloadBitrates.Distinct().ToList();
+                
+                //remove checked speeds
+                knownDownloadBitrates = knownDownloadBitrates.Except(checkedDownloadSpeeds).ToList();
+                checkedDownloadSpeeds.AddRange(knownDownloadBitrates);
+
+                //check speed
                 _downstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 5));
 
-                //fallback: speed not found in profile list, check every speed (very slow)
+                //fallback 2
+                //----------
+                //check every mb, with a margin of -128 to +128
                 if (_downstreamCurrentBitRate < 0)
                 {
-                    var valuesToCheck = Enumerable.Range(0, 100000).ToList();
+                    var valuesToCheck = new List<int>();
+                    for (var i = 1; i < 140; i++)
+                    {
+                        valuesToCheck.AddRange(Enumerable.Range((i*1000) - 128, 256).ToList());
+                    }
+
+                    //remove checked speeds
+                    valuesToCheck = valuesToCheck.Except(checkedDownloadSpeeds).ToList();
+                    checkedDownloadSpeeds.AddRange(valuesToCheck);
+
+                    //check speed
+                    _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);   
+                }
+
+                //fallback 3
+                //----------
+                //check every speed possible (very slow)
+                if (_downstreamCurrentBitRate < 0)
+                {
+                    var valuesToCheck = Enumerable.Range(0, 140000).ToList();
+                    valuesToCheck = valuesToCheck.Except(checkedDownloadSpeeds).ToList();
+
+                    //check speed
                     _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);
                 }
             }
@@ -710,11 +757,15 @@ namespace BBox3Tool.session
         {
             if (DSLStandard == DSLStandard.VDSL2)
             {
+                var checkedUploadSpeeds = new List<int>();
+
                 //check confirmed bitrates first (feedback from users)
                 var knownUploadBitrates = _profiles.SelectMany(x => x.ConfirmedUploadSpeeds).ToList();
                 knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed));
                 knownUploadBitrates = knownUploadBitrates.Distinct().OrderByDescending(x => x).ToList();
                 _upstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 10, 5));
+
+                checkedUploadSpeeds.AddRange(knownUploadBitrates);
 
                 //speed found, return
                 if (_upstreamCurrentBitRate >= 0)
@@ -723,16 +774,48 @@ namespace BBox3Tool.session
                     return;
                 }
 
-                //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -64 to +64
+                //fallback 1
+                //----------
+                //speed not found in confirmed bitrate list, check profile download speeds, but with margin of -128 to +128
                 knownUploadBitrates.Clear();
-                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed).SelectMany(x => Enumerable.Range(x - 64, 128)));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed).SelectMany(x => Enumerable.Range(x - 128, 256)));
                 knownUploadBitrates = knownUploadBitrates.Distinct().ToList();
+
+                //remove checked speeds
+                knownUploadBitrates = knownUploadBitrates.Except(checkedUploadSpeeds).ToList();
+                checkedUploadSpeeds.AddRange(knownUploadBitrates);
+
+                //check speed
                 _upstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 10, 5));
 
-                //fallback: speed not found in profile list, check every speed (slow)
+
+                //fallback 2
+                //----------
+                //check every mb, with a margin of -128 to +128
                 if (_upstreamCurrentBitRate < 0)
                 {
-                    var valuesToCheck = Enumerable.Range(0, 50000).ToList();
+                    var valuesToCheck = new List<int>();
+                    for (var i = 1; i < 50; i++)
+                    {
+                        valuesToCheck.AddRange(Enumerable.Range((i * 1000) - 128, 256).ToList());
+                    }
+
+                    //remove checked speeds
+                    valuesToCheck = valuesToCheck.Except(checkedUploadSpeeds).ToList();
+                    checkedUploadSpeeds.AddRange(valuesToCheck);
+
+                    //check speed
+                    _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
+                }
+
+                //fallback 3
+                //----------
+                //check every speed possible (very slow)
+                if (_upstreamCurrentBitRate < 0)
+                {
+                    var valuesToCheck = Enumerable.Range(0, 40000).ToList();
+                    valuesToCheck = valuesToCheck.Except(checkedUploadSpeeds).ToList();
+                    //check speed
                     _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
                 }
             }
@@ -773,10 +856,11 @@ namespace BBox3Tool.session
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3\"]/Status",
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_A\"]/Status",
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_B\"]/Status",
+                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_L\"]/Status",
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1\"]/Status",
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1_ANNEX_A\"]/Status",
                 "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_1_ANNEX_B\"]/Status",
-                "Device/DSL/Lines/Line[@uid=\"1\" and StandardUsed=\"G_992_3_ANNEX_L\"]/Status"
+
             });
 
             //check standard
@@ -786,28 +870,68 @@ namespace BBox3Tool.session
                 {
                     switch (i)
                     {
+                        //VDSL2
                         case 0:
-                        case 1:
-                        case 2:
+                            Annex = Annex.unknown;
                             DSLStandard = DSLStandard.VDSL2;
                             break;
+                        case 1:
+                            Annex = Annex.A;
+                            DSLStandard = DSLStandard.VDSL2;
+                            break;
+                        case 2:
+                            Annex = Annex.B;
+                            DSLStandard = DSLStandard.VDSL2;
+                            break;
+
+                        //ADSL2plus
                         case 3:
-                        case 4:
-                        case 5:
+                            Annex = Annex.unknown;
                             DSLStandard = DSLStandard.ADSL2plus;
                             break;
+                        case 4:
+                            Annex = Annex.A;
+                            DSLStandard = DSLStandard.ADSL2plus;
+                            break;
+                        case 5:
+                            Annex = Annex.B;
+                            DSLStandard = DSLStandard.ADSL2plus;
+                            break;
+
+                        //ADSL2
                         case 6:
+                            Annex = Annex.unknown;
+                            DSLStandard = DSLStandard.ADSL2;
+                            break;
                         case 7:
+                            Annex = Annex.A;
+                            DSLStandard = DSLStandard.ADSL2;
+                            break;
                         case 8:
+                            Annex = Annex.B;
                             DSLStandard = DSLStandard.ADSL2;
                             break;
                         case 9:
+                            Annex = Annex.L;
+                            DSLStandard = DSLStandard.ADSL2;
+                            break;
+
+                        //ADSL
                         case 10:
-                        case 11:
-                        case 12:
+                            Annex = Annex.unknown;
                             DSLStandard = DSLStandard.ADSL;
                             break;
+                        case 11:
+                            Annex = Annex.A;
+                            DSLStandard = DSLStandard.ADSL;
+                            break;
+                        case 12:
+                            Annex = Annex.B;
+                            DSLStandard = DSLStandard.ADSL;
+                            break;
+
                         default:
+                            Annex = Annex.unknown;
                             DSLStandard = DSLStandard.unknown;
                             break;
                     }
@@ -928,6 +1052,9 @@ namespace BBox3Tool.session
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                if (profile == null)
+                    return;
+
                 switch (profile.ProfileVDSL2)
                 {
                     case VDSL2Profile.p17a:
@@ -1012,6 +1139,9 @@ namespace BBox3Tool.session
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                if (profile == null)
+                    return;
+
                 switch (profile.ProfileVDSL2)
                 {
                     case VDSL2Profile.p17a:

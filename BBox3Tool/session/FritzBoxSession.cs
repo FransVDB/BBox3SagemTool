@@ -16,6 +16,7 @@ namespace BBox3Tool.session
 	    {
             DeviceName = "Fritz!Box 7390";
             DSLStandard = DSLStandard.unknown;
+            Annex = Annex.unknown;
             Distance = null;
             VectoringDown = false;
             VectoringUp = false;
@@ -234,5 +235,7 @@ namespace BBox3Tool.session
         public bool? VectoringROPCapable { get; private set; }
 
         public DSLStandard DSLStandard { get; private set; }
+
+        public Annex Annex { get; private set; }
     }
 }

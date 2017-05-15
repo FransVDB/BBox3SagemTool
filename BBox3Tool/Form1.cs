@@ -201,7 +201,11 @@ namespace BBox3Tool
             builder.AppendLine("ROP vectoring compatible:      " + boolToString(_session.VectoringROPCapable));
             builder.AppendLine("");
 
-            builder.AppendLine("DSL standard:                  " + _session.DSLStandard.ToString().Replace("plus", "+"));
+            var dslStandardValue = _session.DSLStandard.ToString().Replace("plus", "+");
+            if (_session.Annex != Annex.unknown)
+                dslStandardValue += " Annex " + _session.Annex + "";
+            builder.AppendLine("DSL standard:                  " + dslStandardValue);
+
             if (_session.DSLStandard == DSLStandard.VDSL2)
             {
                 ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
@@ -411,7 +415,10 @@ namespace BBox3Tool
 
                     // Get dsl standard
                     //-----------------
-                    ThreadUtils.SetLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
+                    var dslStandardValue = _session.DSLStandard.ToString().Replace("plus", "+");
+                    if (_session.Annex != Annex.unknown)
+                        dslStandardValue += " Annex " +_session.Annex + "";
+                    ThreadUtils.SetLabelTextFromThread(labelDSLStandard, dslStandardValue);
 
                     // Get sync values
                     //----------------

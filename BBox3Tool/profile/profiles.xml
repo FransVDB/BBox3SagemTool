@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <document>
-  <version>3.2</version>
-  <date>06/02/2016</date>
+  <version>3.4</version>
+  <date>15/05/2017</date>
   <profiles>
     
     <!-- ZONE 1: 0 - 400m -->
@@ -196,6 +196,12 @@
     </profile>
     <profile name="unknown" speedname="60/20" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
       <official down="60000" up="20000" />
+    </profile>
+
+    <profile name="LP213" speedname="70/10" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="10000" />
+      <confirmed down="69999" up="9999" />
+      <confirmed down="69999" up="9998" />
     </profile>
 
     <!-- vectoring dlm-->

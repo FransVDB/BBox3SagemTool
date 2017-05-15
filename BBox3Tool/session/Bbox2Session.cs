@@ -58,6 +58,8 @@ namespace BBox3Tool.session
 
         public DSLStandard DSLStandard { get; private set; }
 
+        public Annex Annex { get; private set; }
+
         public bool LineConnected
         {
             get
@@ -167,6 +169,7 @@ namespace BBox3Tool.session
                 {
                     //vdsl command successfull, so line obviously vdsl2
                     DSLStandard = DSLStandard.VDSL2;
+                    Annex = Annex.unknown;
                     // Parse results
                     ParsePstatex(pstatexReply);
                 }
@@ -196,7 +199,9 @@ namespace BBox3Tool.session
                 UpstreamAttenuation = 0;
                 Distance = 0;
                 DSLStandard = DSLStandard.unknown;
+                Annex = Annex.unknown;
                 _vdslProfile = VDSL2Profile.unknown;
+                
                 //TODO read adsl stats from telnet
                 //_tc.WriteLine("adslstat");
             }
