@@ -1052,10 +1052,20 @@ namespace BBox3Tool.session
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                VDSL2Profile vdsl2Profile;
+                decimal maxDistance ;
                 if (profile == null)
-                    return;
+                {
+                    vdsl2Profile = GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                    maxDistance = 0;
+                }
+                else
+                {
+                    vdsl2Profile = profile.ProfileVDSL2;
+                    maxDistance = profile.DistanceMax;
+                }
 
-                switch (profile.ProfileVDSL2)
+                switch (vdsl2Profile)
                 {
                     case VDSL2Profile.p17a:
                         {
@@ -1075,7 +1085,7 @@ namespace BBox3Tool.session
                     case VDSL2Profile.p8d:
                         {
                             //zone 3
-                            if (profile.DistanceMax <= 1000)
+                            if (maxDistance <= 1000)
                                 _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 1710);
                             //zone 4 & 5
                             else
@@ -1139,10 +1149,20 @@ namespace BBox3Tool.session
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                VDSL2Profile vdsl2Profile;
+                decimal maxDistance;
                 if (profile == null)
-                    return;
+                {
+                    vdsl2Profile = GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                    maxDistance = 0;
+                }
+                else
+                {
+                    vdsl2Profile = profile.ProfileVDSL2;
+                    maxDistance = profile.DistanceMax;
+                }
 
-                switch (profile.ProfileVDSL2)
+                switch (vdsl2Profile)
                 {
                     case VDSL2Profile.p17a:
                         {
@@ -1154,7 +1174,7 @@ namespace BBox3Tool.session
                     case VDSL2Profile.p8d:
                         {
                             //zone 3
-                            if (profile.DistanceMax <= 1000)
+                            if (maxDistance <= 1000)
                                 _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 440);
                             //zone 4 & 5
                             else
@@ -1264,6 +1284,17 @@ namespace BBox3Tool.session
         #endregion
 
         #region private
+
+        private VDSL2Profile GetVdsl2ProfileFallBack(int DownstreamCurrentBitRate, int UpstreamCurrentBitRate)
+        {
+            if (DownstreamCurrentBitRate >= 65000)
+                return VDSL2Profile.p17a;
+            else
+                if (UpstreamCurrentBitRate >= 5500)
+                    return VDSL2Profile.p17a;
+            //no way of knowing for sure
+            return VDSL2Profile.unknown;
+        }
 
         /// <summary>
         ///     Get line status (connected/disconnected)

@@ -211,15 +211,15 @@ namespace BBox3Tool
                 ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                 if (currentProfile == null)
                 {
-                    builder.AppendLine("DSL profile:                   Unknown");
+                    builder.AppendLine("DSL profile:                   unknown");
                     if (_session is Bbox3Session)
                         builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     else
                         builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     builder.AppendLine("");
-                    builder.AppendLine("Proximus profile name:         Unknown");
-                    builder.AppendLine("Proximus DLM profile:          Unknown");
-                    builder.AppendLine("Proximus repair profile:       Unknown");
+                    builder.AppendLine("Proximus profile name:         unknown");
+                    builder.AppendLine("Proximus DLM profile:          unknown");
+                    builder.AppendLine("Proximus repair profile:       unknown");
                 }
                 else
                 {
