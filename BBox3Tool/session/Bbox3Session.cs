@@ -949,12 +949,16 @@ namespace BBox3Tool.session
         {
             if (DSLStandard == DSLStandard.VDSL2)
             {
-                //only correct after line reset
-                var valuesToCheck = new List<int>();
-                valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
-                var inpDownstream = GetDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINP", valuesToCheck, 10, 5);
-                VectoringDown = (inpDownstream >= 10);
-
+                if (DownstreamCurrentBitRate >= 71000)
+                    VectoringDown = true;
+                else
+                {
+                    //only correct after line reset
+                    var valuesToCheck = new List<int>();
+                    valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
+                    var inpDownstream = GetDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINP", valuesToCheck, 10, 5);
+                    VectoringDown = (inpDownstream >= 10);
+                }
             }
             else
                 VectoringDown = false;
@@ -969,11 +973,16 @@ namespace BBox3Tool.session
         {
             if (DSLStandard == DSLStandard.VDSL2)
             {
-                //only correct after line reset
-                var valuesToCheck = new List<int>();
-                valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
-                var inpUpstream = GetDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINPus", valuesToCheck, 10, 5);
-                VectoringUp = (inpUpstream >= 10);
+                if (UpstreamCurrentBitRate >= 11000)
+                    VectoringUp = true;
+                else
+                {
+                    //only correct after line reset
+                    var valuesToCheck = new List<int>();
+                    valuesToCheck.AddRange(Enumerable.Range(0, 60).ToList());
+                    var inpUpstream = GetDslValueParallel("Device/DSL/Lines/Line/Status[{0}]", "../../../Channels/Channel[@uid=\"1\"]/ACTINPus", valuesToCheck, 10, 5);
+                    VectoringUp = (inpUpstream >= 10);
+                }
             }
             else
                 VectoringUp = false;
@@ -1048,7 +1057,7 @@ namespace BBox3Tool.session
         public void GetDownstreamMaxBitRate()
         {
             _dsMaxBitRateDone = true;
-            if (DSLStandard == DSLStandard.VDSL2)
+            if (DSLStandard == DSLStandard.VDSL2 && _downstreamNoiseMargin > 0)
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
@@ -1056,7 +1065,7 @@ namespace BBox3Tool.session
                 decimal maxDistance ;
                 if (profile == null)
                 {
-                    vdsl2Profile = GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                    vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
                     maxDistance = 0;
                 }
                 else
@@ -1100,6 +1109,9 @@ namespace BBox3Tool.session
             if (_downstreamCurrentBitRate >= 39990)
             {
                 var startValue = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6.5m) * 3200) + Convert.ToInt32(5000 / _downstreamAttenuation);
+                if (startValue < _downstreamCurrentBitRate)
+                    startValue = _downstreamCurrentBitRate + 15000;
+
                 //check range + - 15.000 of predicted value
                 for (int i = 0; i < 30; i++)
                 {
@@ -1136,6 +1148,11 @@ namespace BBox3Tool.session
                     _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
                 }
             }
+
+            //fix max values that are below current values
+            if (_downstreamMaxBitRate < _downstreamCurrentBitRate)
+                _downstreamMaxBitRate = _downstreamCurrentBitRate;
+
         }
 
         /// <summary>
@@ -1145,7 +1162,7 @@ namespace BBox3Tool.session
         public void GetUpstreamMaxBitRate()
         {
             _usMaxBitRateDone = true;
-            if (DSLStandard == DSLStandard.VDSL2)
+            if (DSLStandard == DSLStandard.VDSL2 && _upstreamNoiseMargin > 0)
             {
                 //get VDSL2 profile
                 ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
@@ -1153,7 +1170,7 @@ namespace BBox3Tool.session
                 decimal maxDistance;
                 if (profile == null)
                 {
-                    vdsl2Profile = GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                    vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
                     maxDistance = 0;
                 }
                 else
@@ -1189,6 +1206,9 @@ namespace BBox3Tool.session
             if (_upstreamCurrentBitRate >= 6000)
             {
                 var startValue = Convert.ToInt32( _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6) * 1300 + 4000 * (1 + (8 - _downstreamAttenuation) / 15)) );
+                if (startValue < _upstreamCurrentBitRate)
+                    startValue = _upstreamCurrentBitRate + 7500;
+
                 //check range + - 7.500 of predicted value
                 for (int i = 0; i < 30; i++)
                 {
@@ -1226,6 +1246,10 @@ namespace BBox3Tool.session
                     _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
                 }
             }
+
+            //fix max values that are below current values
+            if (_upstreamMaxBitRate < _upstreamCurrentBitRate)
+                _upstreamMaxBitRate = _upstreamCurrentBitRate;
         }
 
         //---
@@ -1284,17 +1308,6 @@ namespace BBox3Tool.session
         #endregion
 
         #region private
-
-        private VDSL2Profile GetVdsl2ProfileFallBack(int DownstreamCurrentBitRate, int UpstreamCurrentBitRate)
-        {
-            if (DownstreamCurrentBitRate >= 65000)
-                return VDSL2Profile.p17a;
-            else
-                if (UpstreamCurrentBitRate >= 5500)
-                    return VDSL2Profile.p17a;
-            //no way of knowing for sure
-            return VDSL2Profile.unknown;
-        }
 
         /// <summary>
         ///     Get line status (connected/disconnected)

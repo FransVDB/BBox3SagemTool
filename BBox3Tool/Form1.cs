@@ -211,7 +211,7 @@ namespace BBox3Tool
                 ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                 if (currentProfile == null)
                 {
-                    builder.AppendLine("DSL profile:                   unknown");
+                    builder.AppendLine("DSL profile:                   " + ProfileUtils.GetVdsl2ProfileFallBack(_session.DownstreamCurrentBitRate, _session.UpstreamCurrentBitRate).ToString().Replace("p", ""));
                     if (_session is Bbox3Session)
                         builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     else
@@ -448,7 +448,7 @@ namespace BBox3Tool
                             ThreadUtils.SetLabelTextFromThread(labelDLM, "unknown");
                             ThreadUtils.SetLabelTextFromThread(labelRepair, "unknown");
                             ThreadUtils.SetLabelTextFromThread(labelProximusProfile, "unknown");
-                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, "unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, ProfileUtils.GetVdsl2ProfileFallBack(_session.DownstreamCurrentBitRate, _session.UpstreamCurrentBitRate).ToString().Replace("p", ""));
                         }
                         else
                         {
@@ -456,7 +456,6 @@ namespace BBox3Tool
                             ThreadUtils.SetLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
                             ThreadUtils.SetLabelTextFromThread(labelProximusProfile, currentProfile.SpeedName);
                             ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-
                         }
                     }
                     else
