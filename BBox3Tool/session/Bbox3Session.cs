@@ -326,6 +326,9 @@ namespace BBox3Tool.session
                     jsonObject["reply"]["actions"][1]["callbacks"][0]["parameters"]["value"].ToString()
             };
 
+            InternalFirmwareVersion = jsonObject["reply"]["actions"][2]["callbacks"][0]["parameters"]["value"].ToString();
+            GUIFirmwareVersion = jsonObject["reply"]["actions"][1]["callbacks"][0]["parameters"]["value"].ToString();
+
             try
             {
                 double seconds = Convert.ToDouble(jsonObject["reply"]["actions"][3]["callbacks"][0]["parameters"]["value"]);
@@ -536,7 +539,7 @@ namespace BBox3Tool.session
                                                         }
                                                     },
                                                     {"time-format", "ISO_8601"},
-                                                    {"depth", _debug ? 99 : 0}, //default 2, 6 = refresh
+                                                    {"depth", _debug ? 99 : 6}, //default 2, 6 = refresh
                                                     {"max-add-events", 5},
                                                     {"write-only-string", "_XMO_WRITE_ONLY_"},
                                                     {"undefined-write-only-string", "_XMO_UNDEFINED_WRITE_ONLY_"}
@@ -649,7 +652,7 @@ namespace BBox3Tool.session
         public void RefreshData()
         {
             //request everything --> triggers refresh somehow
-            BBoxGetValue(new List<string> { "*" }, 5);
+            BBoxGetValue(new List<string> { "*" }, 10);
         }
 
         #endregion
@@ -949,7 +952,7 @@ namespace BBox3Tool.session
         {
             if (DSLStandard == DSLStandard.VDSL2)
             {
-                if (DownstreamCurrentBitRate >= 71000)
+                if (DownstreamCurrentBitRate >= 71000 || VectoringUp)
                     VectoringDown = true;
                 else
                 {
@@ -1057,102 +1060,108 @@ namespace BBox3Tool.session
         public void GetDownstreamMaxBitRate()
         {
             _dsMaxBitRateDone = true;
-            if (DSLStandard == DSLStandard.VDSL2 && _downstreamNoiseMargin > 0)
+            try
             {
-                //get VDSL2 profile
-                ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
-                VDSL2Profile vdsl2Profile;
-                decimal maxDistance ;
-                if (profile == null)
+                if (DSLStandard == DSLStandard.VDSL2 && _downstreamNoiseMargin > 0)
                 {
-                    vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
-                    maxDistance = 0;
+                    //get VDSL2 profile
+                    ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                    VDSL2Profile vdsl2Profile;
+                    decimal maxDistance;
+                    if (profile == null)
+                    {
+                        vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                        maxDistance = 0;
+                    }
+                    else
+                    {
+                        vdsl2Profile = profile.ProfileVDSL2;
+                        maxDistance = profile.DistanceMax;
+                    }
+
+                    switch (vdsl2Profile)
+                    {
+                        case VDSL2Profile.p17a:
+                            {
+                                _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 2900) + Convert.ToInt32(5000 / _downstreamAttenuation);
+
+                                //corrections
+                                if (_downstreamMaxBitRate >= 140000)
+                                    _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.98);
+                                else if (_downstreamMaxBitRate >= 138000)
+                                    _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.985);
+                                else if (_downstreamMaxBitRate >= 136000)
+                                    _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.995);
+
+                                return;
+                            }
+                        case VDSL2Profile.p8b:
+                        case VDSL2Profile.p8d:
+                            {
+                                //zone 3
+                                if (maxDistance <= 1000)
+                                    _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 1710);
+                                //zone 4 & 5
+                                else
+                                    _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 900);
+                                return;
+                            }
+                    }
+                }
+
+                //ADSL mode of VDSL2 profile could not be determined, get max bitrate from bbox
+                var valuesToCheck = new List<int>();
+                if (_downstreamCurrentBitRate >= 39990)
+                {
+                    var startValue = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6.5m) * 3200) + Convert.ToInt32(5000 / _downstreamAttenuation);
+                    if (startValue < _downstreamCurrentBitRate)
+                        startValue = _downstreamCurrentBitRate + 15000;
+
+                    //check range + - 15.000 of predicted value
+                    for (int i = 0; i < 30; i++)
+                    {
+                        valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 500), 500));
+                        valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 500), 500));
+                    }
+                    _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+
+                    //out of predicted range
+                    if (_downstreamMaxBitRate < 0)
+                    {
+                        valuesToCheck.Clear();
+
+                        //add values form predicted value +15.000 to 150.000
+                        if (startValue + 15000 < 150000)
+                            valuesToCheck.AddRange(Enumerable.Range(startValue + 15000, 150000 - (startValue + 15000)));
+
+                        //add values from predicted value -15.000 to 0
+                        if (startValue - 15000 > 0)
+                            valuesToCheck.AddRange(Enumerable.Range(0, startValue - 15000).OrderByDescending(x => x));
+
+                        _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+                    }
                 }
                 else
                 {
-                    vdsl2Profile = profile.ProfileVDSL2;
-                    maxDistance = profile.DistanceMax;
-                }
-
-                switch (vdsl2Profile)
-                {
-                    case VDSL2Profile.p17a:
-                        {
-                            _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 2900) + Convert.ToInt32(5000 / _downstreamAttenuation);
-                            
-                            //corrections
-                            if (_downstreamMaxBitRate >= 140000)
-                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.98);
-                            else if (_downstreamMaxBitRate >= 138000)
-                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.985);
-                            else if (_downstreamMaxBitRate >= 136000)
-                                _downstreamMaxBitRate = Convert.ToInt32(_downstreamMaxBitRate * 0.995);
-
-                            return;
-                        }
-                    case VDSL2Profile.p8b:
-                    case VDSL2Profile.p8d:
-                        {
-                            //zone 3
-                            if (maxDistance <= 1000)
-                                _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 1710);
-                            //zone 4 & 5
-                            else
-                                _downstreamMaxBitRate = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6m) * 900);
-                            return;
-                        }
-                }
-            }
-
-            //ADSL mode of VDSL2 profile could not be determined, get max bitrate from bbox
-            var valuesToCheck = new List<int>();
-            if (_downstreamCurrentBitRate >= 39990)
-            {
-                var startValue = _downstreamCurrentBitRate + Convert.ToInt32((_downstreamNoiseMargin - 6.5m) * 3200) + Convert.ToInt32(5000 / _downstreamAttenuation);
-                if (startValue < _downstreamCurrentBitRate)
-                    startValue = _downstreamCurrentBitRate + 15000;
-
-                //check range + - 15.000 of predicted value
-                for (int i = 0; i < 30; i++)
-                {
-                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 500), 500));
-                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 500), 500));
-                }
-                _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
-
-                //out of predicted range
-                if (_downstreamMaxBitRate < 0)
-                {
-                    valuesToCheck.Clear();
-
-                    //add values form predicted value +15.000 to 150.000
-                    if (startValue + 15000 < 150000)
-                        valuesToCheck.AddRange(Enumerable.Range(startValue + 15000, 150000 - (startValue + 15000)));
-
-                    //add values from predicted value -15.000 to 0
-                    if (startValue - 15000 > 0)
-                        valuesToCheck.AddRange(Enumerable.Range(0, startValue - 15000).OrderByDescending(x => x));
-
+                    valuesToCheck.AddRange(Enumerable.Range(_downstreamCurrentBitRate, 150000 - _downstreamCurrentBitRate));
                     _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+
+                    if (_downstreamMaxBitRate < 0)
+                    {
+                        valuesToCheck.Clear();
+                        valuesToCheck.AddRange(Enumerable.Range(0, _downstreamCurrentBitRate));
+                        _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
+                    }
                 }
+
+                //fix max values that are below current values
+                if (_downstreamMaxBitRate < _downstreamCurrentBitRate)
+                    _downstreamMaxBitRate = _downstreamCurrentBitRate;
             }
-            else
+            catch(Exception ex)
             {
-                valuesToCheck.AddRange(Enumerable.Range(_downstreamCurrentBitRate, 150000 - _downstreamCurrentBitRate));
-                _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
-
-                if (_downstreamMaxBitRate < 0)
-                {
-                    valuesToCheck.Clear();
-                    valuesToCheck.AddRange(Enumerable.Range(0, _downstreamCurrentBitRate));
-                    _downstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "DownstreamMaxBitRate", valuesToCheck);
-                }
-            }
-
-            //fix max values that are below current values
-            if (_downstreamMaxBitRate < _downstreamCurrentBitRate)
                 _downstreamMaxBitRate = _downstreamCurrentBitRate;
-
+            }
         }
 
         /// <summary>
@@ -1162,94 +1171,101 @@ namespace BBox3Tool.session
         public void GetUpstreamMaxBitRate()
         {
             _usMaxBitRateDone = true;
-            if (DSLStandard == DSLStandard.VDSL2 && _upstreamNoiseMargin > 0)
+            try
             {
-                //get VDSL2 profile
-                ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
-                VDSL2Profile vdsl2Profile;
-                decimal maxDistance;
-                if (profile == null)
+                if (DSLStandard == DSLStandard.VDSL2 && _upstreamNoiseMargin > 0)
                 {
-                    vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
-                    maxDistance = 0;
+                    //get VDSL2 profile
+                    ProximusLineProfile profile = ProfileUtils.GetProfile(_profiles, UpstreamCurrentBitRate, DownstreamCurrentBitRate, VectoringDown, VectoringUp, Distance);
+                    VDSL2Profile vdsl2Profile;
+                    decimal maxDistance;
+                    if (profile == null)
+                    {
+                        vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                        maxDistance = 0;
+                    }
+                    else
+                    {
+                        vdsl2Profile = profile.ProfileVDSL2;
+                        maxDistance = profile.DistanceMax;
+                    }
+
+                    switch (vdsl2Profile)
+                    {
+                        case VDSL2Profile.p17a:
+                            {
+                                //zone 1 & 2
+                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 5m) * 1250 + 1000 * (1 + (8 - _downstreamAttenuation) / 15));
+                                return;
+                            }
+                        case VDSL2Profile.p8b:
+                        case VDSL2Profile.p8d:
+                            {
+                                //zone 3
+                                if (maxDistance <= 1000)
+                                    _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 440);
+                                //zone 4 & 5
+                                else
+                                    _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 140);
+                                return;
+                            }
+                    }
+                }
+
+                //17a profiles
+                var valuesToCheck = new List<int>();
+                if (_upstreamCurrentBitRate >= 6000)
+                {
+                    var startValue = Convert.ToInt32(_upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6) * 1300 + 4000 * (1 + (8 - _downstreamAttenuation) / 15)));
+                    if (startValue < _upstreamCurrentBitRate)
+                        startValue = _upstreamCurrentBitRate + 7500;
+
+                    //check range + - 7.500 of predicted value
+                    for (int i = 0; i < 30; i++)
+                    {
+                        valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 250), 250));
+                        valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 250), 250));
+                    }
+
+                    _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+
+                    //out of predicted range
+                    if (_upstreamMaxBitRate < 0)
+                    {
+                        valuesToCheck.Clear();
+
+                        //add values form predicted value +7.500 to 50.000
+                        if (startValue + 7500 < 50000)
+                            valuesToCheck.AddRange(Enumerable.Range(startValue + 7500, 50000 - (startValue + 7500)));
+
+                        //add values from predicted value -7.500 to 0
+                        if (startValue - 7500 > 0)
+                            valuesToCheck.AddRange(Enumerable.Range(0, startValue - 7500).OrderByDescending(x => x));
+
+                        _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+                    }
                 }
                 else
                 {
-                    vdsl2Profile = profile.ProfileVDSL2;
-                    maxDistance = profile.DistanceMax;
-                }
-
-                switch (vdsl2Profile)
-                {
-                    case VDSL2Profile.p17a:
-                        {
-                            //zone 1 & 2
-                            _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 5m) * 1250 + 1000 * (1 + (8 - _downstreamAttenuation) / 15));
-                            return;
-                        }
-                    case VDSL2Profile.p8b:
-                    case VDSL2Profile.p8d:
-                        {
-                            //zone 3
-                            if (maxDistance <= 1000)
-                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 440);
-                            //zone 4 & 5
-                            else
-                                _upstreamMaxBitRate = _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6m) * 140);
-                            return;
-                        }
-                }
-            }
-
-            //17a profiles
-            var valuesToCheck = new List<int>();
-            if (_upstreamCurrentBitRate >= 6000)
-            {
-                var startValue = Convert.ToInt32( _upstreamCurrentBitRate + Convert.ToInt32((_upstreamNoiseMargin - 6) * 1300 + 4000 * (1 + (8 - _downstreamAttenuation) / 15)) );
-                if (startValue < _upstreamCurrentBitRate)
-                    startValue = _upstreamCurrentBitRate + 7500;
-
-                //check range + - 7.500 of predicted value
-                for (int i = 0; i < 30; i++)
-                {
-                    valuesToCheck.AddRange(Enumerable.Range(startValue + (i * 250), 250));
-                    valuesToCheck.AddRange(Enumerable.Range(startValue - (i * 250), 250));
-                }
-
-                _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
-
-                //out of predicted range
-                if (_upstreamMaxBitRate < 0)
-                {
-                    valuesToCheck.Clear();
-
-                    //add values form predicted value +7.500 to 50.000
-                    if (startValue + 7500 < 50000)
-                        valuesToCheck.AddRange(Enumerable.Range(startValue + 7500, 50000 - (startValue + 7500)));
-
-                    //add values from predicted value -7.500 to 0
-                    if (startValue - 7500 > 0)
-                        valuesToCheck.AddRange(Enumerable.Range(0, startValue - 7500).OrderByDescending(x => x));
-
+                    valuesToCheck.AddRange(Enumerable.Range(_upstreamCurrentBitRate, 50000 - _upstreamCurrentBitRate));
                     _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+
+                    if (_upstreamMaxBitRate < 0)
+                    {
+                        valuesToCheck.Clear();
+                        valuesToCheck.AddRange(Enumerable.Range(0, _upstreamCurrentBitRate));
+                        _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
+                    }
                 }
+
+                //fix max values that are below current values
+                if (_upstreamMaxBitRate < _upstreamCurrentBitRate)
+                    _upstreamMaxBitRate = _upstreamCurrentBitRate;
             }
-            else
+            catch (Exception)
             {
-                valuesToCheck.AddRange(Enumerable.Range(_upstreamCurrentBitRate, 50000 - _upstreamCurrentBitRate));
-                _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
-
-                if (_upstreamMaxBitRate < 0)
-                {
-                    valuesToCheck.Clear();
-                    valuesToCheck.AddRange(Enumerable.Range(0, _upstreamCurrentBitRate));
-                    _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
-                }
-            }
-
-            //fix max values that are below current values
-            if (_upstreamMaxBitRate < _upstreamCurrentBitRate)
                 _upstreamMaxBitRate = _upstreamCurrentBitRate;
+            }
         }
 
         //---
@@ -1318,7 +1334,7 @@ namespace BBox3Tool.session
             return (response["reply"]["actions"][0]["callbacks"][0]["parameters"]["value"].ToString() == "UP");
         }
 
-        private decimal GetDslValueParallel(string xpathBase, string node, List<int> valuesToCheck, int orCount = 75, int xpathCount = 5)
+        private decimal GetDslValueParallel(string xpathBase, string node, List<int> valuesToCheck, int orCount = 25, int xpathCount = 10)
         {
             var index = 0;
             var preciseRange = new List<int>();
@@ -1486,7 +1502,7 @@ namespace BBox3Tool.session
         /// <param name="xpaths">Xpaths to check</param>
         /// <param name="depth">How deep to check</param>
         /// <returns>JSON reply from bbox</returns>
-        private dynamic BBoxGetValue(List<string> xpaths, int depth = 0)
+        private dynamic BBoxGetValue(List<string> xpaths, int depth = 1)
         {
             //prepare actions
             var actions = new List<Dictionary<string, object>>();
