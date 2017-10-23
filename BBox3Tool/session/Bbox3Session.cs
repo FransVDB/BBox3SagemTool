@@ -673,9 +673,19 @@ namespace BBox3Tool.session
             {
                 var checkedDownloadSpeeds = new List<int>();
 
-                //check confirmed bitrates first (feedback from users)
-                var knownDownloadBitrates = _profiles.SelectMany(x => x.ConfirmedDownloadSpeeds).ToList();
-                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed));
+                // Add all official speeds                
+                var knownDownloadBitrates = _profiles.Select(x => x.DownloadSpeed).ToList();
+
+                // Add all official speeds -1 / -2 / +63 / +64
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed - 1));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed - 2));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 63));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed +64));
+
+                //Add all user confirmed speeds
+                knownDownloadBitrates.AddRange(_profiles.SelectMany(x => x.ConfirmedDownloadSpeeds));
+
+                //Check these speeds
                 knownDownloadBitrates = knownDownloadBitrates.Distinct().OrderByDescending(x => x).ToList();
                 _downstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", knownDownloadBitrates, 10, 5));
 
@@ -718,7 +728,7 @@ namespace BBox3Tool.session
                     checkedDownloadSpeeds.AddRange(valuesToCheck);
 
                     //check speed
-                    _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);   
+                    _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 10, 5);   
                 }
 
                 //fallback 3
@@ -730,7 +740,7 @@ namespace BBox3Tool.session
                     valuesToCheck = valuesToCheck.Except(checkedDownloadSpeeds).ToList();
 
                     //check speed
-                    _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);
+                    _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 10, 5);
                 }
             }
             else
@@ -747,7 +757,7 @@ namespace BBox3Tool.session
                 }
                 //not found, check every speed from 0 to 30000
                 var valuesToCheck = Enumerable.Range(0, 30000).ToList();
-                _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 75, 5);
+                _downstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/DownstreamCurrRate", valuesToCheck, 10, 5);
 
             }
             _dsCurrBitRateDone = true;
@@ -762,9 +772,19 @@ namespace BBox3Tool.session
             {
                 var checkedUploadSpeeds = new List<int>();
 
-                //check confirmed bitrates first (feedback from users)
-                var knownUploadBitrates = _profiles.SelectMany(x => x.ConfirmedUploadSpeeds).ToList();
-                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed));
+                // Add all official speeds                
+                var knownUploadBitrates = _profiles.Select(x => x.UploadSpeed).ToList();
+
+                // Add all official speeds -1 / -2 / +63 / +64
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed - 1));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed - 2));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 63));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 64));
+
+                //Add all user confirmed speeds
+                knownUploadBitrates.AddRange(_profiles.SelectMany(x => x.ConfirmedUploadSpeeds));
+
+                //Check these speeds
                 knownUploadBitrates = knownUploadBitrates.Distinct().OrderByDescending(x => x).ToList();
                 _upstreamCurrentBitRate = Convert.ToInt32(GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", knownUploadBitrates, 10, 5));
 
@@ -808,7 +828,7 @@ namespace BBox3Tool.session
                     checkedUploadSpeeds.AddRange(valuesToCheck);
 
                     //check speed
-                    _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
+                    _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 10, 5);
                 }
 
                 //fallback 3
@@ -819,7 +839,7 @@ namespace BBox3Tool.session
                     var valuesToCheck = Enumerable.Range(0, 40000).ToList();
                     valuesToCheck = valuesToCheck.Except(checkedUploadSpeeds).ToList();
                     //check speed
-                    _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
+                    _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 10, 5);
                 }
             }
             else
@@ -836,7 +856,7 @@ namespace BBox3Tool.session
                 }
                 //not found, check every speed from 0 to 6000
                 var valuesToCheck = Enumerable.Range(0, 6000).ToList();
-                _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 75, 5);
+                _upstreamCurrentBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "../../Channels/Channel/UpstreamCurrRate", valuesToCheck, 10 ,5);
 
             }
 
@@ -1234,9 +1254,9 @@ namespace BBox3Tool.session
                     {
                         valuesToCheck.Clear();
 
-                        //add values form predicted value +7.500 to 50.000
-                        if (startValue + 7500 < 50000)
-                            valuesToCheck.AddRange(Enumerable.Range(startValue + 7500, 50000 - (startValue + 7500)));
+                        //add values form predicted value +7.500 to 60.000
+                        if (startValue + 7500 < 60000)
+                            valuesToCheck.AddRange(Enumerable.Range(startValue + 7500, 60000 - (startValue + 7500)));
 
                         //add values from predicted value -7.500 to 0
                         if (startValue - 7500 > 0)
@@ -1247,7 +1267,7 @@ namespace BBox3Tool.session
                 }
                 else
                 {
-                    valuesToCheck.AddRange(Enumerable.Range(_upstreamCurrentBitRate, 50000 - _upstreamCurrentBitRate));
+                    valuesToCheck.AddRange(Enumerable.Range(_upstreamCurrentBitRate, 60000 - _upstreamCurrentBitRate));
                     _upstreamMaxBitRate = (int)GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "UpstreamMaxBitRate", valuesToCheck);
 
                     if (_upstreamMaxBitRate < 0)

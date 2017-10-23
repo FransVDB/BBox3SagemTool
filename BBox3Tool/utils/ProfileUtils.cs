@@ -146,9 +146,9 @@ namespace BBox3Tool.utils
                           .First().x;
                 }*/
 
-                //get profiles with closest speeds in range of +256kb
+                //get profiles with closest speeds in range of 512kb
                 List<ProximusLineProfile> rangeMatches = profiles.Select(x => new { x, diffDownload = Math.Abs(x.DownloadSpeed - downloadSpeed), diffUpload = Math.Abs(x.UploadSpeed - uploadSpeed) })
-                    .Where(x => x.diffDownload <= 256 && x.diffUpload <= 256)
+                    .Where(x => x.diffDownload <= 512 && x.diffUpload <= 512)
                     .OrderBy(p => p.diffDownload)
                     .ThenBy(p => p.diffUpload)
                     .Select(y => y.x)
@@ -237,7 +237,7 @@ namespace BBox3Tool.utils
             if (downstreamCurrentBitRate >= 65000)
                 return VDSL2Profile.p17a;
             else
-                if (upstreamCurrentBitRate >= 5500)
+                if (upstreamCurrentBitRate >= 9500)
                 return VDSL2Profile.p17a;
             //no way of knowing for sure
             return VDSL2Profile.unknown;
