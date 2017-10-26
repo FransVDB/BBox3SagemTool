@@ -1,85 +1,683 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <document>
-  <version>3.2</version>
-  <date>06/02/2016</date>
+  <version>4.0</version>
+  <date>23/10/2017</date>
   <profiles>
     
-    <!-- ZONE 1: 0 - 400m -->
-    <!-- ================ -->
+    <!-- vectoring profiles 23/10/2017 -->
     
-    <!-- vectoring profiles-->
+    <!-- ZONE <= 900m -->
+    <!-- ============ -->
 
-    <profile name="unknown" speedname="70/20" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="17a">
-      <official down="70000" up="20000" />
-      <confirmed down="69999" up="20000" />
+    <profile name="LP004" speedname="100/40"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="40000" />
     </profile>
-
-    <!-- full vectoring dlm-->
-    <profile name="unknown" speedname="100/20" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+    <profile name="LP005" speedname="100/35"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="35000" />
+    </profile>
+    <profile name="LP006" speedname="100/30"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="30000" />
+    </profile>
+    <profile name="LP007" speedname="100/25"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="25000" />
+    </profile>
+    <profile name="LP008" speedname="100/20"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
       <official down="100000" up="20000" />
-      <confirmed down="99999" up="20000" />
+      <confirmed down="100404" up="20179" />
+    </profile>    
+    <profile name="LP009" speedname="100/17,5" min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="17500" />
     </profile>
-    <profile name="unknown" speedname="85/20" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+    <profile name="LP010" speedname="100/15"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="15000" />
+    </profile>
+    <profile name="LP011" speedname="100/12,5" min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="12500" />
+    </profile>
+    <profile name="LP147" speedname="100/10"   min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="10000" />
+    </profile>
+    <profile name="LP143" speedname="100/8"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="8000" />
+    </profile>
+    <profile name="LP139" speedname="100/6"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="6000" />
+    </profile>
+    <profile name="LP136" speedname="100/4"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="100000" up="4000" />
+    </profile>
+
+    
+    <profile name="LP021" speedname="85/40"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="40000" />
+    </profile>
+    <profile name="LP022" speedname="85/35"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="35000" />
+    </profile>
+    <profile name="LP023" speedname="85/30"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="30000" />
+    </profile>
+    <profile name="LP024" speedname="85/25"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="25000" />
+    </profile>
+    <profile name="LP025" speedname="85/20"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
       <official down="85000" up="20000" />
     </profile>
-    <profile name="unknown" speedname="100/15" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="100000" up="15000" />
-      <confirmed down="99999" up="14999" />
+    <profile name="LP026" speedname="85/17,5"  min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="17500" />
     </profile>
-    <profile name="unknown" speedname="85/15" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+    <profile name="LP027" speedname="85/15"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
       <official down="85000" up="15000" />
-      <confirmed down="85000" up="14998" />
     </profile>
-    <profile name="unknown" speedname="70/15" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+    <profile name="LP028" speedname="85/12,5"  min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="12500" />
+    </profile>
+    <profile name="LP146" speedname="85/10"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="10000" />
+    </profile>
+    <profile name="LP142" speedname="85/8"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="8000" />
+    </profile>
+    <profile name="LP138" speedname="85/6"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="6000" />
+    </profile>
+    <profile name="LP135" speedname="85/4"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="85000" up="4000" />
+    </profile>
+    
+    
+    <profile name="LP038" speedname="70/40"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="40000" />
+    </profile>
+    <profile name="LP039" speedname="70/35"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="35000" />
+    </profile>
+    <profile name="LP040" speedname="70/30"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="17a">
+      <official down="70000" up="30000" />
+    </profile>
+    <profile name="LP041" speedname="70/25"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="25000" />
+    </profile>
+    <profile name="LP042" speedname="70/20"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="20000" />
+    </profile>
+    <profile name="LP043" speedname="70/17,5"  min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="17500" />
+    </profile>
+    <profile name="LP044" speedname="70/15"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
       <official down="70000" up="15000" />
     </profile>
+    <profile name="LP045" speedname="70/12,5"  min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="12500" />
+    </profile>
+    <profile name="LP145" speedname="70/10"    min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="10000" />
+    </profile>
+    <profile name="LP141" speedname="70/8"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="8000" />
+    </profile>
+    <profile name="LP810" speedname="70/6"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="6000" />
+    </profile>
+    <profile name="LP820" speedname="70/4"     min="0" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="70000" up="4000" />
+    </profile>
 
-    <profile name="LP147" speedname="100/10" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="100000" up="10064" />
-      <confirmed down="99999" up="10063" />
+
+    <!-- ZONE > 900m -->
+    <!-- =========== -->
+    
+    <profile name="LP055" speedname="60/40"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="40000" />
     </profile>
-    <profile name="LP143" speedname="100/8" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="100000" up="8064" />
+    <profile name="LP056" speedname="60/35"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="35000" />
     </profile>
-    <profile name="LP139" speedname="100/6" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="100000" up="6064" />
+    <profile name="LP057" speedname="60/30"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="30000" />
+    </profile>
+    <profile name="LP058" speedname="60/25"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="25000" />
+    </profile>
+    <profile name="LP059" speedname="60/20"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="20000" />
+    </profile>
+    <profile name="LP060" speedname="60/17,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="17500" />
+    </profile>
+    <profile name="LP061" speedname="60/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="15000" />
+    </profile>
+    <profile name="LP062" speedname="60/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="60000" up="12500" />
+    </profile>
+    <profile name="LP177" speedname="60/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="10000" />
+    </profile>
+    <profile name="LP176" speedname="60/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="8000" />
+    </profile>
+    <profile name="LP175" speedname="60/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="6000" />
+    </profile>
+    <profile name="LP174" speedname="60/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="5000" />
+    </profile>
+    <profile name="LP173" speedname="60/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="4000" />
+    </profile>
+    <profile name="LP183" speedname="60/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="3000" />
+    </profile>
+    <profile name="LP077" speedname="60/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="2200" />
+    </profile>
+    <profile name="LP182" speedname="60/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="2000" />
+    </profile>
+    <profile name="LP070" speedname="60/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="1500" />
+    </profile>
+    <profile name="LP071" speedname="60/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="60000" up="1000" />
+    </profile>
+    
+    
+    <profile name="LP079" speedname="50/40"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="40000" />
+    </profile>
+    <profile name="LP080" speedname="50/35"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="35000" />
+    </profile>
+    <profile name="LP081" speedname="50/30"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="30000" />
+    </profile>
+    <profile name="LP082" speedname="50/25"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="25000" />
+    </profile>
+    <profile name="LP083" speedname="50/20"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="20000" />
+    </profile>
+    <profile name="LP084" speedname="50/17,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="17500" />
+    </profile>
+    <profile name="LP085" speedname="50/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="17a">
+      <official down="50000" up="15000" />
+    </profile>
+    <profile name="LP086" speedname="50/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="50000" up="12500" />
+    </profile>
+    <profile name="LP144" speedname="50/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="10000" />
+    </profile>
+    <profile name="LP140" speedname="50/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="8000" />
+    </profile>
+    <profile name="LP137" speedname="50/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="6000" />
+    </profile>
+    <profile name="LP138" speedname="50/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="5000" />
+    </profile>    
+    <profile name="LP830" speedname="50/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="4000" />
+    </profile>
+    <profile name="LP163" speedname="50/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="3000" />
+    </profile>
+    <profile name="LP101" speedname="50/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="2200" />
+    </profile>
+    <profile name="LP840" speedname="50/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="2000" />
+    </profile>
+    <profile name="LP094" speedname="50/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="1500" />
+    </profile>
+    <profile name="LP095" speedname="50/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="50000" up="1000" />
     </profile>
 
-    <profile name="LP146" speedname="85/10" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="85000" up="10064" />
+
+    <profile name="LP103" speedname="40/40"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="40000" />
     </profile>
-    <profile name="LP142" speedname="85/8" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="85000" up="8064" />
+    <profile name="LP104" speedname="40/35"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="35000" />
     </profile>
-    <profile name="LP138" speedname="85/6" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="85000" up="6064" />
+    <profile name="LP105" speedname="40/30"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="30000" />
+    </profile>
+    <profile name="LP106" speedname="40/25"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="25000" />
+    </profile>
+    <profile name="LP107" speedname="40/20"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="20000" />
+    </profile>
+    <profile name="LP108" speedname="40/17.5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="17500" />
+    </profile>
+    <profile name="LP109" speedname="40/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="15000" />
+    </profile>
+    <profile name="LP110" speedname="40/12.5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="40000" up="12500" />
+    </profile>
+    <profile name="LP111" speedname="40/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="10000" />
+    </profile>
+    <profile name="LP112" speedname="40/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="8000" />
+    </profile> 
+    <profile name="LP113" speedname="40/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="6000" />
+    </profile>
+    <profile name="LP114" speedname="40/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="5000" />
+    </profile>
+    <profile name="LP115" speedname="40/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="4000" />
+    </profile>
+    <profile name="LP116" speedname="40/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="3000" />
+    </profile>
+    <profile name="LP125" speedname="40/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="2200" />
+    </profile>
+    <profile name="LP117" speedname="40/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="2000" />
+    </profile>
+    <profile name="LP118" speedname="40/1.5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="1500" />
+    </profile>
+    <profile name="LP119" speedname="40/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="40000" up="1000" />
+    </profile>
+
+
+    <profile name="LP127" speedname="30/40"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="40000" />
+    </profile>
+    <profile name="LP128" speedname="30/35"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="35000" />
+    </profile>
+    <profile name="LP129" speedname="30/30"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="30000" />
+    </profile>
+    <profile name="LP130" speedname="30/25"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="25000" />
+    </profile>
+    <profile name="LP131" speedname="30/20"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="20000" />
+    </profile>
+    <profile name="LP132" speedname="30/17,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="17500" />
+    </profile>
+    <profile name="LP133" speedname="30/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="15000" />
+    </profile>
+    <profile name="LP134" speedname="30/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
+      <official down="30000" up="12500" />
+    </profile>
+    <profile name="LP135" speedname="30/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
+      <official down="30000" up="10000" />
+    </profile>
+    <profile name="LP136" speedname="30/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="8000" />
+    </profile>
+    <profile name="LP137" speedname="30/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="6000" />
+    </profile>
+    <profile name="LP138" speedname="30/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="5000" />
+    </profile>
+    <profile name="LP139" speedname="30/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="4000" />
+    </profile>
+    <profile name="LP140" speedname="30/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="3000" />
+    </profile>
+    <profile name="LP141" speedname="30/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="2000" />
+    </profile>
+    <profile name="LP150" speedname="30/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="2200" />
+    </profile>
+    <profile name="LP142" speedname="30/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="1500" />
+    </profile>
+    <profile name="LP143" speedname="30/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="1000" />
+    </profile>
+    <profile name="LP144" speedname="30/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="30000" up="800" />
+    </profile>
+
+    
+    <profile name="LP152" speedname="25/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="15000" />
+    </profile>
+    <profile name="LP153" speedname="25/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="12500" />
+    </profile>
+    <profile name="LP154" speedname="25/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="10000" />
+    </profile>
+    <profile name="LP155" speedname="25/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="8000" />
+    </profile>
+    <profile name="LP156" speedname="25/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="6000" />
+    </profile>
+    <profile name="LP157" speedname="25/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="5000" />
+    </profile>
+    <profile name="LP158" speedname="25/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="4000" />
+    </profile>
+    <profile name="LP159" speedname="25/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="3000" />
+    </profile>
+    <profile name="LP261" speedname="25/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="2200" />
+    </profile>    
+    <profile name="LP160" speedname="25/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="2000" />
+    </profile>
+    <profile name="LP161" speedname="25/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="1500" />
+    </profile>
+    <profile name="LP162" speedname="25/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="1000" />
+    </profile>
+    <profile name="LP163" speedname="25/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="25000" up="800" />
+    </profile>
+
+
+    <profile name="LP164" speedname="22/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="15000" />
+    </profile>
+    <profile name="LP165" speedname="22/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="12500" />
+    </profile>
+    <profile name="LP166" speedname="22/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="10000" />
+    </profile>
+    <profile name="LP167" speedname="22/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="8000" />
+    </profile>  
+    <profile name="LP168" speedname="22/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="6000" />
+    </profile>
+    <profile name="LP169" speedname="22/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="5000" />
+    </profile>
+    <profile name="LP170" speedname="22/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="4000" />
+    </profile>
+    <profile name="LP171" speedname="22/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="3000" />
+    </profile>
+    <profile name="LP172" speedname="22/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
+      <official down="22000" up="2000" />
+    </profile>
+    <profile name="LP173" speedname="22/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="1500" />
+    </profile>
+    <profile name="LP174" speedname="22/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="1000" />
+    </profile>
+    <profile name="LP175" speedname="22/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="22000" up="800" />
+    </profile>
+
+
+    <profile name="LP176" speedname="20/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="15000" />
+    </profile>
+    <profile name="LP177" speedname="20/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="12500" />
+    </profile>
+    <profile name="LP178" speedname="20/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="10000" />
+    </profile>
+    <profile name="LP179" speedname="20/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="8000" />
+    </profile>
+    <profile name="LP180" speedname="20/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="6000" />
+    </profile>
+    <profile name="LP181" speedname="20/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="5000" />
+    </profile>
+    <profile name="LP182" speedname="20/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="4000" />
+    </profile>
+    <profile name="LP183" speedname="20/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="3000" />
+    </profile>
+    <profile name="LP269" speedname="20/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="2200" />
+    </profile>
+    <profile name="LP184" speedname="20/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="2000" />
+    </profile>
+    <profile name="LP185" speedname="20/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="1500" />
+    </profile>
+    <profile name="LP186" speedname="20/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="1000" />
+    </profile>
+    <profile name="LP187" speedname="20/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="800" />
+    </profile>
+    <profile name="LP272" speedname="20/0.7"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="704" />
+    </profile>
+    <profile name="LP273" speedname="20/0.57"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="576" />
+    </profile>
+    <profile name="LP274" speedname="20/0,51"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="20000" up="516" />
+    </profile>
+
+    
+    <profile name="LP188" speedname="18/15"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="15000" />
+    </profile>
+    <profile name="LP189" speedname="18/12,5"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="12500" />
+    </profile>
+    <profile name="LP190" speedname="18/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="10000" />
+    </profile>
+    <profile name="LP191" speedname="18/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="8000" />
+    </profile>
+    <profile name="LP192" speedname="18/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="6000" />
+    </profile>
+    <profile name="LP193" speedname="18/5"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="5000" />
+    </profile>
+    <profile name="LP194" speedname="18/4"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="4000" />
+    </profile>
+    <profile name="LP195" speedname="18/3"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="3000" />
+    </profile>
+    <profile name="LP196" speedname="18/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
+      <official down="18000" up="2000" />
+    </profile>
+    <profile name="LP197" speedname="18/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
+      <official down="18000" up="1500" />
+    </profile>
+    <profile name="LP198" speedname="18/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="1000" />
+    </profile>
+    <profile name="LP199" speedname="18/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="18000" up="800" />
+    </profile>
+
+    <profile name="LP200" speedname="16,5/15"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="15000" />
+    </profile>
+    <profile name="LP201" speedname="16,5/12,5" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="12500" />
+    </profile>
+    <profile name="LP202" speedname="16,5/10"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="10000" />
+    </profile>
+    <profile name="LP203" speedname="16,5/8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="8000" />
+    </profile>
+    <profile name="LP204" speedname="16,5/6"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="6000" />
+    </profile>
+    <profile name="LP205" speedname="16,5/5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="5000" />
+    </profile>
+    <profile name="LP206" speedname="16,5/4"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="4000" />
+    </profile>
+    <profile name="LP207" speedname="16,5/3"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="3000" />
+    </profile>
+    <profile name="LP280" speedname="16,5/2,2" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="2200" />
+    </profile>
+    <profile name="LP208" speedname="16,5/2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="2000" />
+    </profile>
+    <profile name="LP209" speedname="16,5/1,5" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="1500" />
+    </profile>
+    <profile name="LP210" speedname="16,5/1"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="1000" />
+    </profile>
+    <profile name="LP211" speedname="16,5/0,8" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="16500" up="800" />
     </profile>
     
-    <profile name="LP145" speedname="70/10" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="true" dlm="true" repair="false" vdsl2="17a">
-      <official down="70000" up="10064" />
-      <confirmed down="69999" up="10063" />
+
+    <profile name="LP212" speedname="14,5/15"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="15000" />
+    </profile>
+    <profile name="LP213" speedname="14,5/12,5" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="12500" />
+    </profile>
+    <profile name="LP214" speedname="14,5/10"  min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="10000" />
+    </profile>
+    <profile name="LP215" speedname="14,5/8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="8000" />
+    </profile>
+    <profile name="LP216" speedname="14,5/6"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="6000" />
+    </profile>
+    <profile name="LP217" speedname="14,5/5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="5000" />
+    </profile>
+    <profile name="LP218" speedname="14,5/4"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="4000" />
+    </profile>
+    <profile name="LP219" speedname="14,5/3"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="3000" />
+    </profile>
+    <profile name="LP291" speedname="14,5/2,2" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="2200" />
+    </profile>
+    <profile name="LP220" speedname="14,5/2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="2000" />
+    </profile>
+    <profile name="LP221" speedname="14,5/1,5" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="1500" />
+    </profile>
+    <profile name="LP222" speedname="14,5/1"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="1000" />
+    </profile>
+    <profile name="LP223" speedname="14,5/0,8" min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="14500" up="800" />
+    </profile>
+
+    
+    <profile name="LP297" speedname="12/10"    min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="10000" />
+    </profile>
+    <profile name="LP298" speedname="12/8"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="8000" />
+    </profile>
+    <profile name="LP299" speedname="12/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="6000" />
+    </profile>
+    <profile name="LP302" speedname="12/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="2200" />
+    </profile>    
+    <profile name="LP224" speedname="12/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="2000" />
+    </profile>
+    <profile name="LP225" speedname="12/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
+      <official down="12000" up="1500" />
+    </profile>
+    <profile name="LP226" speedname="12/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="1000" />
+    </profile>
+    <profile name="LP227" speedname="12/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="12000" up="800" />
+    </profile>
+
+    
+    <profile name="LP228" speedname="11/2"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="11000" up="2000" />
+    </profile>
+    <profile name="LP229" speedname="11/1,5"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="11000" up="1500" />
+    </profile>
+    <profile name="LP230" speedname="11/1"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="11000" up="1000" />
+    </profile>
+    <profile name="LP231" speedname="11/0,8"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="11000" up="800" />
     </profile>
     
-    <profile name="LP141" speedname="70/8" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="70000" up="8064" />
+
+    <profile name="LP308" speedname="11/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="10100" up="6000" />
     </profile>
-    <profile name="LP810" speedname="70/6" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="70000" up="6064" />
+    <profile name="LP311" speedname="11/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="10100" up="2200" />
     </profile>
+
     
-    <!-- vectoring repair-->
-    <profile name="LP820" speedname="70/4" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="false" repair="true" vdsl2="17a">
-      <official down="70000" up="4064" />
+    <profile name="LP317" speedname="9,5/6"     min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="9500" up="6000" />
     </profile>
+    <profile name="LP320" speedname="9,5/2,2"   min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="9500" up="2200" />
+    </profile>
+
     
-    <profile name="LP850" speedname="30/2" min="0" max="400" vectoring="true" vectoring-up="true" provisioning="false" dlm="false" repair="true" vdsl2="17a">
-      <official down="30000" up="2064" />
+    <profile name="LP326" speedname="7/6"       min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="7000" up="6000" />
     </profile>
+
+    
+    <profile name="LP335" speedname="5/4"       min="900" max="2700" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
+      <official down="5000" up="4000" />
+    </profile>
+
     
     <!-- vectoring fallback-->
-    <profile name="LP725" speedname="7,5/0,5" min="0" max="900" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
+    <profile name="LP725" speedname="7,5/0,5" min="0" max="2700" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">
       <official down="7544" up="576" />
     </profile>
+    
+
+    <!-- non vectoring profiles -->
+
+    <!-- ZONE 1: 0 - 400m -->
+    <!-- ================ -->
     
     <!-- non-vectoring profiles-->
     <profile name="LP056" speedname="30/10" min="0" max="400" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="17a">
@@ -183,79 +781,6 @@
     <!-- ZONE 2: 400 - 700m -->
     <!-- ================== -->
     
-    <!-- full vectoring dlm-->
-    <profile name="unknown" speedname="50/15" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="50000" up="15000" />
-    </profile>
-    <profile name="unknown" speedname="50/20" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="50000" up="20000" />
-    </profile>
-
-    <profile name="unknown" speedname="60/15" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="15000" />
-    </profile>
-    <profile name="unknown" speedname="60/20" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="20000" />
-    </profile>
-
-    <!-- vectoring dlm-->
-    <profile name="LP136" speedname="100/4" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="100000" up="4064" />
-    </profile>
-    <profile name="LP135" speedname="85/4" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="85000" up="4064" />
-    </profile>
-
-    <profile name="LP177" speedname="60/10" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="10064" />
-    </profile>
-    <profile name="LP176" speedname="60/8" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="8064" />
-    </profile>
-    <profile name="LP175" speedname="60/6" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="6064" />
-    </profile>
-    <profile name="LP174" speedname="60/4" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="60000" up="4064" />
-    </profile>
-    <profile name="LP183" speedname="60/3" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8d">
-      <official down="60000" up="3064" />
-    </profile>
-    <profile name="LP182" speedname="60/2" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8d">
-      <official down="60000" up="2064" />
-    </profile>
-    
-    <profile name="LP144" speedname="50/10" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="50000" up="10064" />
-    </profile>
-    <profile name="LP140" speedname="50/8" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="17a">
-      <official down="50000" up="8064" />
-    </profile>
-    <profile name="LP830" speedname="50/4" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8d">
-      <official down="50000" up="4064" />
-    </profile>
-    <profile name="LP163" speedname="50/3" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8d">
-      <official down="50000" up="3064" />
-    </profile>
-    <profile name="LP840" speedname="50/2" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8d">
-      <official down="50000" up="2064" />
-    </profile>
-
-    <!-- vectoring profiles-->
-    <profile name="LP137" speedname="50/6" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="17a">
-      <official down="50000" up="6064" />
-      <confirmed down="49998" up="6063" />
-    </profile>
-    <profile name="unknown" speedname="50/10" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="17a">
-      <official down="50000" up="10064" />
-      <confirmed down="49999" up="10064" />
-    </profile>
-
-    <!-- vectoring repair-->
-    <profile name="LP159" speedname="20/2" min="400" max="900" vectoring="true" vectoring-up="true" provisioning="false" dlm="false" repair="true" vdsl2="17a">
-      <official down="20000" up="2000" />
-    </profile>
-    
     <!-- non-vectoring profiles-->
     <profile name="LP707" speedname="20/6" min="400" max="700" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="17a">
       <official down="20064" up="6064" />
@@ -339,30 +864,6 @@
 
     <!-- ZONE 3: 700 - 1000m -->
     <!-- =================== -->
-
-    <!-- vectoring profiles-->
-    <profile name="unknown" speedname="30/5" min="700" max="1000" vectoring="true" vectoring-up="true" provisioning="true" dlm="false" repair="false" vdsl2="8b">
-      <official down="30064" up="5064" />
-      <confirmed down="29998" up="4999" />
-      <confirmed down="29999" up="5000" />
-    </profile>
-
-    <!-- vectoring dlm-->
-    <profile name="unknown" speedname="40/5" min="700" max="1000" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
-      <official down="40064" up="5064" />
-      <confirmed down="39998" up="4999" />
-      <confirmed down="39999" up="5000" />
-    </profile>
-    <profile name="unknown" speedname="50/5" min="700" max="1000" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
-      <official down="50064" up="5064" />
-      <confirmed down="49998" up="4999" />
-      <confirmed down="49999" up="5000" />
-    </profile>
-    <profile name="unknown" speedname="60/5" min="700" max="1000" vectoring="true" vectoring-up="true" provisioning="false" dlm="true" repair="false" vdsl2="8b">
-      <official down="60064" up="5064" />
-      <confirmed down="59998" up="4999" />
-      <confirmed down="59999" up="5000" />
-    </profile>    
 
     <!-- non-vectoring profiles-->
     <profile name="LP702" speedname="16,5/2" min="700" max="1000" vectoring="false" vectoring-up="false" provisioning="true" dlm="false" repair="false" vdsl2="8d">

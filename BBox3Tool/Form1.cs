@@ -201,21 +201,25 @@ namespace BBox3Tool
             builder.AppendLine("ROP vectoring compatible:      " + boolToString(_session.VectoringROPCapable));
             builder.AppendLine("");
 
-            builder.AppendLine("DSL standard:                  " + _session.DSLStandard.ToString().Replace("plus", "+"));
+            var dslStandardValue = _session.DSLStandard.ToString().Replace("plus", "+");
+            if (_session.Annex != Annex.unknown)
+                dslStandardValue += " Annex " + _session.Annex + "";
+            builder.AppendLine("DSL standard:                  " + dslStandardValue);
+
             if (_session.DSLStandard == DSLStandard.VDSL2)
             {
                 ProximusLineProfile currentProfile = ProfileUtils.GetProfile(_profiles, _session.UpstreamCurrentBitRate, _session.DownstreamCurrentBitRate, _session.VectoringDown, _session.VectoringUp, _session.Distance);
                 if (currentProfile == null)
                 {
-                    builder.AppendLine("DSL profile:                   Unknown");
+                    builder.AppendLine("DSL profile:                   " + ProfileUtils.GetVdsl2ProfileFallBack(_session.DownstreamCurrentBitRate, _session.UpstreamCurrentBitRate).ToString().Replace("p", ""));
                     if (_session is Bbox3Session)
                         builder.AppendLine("Estimated distance:            " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     else
                         builder.AppendLine("Distance                       " + (_session.Distance == null ? "unknown" : ((decimal)_session.Distance).ToString("0 'm'")));
                     builder.AppendLine("");
-                    builder.AppendLine("Proximus profile name:         Unknown");
-                    builder.AppendLine("Proximus DLM profile:          Unknown");
-                    builder.AppendLine("Proximus repair profile:       Unknown");
+                    builder.AppendLine("Proximus profile name:         unknown");
+                    builder.AppendLine("Proximus DLM profile:          unknown");
+                    builder.AppendLine("Proximus repair profile:       unknown");
                 }
                 else
                 {
@@ -411,7 +415,10 @@ namespace BBox3Tool
 
                     // Get dsl standard
                     //-----------------
-                    ThreadUtils.SetLabelTextFromThread(labelDSLStandard, _session.DSLStandard.ToString().Replace("plus", "+"));
+                    var dslStandardValue = _session.DSLStandard.ToString().Replace("plus", "+");
+                    if (_session.Annex != Annex.unknown)
+                        dslStandardValue += " Annex " +_session.Annex + "";
+                    ThreadUtils.SetLabelTextFromThread(labelDSLStandard, dslStandardValue);
 
                     // Get sync values
                     //----------------
@@ -441,7 +448,7 @@ namespace BBox3Tool
                             ThreadUtils.SetLabelTextFromThread(labelDLM, "unknown");
                             ThreadUtils.SetLabelTextFromThread(labelRepair, "unknown");
                             ThreadUtils.SetLabelTextFromThread(labelProximusProfile, "unknown");
-                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, "unknown");
+                            ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, ProfileUtils.GetVdsl2ProfileFallBack(_session.DownstreamCurrentBitRate, _session.UpstreamCurrentBitRate).ToString().Replace("p", ""));
                         }
                         else
                         {
@@ -449,7 +456,6 @@ namespace BBox3Tool
                             ThreadUtils.SetLabelTextFromThread(labelRepair, boolToString(currentProfile.RepairProfile));
                             ThreadUtils.SetLabelTextFromThread(labelProximusProfile, currentProfile.SpeedName);
                             ThreadUtils.SetLabelTextFromThread(labelVDSLProfile, currentProfile.ProfileVDSL2.ToString().Replace("p", ""));
-
                         }
                     }
                     else

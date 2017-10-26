@@ -36,5 +36,6 @@ namespace BBox3Tool.session
         bool? VectoringROPCapable { get; }
         bool LineConnected { get; }
         DSLStandard DSLStandard { get; }
+        Annex Annex { get; }
     }
 }
