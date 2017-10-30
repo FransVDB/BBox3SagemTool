@@ -54,7 +54,7 @@ namespace BBox3Tool.session
 
         public bool VectoringDeviceCapable { get; private set; }
 
-        public bool? VectoringROPCapable { get; private set; }
+        public bool VectoringROPCapable { get; private set; }
 
         public DSLStandard DSLStandard { get; private set; }
 

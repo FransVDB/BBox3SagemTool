@@ -55,7 +55,7 @@ namespace BBox3Tool.session
         private decimal? _distance;
         private bool _vectoringDown;
         private bool _vectoringUp;
-        private bool? _vectoringROPCapable;
+        private bool _vectoringROPCapable;
         private DSLStandard _DSLStandard;
         private Annex _annex;
 
@@ -65,7 +65,7 @@ namespace BBox3Tool.session
         private bool _dsAttenuationDone, _usAttenuationDone;
         private bool _dsNoiseMarginDone, _usNoiseMarginDone;
         private bool _distanceDone;
-        private bool _vectoringDownDone, _vectoringUpDone;
+        private bool _vectoringDownDone, _vectoringUpDone, _vectoringROPCapableDone;
         private bool _dslStandardDone;
 
         #endregion
@@ -203,13 +203,13 @@ namespace BBox3Tool.session
             private set { _vectoringUp = value; }
         }
 
-        public bool? VectoringROPCapable
+        public bool VectoringROPCapable
         {
             get
             {
-                if (VectoringDown || VectoringUp)
-                    return true;
-                return null;
+                if (!_vectoringROPCapableDone)
+                    GetVectoringROPCapable();
+                return _vectoringROPCapable;
             }
             private set { _vectoringROPCapable = value; }
         }
@@ -293,7 +293,7 @@ namespace BBox3Tool.session
             VectoringDown = false;
             VectoringUp = false;
             VectoringDeviceCapable = true;
-            VectoringROPCapable = null;
+            VectoringROPCapable = false;
             DSLStandard = DSLStandard.unknown;
 
             //load profiles
@@ -454,6 +454,35 @@ namespace BBox3Tool.session
             //test = getDslValueSingleLinear("Device/DSL/Lines/Line[{0}]/LastChange", "UpstreamNoiseMargin", valuesToCheck) / 10;
             //watch.Stop();
             //Debug.WriteLine("getDslValueSingleLinear: " + watch.Elapsed.ToString());
+        }
+
+        public string GetDslam()
+        {
+            // Check known Broadcom ROP
+            dynamic jsonObject = BBoxGetValue(new List<string>
+            {
+                "Device/DSL/Lines/Line[IDDSLAM='BDCM:0xb1ae']/Status", //BDCM
+            });
+
+            if (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied")
+            {
+                return "BDCM:0xb1ae";
+            }
+
+            //Check Broadcom/Ikanos rops
+            string dslam;
+            var valuesToCheck = new List<string>();
+            for (int i = 0; i < 65535; i++)
+            {
+                valuesToCheck.Add("BDCM:0x" + i.ToString("x4"));
+                valuesToCheck.Add("IKNS:0x" + i.ToString("x4"));
+            }
+            dslam = GetDslValueParallel("Device/DSL/Lines/Line[{0}]/Status", "IDDSLAM", valuesToCheck);
+
+            if (!string.IsNullOrEmpty(dslam))
+                return dslam;
+
+            return "unknown";
         }
 
         #endregion
@@ -1013,6 +1042,43 @@ namespace BBox3Tool.session
             _vectoringUpDone = true;
         }
 
+        /// <summary>
+        ///     Check if ROP is vectoring capable
+        /// </summary>
+        public void GetVectoringROPCapable()
+        {
+            if (VectoringDown || VectoringUp)
+            {
+                // Obviously...
+                VectoringROPCapable = true;
+            }
+            else
+            {
+                // Check IDDSLAM
+                dynamic jsonObject = BBoxGetValue(new List<string>
+                {
+                    "Device/DSL/Lines/Line[IDDSLAM='BDCM:0xb1ae']/Status", //BDCM
+                    "Device/DSL/Lines/Line[IDDSLAM='IKNS:0x0000']/Status"  //IKNS
+                 });
+
+                // Broadcom ROP: vectoring capable
+                if (jsonObject["reply"]["actions"][0]["error"]["description"] == "Applied")
+                {
+                    VectoringROPCapable = true;
+                }
+
+                // Ikanos ROP: not vectoring capable
+                if (jsonObject["reply"]["actions"][1]["error"]["description"] == "Applied")
+                {
+                    VectoringROPCapable = false;
+                }
+
+                    //Unknown vendor, assume false(default value)
+            }
+
+            _vectoringROPCapableDone = true;
+        }
+
         #endregion profile
 
         #region stats
@@ -1407,6 +1473,59 @@ namespace BBox3Tool.session
             return GetDslValueLinear(xpathBase, node, preciseRange, 5);
         }
 
+        private string GetDslValueParallel(string xpathBase, string node, List<string> valuesToCheck, int orCount = 25, int xpathCount = 10)
+        {
+            var index = 0;
+            var preciseRange = new List<string>();
+            do
+            {
+                //prepare requests
+                var range = Math.Min(orCount * xpathCount, valuesToCheck.Count - index);
+                var rangeValues = valuesToCheck.GetRange(index, range);
+
+                var actions = new List<string>();
+                for (var i = 0; i < xpathCount; i++)
+                {
+                    var list = new List<string>();
+                    for (var j = 0; j < orCount; j++)
+                    {
+                        var rangeIndex = (i * orCount) + j;
+                        if (rangeIndex >= rangeValues.Count)
+                            break;
+                        list.Add(node + "='" + rangeValues[rangeIndex] + "'");
+                    }
+                    var xpathSub = string.Join(" or ", list);
+                    if (xpathSub != string.Empty)
+                        actions.Add(string.Format(xpathBase, xpathSub));
+                }
+
+                //get values from bbox
+                dynamic jsonObject = BBoxGetValue(actions);
+
+                //check values
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    if (jsonObject["reply"]["actions"][i]["error"]["description"] == "Applied")
+                    {
+                        preciseRange = rangeValues.GetRange(i * orCount, Math.Min(orCount, rangeValues.Count - (i * orCount)));
+                        break;
+                    }
+                }
+
+                //increase start
+                index += range;
+
+            }
+            while (preciseRange.Count == 0 && index < valuesToCheck.Count);
+
+            //not found
+            if (preciseRange.Count == 0)
+                return "";
+
+            //get precise value
+            return GetDslValueLinear(xpathBase, node, preciseRange, 5);
+        }
+        
         /// <summary>
         ///     Get DSL value using linear algorithm
         /// </summary>
