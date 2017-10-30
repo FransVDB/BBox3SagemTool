@@ -705,11 +705,19 @@ namespace BBox3Tool.session
                 // Add all official speeds                
                 var knownDownloadBitrates = _profiles.Select(x => x.DownloadSpeed).ToList();
 
-                // Add all official speeds -1 / -2 / +63 / +64
+                // Add all official speeds + known deviations
                 knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed - 1));
                 knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed - 2));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 4));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 48));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 49));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 62));
                 knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 63));
-                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed +64));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 64));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 175));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 198));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 199));
+                knownDownloadBitrates.AddRange(_profiles.Select(x => x.DownloadSpeed + 200));
 
                 //Add all user confirmed speeds
                 knownDownloadBitrates.AddRange(_profiles.SelectMany(x => x.ConfirmedDownloadSpeeds));
@@ -804,11 +812,19 @@ namespace BBox3Tool.session
                 // Add all official speeds                
                 var knownUploadBitrates = _profiles.Select(x => x.UploadSpeed).ToList();
 
-                // Add all official speeds -1 / -2 / +63 / +64
+                // Add all official speeds + known deviations
                 knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed - 1));
                 knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed - 2));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 4));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 48));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 49));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 62));
                 knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 63));
                 knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 64));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 175));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 198));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 199));
+                knownUploadBitrates.AddRange(_profiles.Select(x => x.UploadSpeed + 200));
 
                 //Add all user confirmed speeds
                 knownUploadBitrates.AddRange(_profiles.SelectMany(x => x.ConfirmedUploadSpeeds));
