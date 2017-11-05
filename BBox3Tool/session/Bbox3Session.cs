@@ -258,45 +258,10 @@ namespace BBox3Tool.session
 
         public Bbox3Session(BackgroundWorker worker, List<ProximusLineProfile> profiles, bool debug = false)
         {
-            LoggedIn = false;
+            DeviceName = "B-Box 3 Sagem";
+
             _debug = debug;
             _worker = worker;
-
-            //auth
-            _sessionID = 0;
-            _requestID = 0;
-            _notificationID = 1;
-            _basicAuth = false;
-            _serverNonce = "";
-            _localNonce = "";
-
-            //stats
-            DownstreamAttenuation = -1;
-            UpstreamAttenuation = -1;
-            DownstreamNoiseMargin = -1;
-            UpstreamNoiseMargin = -1;
-            DownstreamMaxBitRate = -1;
-            UpstreamMaxBitRate = -1;
-            DownstreamCurrentBitRate = -1;
-            UpstreamCurrentBitRate = -1;
-
-            //device
-            DeviceName = "B-Box 3 Sagem";
-            HardwareVersion = "";
-            GUIFirmwareVersion = "";
-            InternalFirmwareVersion = "";
-            DeviceUptime = new TimeSpan(0);
-            LinkUptime = new TimeSpan(0);
-
-            CurrentProfile = new ProximusLineProfile();
-            Distance = null;
-            VectoringDown = false;
-            VectoringUp = false;
-            VectoringDeviceCapable = true;
-            VectoringROPCapable = false;
-            DSLStandard = DSLStandard.unknown;
-
-            //load profiles
             _profiles = profiles;
         }
 
@@ -487,7 +452,6 @@ namespace BBox3Tool.session
 
         #endregion
 
-
         #region login&logout
 
         /// <summary>
@@ -496,6 +460,7 @@ namespace BBox3Tool.session
         /// <returns>Login successfull or not</returns>
         public bool OpenSession(string host, string username, string password)
         {
+            
             _username = username;
             _password = password;
             _bboxUrl = new Uri("http://" + host);
@@ -504,6 +469,7 @@ namespace BBox3Tool.session
             try
             {
                 //reset member vars
+                LoggedIn = false;
                 _sessionID = 0;
                 _requestID = 0;
                 _basicAuth = false;
@@ -680,6 +646,45 @@ namespace BBox3Tool.session
         /// </summary>
         public void RefreshData()
         {
+            //stats
+            DownstreamAttenuation = -1;
+            UpstreamAttenuation = -1;
+            DownstreamNoiseMargin = -1;
+            UpstreamNoiseMargin = -1;
+            DownstreamMaxBitRate = -1;
+            UpstreamMaxBitRate = -1;
+            DownstreamCurrentBitRate = -1;
+            UpstreamCurrentBitRate = -1;
+
+            //device
+            HardwareVersion = "";
+            GUIFirmwareVersion = "";
+            InternalFirmwareVersion = "";
+            DeviceUptime = new TimeSpan(0);
+            LinkUptime = new TimeSpan(0);
+
+            CurrentProfile = new ProximusLineProfile();
+
+            //Vectoring
+            VectoringDown = false;
+            VectoringUp = false;
+            VectoringDeviceCapable = true;
+            VectoringROPCapable = false;
+
+            //DSL
+            DSLStandard = DSLStandard.unknown;
+            Annex = Annex.unknown;
+            Distance = null;
+
+            //private vars
+            _dsCurrBitRateDone = false; _usCurrBitRateDone = false;
+            _dsMaxBitRateDone = false; _usMaxBitRateDone = false;
+            _dsAttenuationDone = false; _usAttenuationDone = false;
+            _dsNoiseMarginDone = false; _usNoiseMarginDone = false;
+            _distanceDone = false;
+            _vectoringDownDone = false; _vectoringUpDone = false; _vectoringROPCapableDone = false;
+            _dslStandardDone = false;
+
             //request everything --> triggers refresh somehow
             BBoxGetValue(new List<string> { "*" }, 10);
         }
@@ -1172,7 +1177,7 @@ namespace BBox3Tool.session
                     decimal maxDistance;
                     if (profile == null)
                     {
-                        vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                        vdsl2Profile = StatsUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate, DownstreamAttenuation, (VectoringDown || VectoringUp));
                         maxDistance = 0;
                     }
                     else
@@ -1283,7 +1288,7 @@ namespace BBox3Tool.session
                     decimal maxDistance;
                     if (profile == null)
                     {
-                        vdsl2Profile = ProfileUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate);
+                        vdsl2Profile = StatsUtils.GetVdsl2ProfileFallBack(DownstreamCurrentBitRate, UpstreamCurrentBitRate, DownstreamAttenuation, (VectoringDown || VectoringUp));
                         maxDistance = 0;
                     }
                     else

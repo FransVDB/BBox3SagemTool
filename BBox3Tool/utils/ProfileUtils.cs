@@ -225,22 +225,5 @@ namespace BBox3Tool.utils
             return null;
         }
 
-
-        /// <summary>
-        /// Get VDSL2 profile, derived from current sync
-        /// </summary>
-        /// <param name="downstreamCurrentBitRate">Current downstream bitrate</param>
-        /// <param name="upstreamCurrentBitRate">Current upstream bitrate</param>
-        /// <returns>VDSL2 profile, if it could be derived</returns>
-        public static VDSL2Profile GetVdsl2ProfileFallBack(int downstreamCurrentBitRate, int upstreamCurrentBitRate)
-        {
-            if (downstreamCurrentBitRate >= 65000)
-                return VDSL2Profile.p17a;
-            else
-                if (upstreamCurrentBitRate >= 9500)
-                return VDSL2Profile.p17a;
-            //no way of knowing for sure
-            return VDSL2Profile.unknown;
-        }
     }
 }

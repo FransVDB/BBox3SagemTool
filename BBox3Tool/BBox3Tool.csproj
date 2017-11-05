@@ -68,6 +68,7 @@
     <Compile Include="utils\ProfileUtils.cs" />
     <Compile Include="objects\DeviceSettings.cs" />
     <Compile Include="utils\SettingsUtils.cs" />
+    <Compile Include="utils\StatsUtils.cs" />
     <Compile Include="utils\ThreadUtils.cs" />
     <Compile Include="session\Bbox2Session.cs" />
     <Compile Include="session\Bbox3Session.cs" />

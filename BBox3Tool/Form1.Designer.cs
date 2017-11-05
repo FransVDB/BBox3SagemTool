@@ -126,6 +126,7 @@
             this.backgroundWorkerLiveUpdate = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorkerDetectDevice = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorkerConnect = new System.ComponentModel.BackgroundWorker();
+            this.buttonRefresh = new System.Windows.Forms.Button();
             this.panelDebug.SuspendLayout();
             this.panelLogin.SuspendLayout();
             this.panelUnsupported.SuspendLayout();
@@ -765,6 +766,7 @@
             // panelInfo
             // 
             this.panelInfo.BackColor = System.Drawing.Color.White;
+            this.panelInfo.Controls.Add(this.buttonRefresh);
             this.panelInfo.Controls.Add(this.panel4);
             this.panelInfo.Controls.Add(this.panel3);
             this.panelInfo.Controls.Add(this.panel2);
@@ -1248,6 +1250,16 @@
             this.backgroundWorkerConnect.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerConnect_DoWork);
             this.backgroundWorkerConnect.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorkerConnect_RunWorkerCompleted);
             // 
+            // buttonRefresh
+            // 
+            this.buttonRefresh.Location = new System.Drawing.Point(101, 297);
+            this.buttonRefresh.Name = "buttonRefresh";
+            this.buttonRefresh.Size = new System.Drawing.Size(83, 23);
+            this.buttonRefresh.TabIndex = 67;
+            this.buttonRefresh.Text = "Refresh";
+            this.buttonRefresh.UseVisualStyleBackColor = true;
+            this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1392,6 +1404,7 @@
         private System.Windows.Forms.Label labelVectoringUp;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Button buttonRefresh;
     }
 }
 
